@@ -1,0 +1,61 @@
+﻿@model ChapeauProject.ViewModels.MenuViewModel
+
+@{
+    ViewData["Title"] = "Restaurant Menu";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4" style="font-family: 'Playfair Display';">Menu</h2>
+
+    <div class="d-flex justify-content-center mb-3">
+        <div class="btn-group">
+            <a asp-action="Index" asp-route-menuCard="Lunch" class="btn btn-outline-dark @(Model.SelectedCard == "Lunch" ? "active" : "")">Lunch</a>
+            <a asp-action="Index" asp-route-menuCard="Dinner" class="btn btn-outline-dark @(Model.SelectedCard == "Dinner" ? "active" : "")">Dinner</a>
+            <a asp-action="Index" asp-route-menuCard="Drinks" class="btn btn-outline-dark @(Model.SelectedCard == "Drinks" ? "active" : "")">Drinks</a>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center mb-4">
+        <div class="btn-group btn-group-sm">
+            <a asp-action="Index" asp-route-menuCard="@Model.SelectedCard" asp-route-category="All" class="btn btn-light @(Model.SelectedCategory == "All" ? "active" : "")">All</a>
+            <a asp-action="Index" asp-route-menuCard="@Model.SelectedCard" asp-route-category="Starters" class="btn btn-light @(Model.SelectedCategory == "Starters" ? "active" : "")">Starters</a>
+            <a asp-action="Index" asp-route-menuCard="@Model.SelectedCard" asp-route-category="Main" class="btn btn-light @(Model.SelectedCategory == "Main" ? "active" : "")">Mains</a>
+            <a asp-action="Index" asp-route-menuCard="@Model.SelectedCard" asp-route-category="Desserts" class="btn btn-light @(Model.SelectedCategory == "Desserts" ? "active" : "")">Desserts</a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Item Name</th>
+                    <th>Price</th>
+                    <th>Stock Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.MenuItems)
+                {
+                    <tr>
+                        <td class="fw-bold">@item.ItemName</td>
+                        <td>€@item.Price.ToString("0.00")</td>
+                        <td>
+                            @if (item.StockQuantity == 0)
+                            {
+                                <span class="badge bg-danger">Out of Stock</span>
+                            }
+                            else if (item.StockQuantity <= 10)
+                            {
+                                <span class="badge bg-warning text-dark">Almost Out of Stock (@item.StockQuantity)</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">In Stock</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

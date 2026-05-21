@@ -1,0 +1,307 @@
+
+:root {
+    --espresso-dark: #2D1B18; 
+    --bistro-gold: #D4AF37; 
+    --parchment-cream: #FDFBF5; 
+    --bistro-text: #3E2723; 
+}
+
+
+html, body {
+    height: 100%;
+    margin: 0;
+    background-color: var(--espresso-dark) !important;
+    font-family: 'Poppins', sans-serif;
+}
+
+
+header, .navbar {
+    background-color: var(--espresso-dark) !important;
+    border-bottom: 2px solid var(--bistro-gold) !important;
+    padding: 1rem 0 !important;
+}
+
+/*  WELL-SEEN LOGO */
+.navbar-brand img {
+    /* Tints black logo to gold */
+    filter: brightness(0) saturate(100%) invert(84%) sepia(31%) saturate(738%) hue-rotate(1deg) brightness(91%) contrast(89%);
+    height: 55px;
+}
+
+.nav-link {
+    color: var(--bistro-gold) !important;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 1 !important; 
+}
+
+
+.welcome-area-wrapper {
+    background-color: var(--parchment-cream) !important;
+    min-height: 75vh;
+    padding: 80px 0;
+    color: var(--bistro-text) !important;
+    /* High-aesthetic parchment texture */
+    background-image: url("https://www.transparenttextures.com/patterns/cream-paper.png");
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.05);
+}
+
+    .welcome-area-wrapper h1,
+    .welcome-area-wrapper p {
+        color: var(--bistro-text) !important;
+        font-family: 'Playfair Display', serif;
+        text-align: center;
+    }
+
+/* 6. LOGIN BUTTON */
+.chapeau-login-btn {
+    color: var(--bistro-gold) !important;
+    border: 1px solid var(--bistro-gold) !important;
+    font-family: 'Playfair Display', serif;
+    background: transparent !important;
+    padding: 6px 18px;
+}
+
+/* 7. DARK FOOTER */
+footer {
+    background-color: var(--espresso-dark) !important;
+    color: var(--bistro-gold) !important;
+    border-top: 1px solid var(--bistro-gold);
+    padding: 30px 0 !important;
+}
+
+.tables-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 16px;
+    padding: 1rem 0;
+}
+
+.table-card {
+    background: white;
+    border: 0.5px solid #ddd;
+    border-radius: 12px;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.table-shape {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.round {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+}
+
+.rect {
+    width: 72px;
+    height: 52px;
+    border-radius: 8px;
+}
+
+.large {
+    width: 80px;
+    height: 56px;
+    border-radius: 8px;
+}
+
+.free {
+    background: #EAF3DE;
+    color: #27500A;
+    border: 1.5px solid #639922;
+}
+
+.occupied {
+    background: #FCEBEB;
+    color: #791F1F;
+    border: 1.5px solid #E24B4A;
+}
+
+.table-num {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.table-seats {
+    font-size: 12px;
+    color: #666;
+}
+
+.status-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 500;
+}
+
+.badge-free {
+    background: #EAF3DE;
+    color: #3B6D11;
+}
+
+.badge-occupied {
+    background: #FCEBEB;
+    color: #A32D2D;
+}
+
+.stat-card {
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 10px 16px;
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 2px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.table-toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.view-orders-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 4px;
+    padding: 5px 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--bistro-gold);
+    border: 1px solid var(--bistro-gold);
+    border-radius: 6px;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
+}
+
+.view-orders-btn:hover {
+    background: var(--bistro-gold);
+    color: var(--espresso-dark);
+}
+
+.orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 1rem 0;
+}
+
+.order-card {
+    background: white;
+    border: 1px solid #e8e0d0;
+    border-radius: 12px;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.order-card-header {
+    text-align: center;
+    border-bottom: 1px solid #e8e0d0;
+    padding-bottom: 10px;
+    margin-bottom: 6px;
+}
+
+.order-table-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--bistro-text);
+}
+
+.order-meta {
+    font-size: 11px;
+    color: #999;
+    margin-top: 2px;
+}
+
+.order-wait {
+    font-size: 12px;
+    font-weight: 600;
+    color: #A32D2D;
+    margin-top: 4px;
+}
+
+.order-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    padding: 4px 0;
+    border-bottom: 1px dashed #f0ebe0;
+    gap: 8px;
+}
+
+    .order-item-row form {
+        display: contents;
+    }
+
+.order-item-name {
+    flex: 1;
+    color: var(--bistro-text);
+}
+
+    .order-item-name.done {
+        text-decoration: line-through;
+        color: #bbb;
+    }
+
+.order-item-qty {
+    font-size: 11px;
+    color: #999;
+    white-space: nowrap;
+}
+
+.check-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 0;
+    line-height: 1;
+}
+
+.complete-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+    padding: 7px 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--bistro-gold);
+    border: 1px solid var(--bistro-gold);
+    border-radius: 6px;
+    background: transparent;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.complete-btn:hover {
+    background: var(--bistro-gold);
+    color: var(--espresso-dark);
+}

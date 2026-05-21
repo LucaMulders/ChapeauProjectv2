@@ -1,0 +1,38 @@
+﻿@model ChapeauProject.Models.LoginModel
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Login</h1>
+<hr />
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger" role="alert">@ViewBag.ErrorMessage</div>
+}
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Login">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label class="control-label">Staff ID: (for testing purposes the staff IDs range from 1 - 5)</label>
+                <input asp-for="StaffID" class="form-control" />
+                <span asp-validation-for="StaffID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Password: (for testing purposes the password is always pass123)</label>
+                <input asp-for="Password" class="form-control" type="password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

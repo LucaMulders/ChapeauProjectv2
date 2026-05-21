@@ -1,0 +1,41 @@
+﻿@model ChapeauProject.ViewModels.TableOrderViewModel
+
+@{
+    ViewData["Title"] = "Table " + Model.TableNumber + " Orders";
+}
+
+<h2>Table @Model.TableNumber</h2>
+<hr />
+
+@foreach (var guest in Model.Guests)
+{
+    <h4>@guest.GuestName</h4>
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in guest.Items)
+            {
+                <tr>
+                    <td>@item.ItemName</td>
+                    <td>@item.Quantity</td>
+                    <td>€@item.Price.ToString("F2")</td>
+                    <td>€@((item.Price * item.Quantity).ToString("F2"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<hr />
+<p>Low VAT (9%): €@Model.LowVAT.ToString("F2")</p>
+<p>High VAT (21%): €@Model.HighVAT.ToString("F2")</p>
+<h4>Total (incl. VAT): €@Model.TotalAmount.ToString("F2")</h4>
+
+<a asp-action="Index" class="btn btn-secondary">Back to Tables</a>

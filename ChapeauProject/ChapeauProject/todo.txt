@@ -1,0 +1,5 @@
+Group:
+1. Add a connection method which all repositories can use and try catch to that. 
+
+Luca:
+1. Make order items and orders enum instead of bit. 

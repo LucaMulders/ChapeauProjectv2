@@ -1,0 +1,49 @@
+﻿@model IEnumerable<ChapeauProject.ViewModels.RunningOrderViewModel>
+
+@{
+    ViewData["Title"] = "Running Orders";
+}
+
+<h2 style="font-family:'Playfair Display',serif; color:var(--bistro-text);">Running Orders</h2>
+<hr />
+
+@if (!Model.Any())
+{
+    <p style="color:#999;">No running orders at the moment.</p>
+}
+else
+{
+    <div class="orders-grid">
+        @foreach (var order in Model)
+        {
+            <div class="order-card">
+                <div class="order-card-header">
+                    <div class="order-table-num">Table @order.TableNumber</div>
+                    <div class="order-meta">Order #@order.OrderID &bull; @order.OrderTime.ToString("HH:mm")</div>
+                    <div class="order-wait">Wait: @order.WaitingTime.Hours h @order.WaitingTime.Minutes m</div>
+                </div>
+
+                @foreach (var item in order.Items)
+                {
+                    <div class="order-item-row">
+                        <form asp-action="ToggleItem" asp-controller="Orders" method="post" style="display:contents;">
+                            <input type="hidden" name="orderItemId" value="@item.OrderItemID" />
+                            <span class="order-item-name @(item.IsPrepared ? "done" : "")">@item.ItemName</span>
+                            <span class="order-item-qty">x@(item.Quantity)</span>
+                            <button type="submit" class="check-btn">@(item.IsPrepared ? "✅" : "⬜")</button>
+                        </form>
+                    </div>
+                }
+
+                <form asp-action="CompleteOrder" asp-controller="Orders" method="post">
+                    <input type="hidden" name="orderId" value="@order.OrderID" />
+                    <button type="submit" class="complete-btn">Mark Complete</button>
+                </form>
+            </div>
+        }
+    </div>
+}
+
+<div style="margin-top:1.5rem;">
+    <a asp-action="Index" class="complete-btn" style="display:inline-block; width:auto; padding: 7px 20px; text-decoration:none;">Refresh</a>
+</div>
