@@ -4,7 +4,7 @@ namespace ChapeauProject.Services
 {
     public interface IStaffService
     {
-        List<Staff> GetAll();
+        List<Staff> GetAllStaff();
         Staff? GetById(int id);
         Staff? GetByLoginCredentials(int staffID, string password);
     }

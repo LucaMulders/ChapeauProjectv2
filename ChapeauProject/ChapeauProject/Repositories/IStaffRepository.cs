@@ -4,7 +4,7 @@ namespace ChapeauProject.Repositories
 {
     public interface IStaffRepository
     {
-        List<Staff> GetAll();
+        List<Staff> GetAllStaff();
         Staff? GetById(int staffID);
         Staff? GetByLoginCredentials(int staffID, string password);
     }

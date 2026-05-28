@@ -6,20 +6,17 @@ using System.Data;
 
 namespace ChapeauProject.Repositories
 {
-    public class MenuRepository : IMenuRepository
+    public class MenuRepository : RepositoryBase, IMenuRepository
     {
-        private readonly string _connectionString;
-
-        public MenuRepository(IConfiguration configuration)
+        public MenuRepository(IConfiguration configuration) : base(configuration)
         {
-            _connectionString = configuration.GetConnectionString("ChapeauProject");
         }
 
         public List<MenuItem> GetFiltered(string cardFilter, string courseFilter) //NOTE improve name of getfiltered
         {
             List<MenuItem> items = new List<MenuItem>();
 
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using (SqlConnection connection = GetConnection())
             {
                 // LEFT JOIN ensures items appear even if Stock or Course links are missing [cite: 7, 13, 19]
                 // UPPER() handles potential case-sensitivity issues between C# and SQL
@@ -49,8 +46,6 @@ namespace ChapeauProject.Repositories
                     {
                         command.Parameters.AddWithValue("@CourseName", courseFilter);
                     }
-
-                    connection.Open();
 
                     using (SqlDataReader reader = command.ExecuteReader())
                     {

@@ -1,0 +1,40 @@
+@model IEnumerable<ChapeauProject.ViewModels.TablesViewModel>
+
+@{
+    ViewData["Title"] = "Bill";
+}
+
+<h2 style="font-family:'Playfair Display',serif; color:var(--bistro-text);">Process a Bill</h2>
+<p style="color:#888;">Select an occupied table to process its bill.</p>
+<hr />
+
+@if (!Model.Any())
+{
+    <p style="color:#999;">No occupied tables at the moment.</p>
+}
+else
+{
+    <div class="tables-grid">
+        @foreach (var item in Model.OrderBy(t => t.Table.TableNumber))
+        {
+            <div class="table-card">
+                <div class="table-shape @(item.Table.Seats <= 2 ? "round" : item.Table.Seats <= 4 ? "rect" : "large") occupied"
+                     style="margin:0 auto 8px;">
+                    <i class="ti ti-armchair"></i>
+                </div>
+                <div class="table-num">Table @item.Table.TableNumber</div>
+                <div class="table-seats">@item.Table.Seats seats</div>
+                <div style="display:flex; gap:6px; justify-content:center; margin:4px 0;">
+                    @if (item.HasFoodOrder) { <span title="Food order">🍽️</span> }
+                    @if (item.HasDrinkOrder) { <span title="Drink order">🍷</span> }
+                    @if (!item.HasFoodOrder && !item.HasDrinkOrder)
+                    { <span style="color:#aaa; font-size:0.8rem;">No pending orders</span> }
+                </div>
+                <a asp-action="Pay" asp-controller="Bill" asp-route-id="@item.Table.TableNumber"
+                   class="view-orders-btn" style="margin-top:8px;">
+                    Process Bill
+                </a>
+            </div>
+        }
+    </div>
+}

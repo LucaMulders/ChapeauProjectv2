@@ -1,22 +1,20 @@
-﻿using ChapeauProject.ViewModels;
+﻿using ChapeauProject.Models;
+using ChapeauProject.ViewModels;
 using Microsoft.Data.SqlClient;
 
 namespace ChapeauProject.Repositories
 {
-    public class OrderRepository : IOrderRepository
+    public class OrderRepository : RepositoryBase, IOrderRepository
     {
-        private readonly string? _connectionString;
-
-        public OrderRepository(IConfiguration configuration)
+        public OrderRepository(IConfiguration configuration) : base(configuration)
         {
-            _connectionString = configuration.GetConnectionString("ChapeauProject");
         }
 
-        public List<RunningOrderViewModel> GetRunningOrders() //NOTE getallorderbystatus and make it enum instead of bit
+        public List<RunningOrderViewModel> GetAllOrdersByStatus()
         {
             var orders = new Dictionary<int, RunningOrderViewModel>();
 
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using (SqlConnection connection = GetConnection())
             {
                 string query = @"
                     SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
@@ -25,12 +23,11 @@ namespace ChapeauProject.Repositories
                     JOIN Guests g ON o.GuestID = g.GuestID
                     JOIN OrderItems oi ON o.OrderID = oi.OrderID
                     JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
-                    WHERE o.OrderStatus = 0
+                    WHERE o.OrderStatus = 'Pending'
                     ORDER BY o.OrderTimeStamp ASC";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    connection.Open();
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -53,7 +50,7 @@ namespace ChapeauProject.Repositories
                                 OrderItemID = reader.GetInt32(reader.GetOrdinal("OrderItemID")),
                                 ItemName = reader.GetString(reader.GetOrdinal("ItemName")),
                                 Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
-                                IsPrepared = reader.GetBoolean(reader.GetOrdinal("PreparationStatus"))
+                                PreparationStatus = Enum.Parse<PreparationStatus>(reader.GetString(reader.GetOrdinal("PreparationStatus")))
                             });
                         }
                     }
@@ -63,15 +60,20 @@ namespace ChapeauProject.Repositories
             return orders.Values.ToList();
         }
 
-        public void ToggleItemPreparation(int orderItemId) //NOTE make enum
+        public void ToggleItemPreparation(int orderItemId)
         {
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using (SqlConnection connection = GetConnection())
             {
-                string query = "UPDATE OrderItems SET PreparationStatus = ~PreparationStatus WHERE OrderItemID = @OrderItemID";
+                string query = @"UPDATE OrderItems SET PreparationStatus =
+                    CASE PreparationStatus
+                        WHEN 'Pending'   THEN 'Preparing'
+                        WHEN 'Preparing' THEN 'Done'
+                        WHEN 'Done'      THEN 'Pending'
+                    END
+                    WHERE OrderItemID = @OrderItemID";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@OrderItemID", orderItemId);
-                    connection.Open();
                     command.ExecuteNonQuery();
                 }
             }
@@ -79,13 +81,12 @@ namespace ChapeauProject.Repositories
 
         public void CompleteOrder(int orderId)
         {
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using (SqlConnection connection = GetConnection())
             {
-                string query = "UPDATE Orders SET OrderStatus = 1 WHERE OrderID = @OrderID";
+                string query = "UPDATE Orders SET OrderStatus = 'Complete' WHERE OrderID = @OrderID";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@OrderID", orderId);
-                    connection.Open();
                     command.ExecuteNonQuery();
                 }
             }

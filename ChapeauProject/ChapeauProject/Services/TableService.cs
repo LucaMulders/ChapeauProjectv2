@@ -13,9 +13,9 @@ namespace ChapeauProject.Services
             _tableRepository = tableRepository;
         }
 
-        public List<Table> GetAll()
+        public List<Table> GetAllTables()
         {
-            return _tableRepository.GetAll();
+            return _tableRepository.GetAllTables();
         }
 
         public Table? GetByTableNumber(int tableNumber)
@@ -30,12 +30,51 @@ namespace ChapeauProject.Services
 
         public TableOrderViewModel GetTableOrders(int tableNumber)
         {
-            return _tableRepository.GetTableOrders(tableNumber);
+            var guestOrders = _tableRepository.GetTableOrders(tableNumber);
+
+            var guests = guestOrders.Select(g => new GuestOrderViewModel
+            {
+                GuestID   = g.GuestID,
+                GuestName = g.GuestName,
+                Items     = g.Items.Select(i => new OrderItemViewModel
+                {
+                    OrderItemID       = i.OrderItemID,
+                    ItemName          = i.ItemName,
+                    Quantity          = i.Quantity,
+                    Price             = i.Price,
+                    VatRate           = i.VatRate,
+                    PreparationStatus = i.PreparationStatus
+                }).ToList()
+            }).ToList();
+
+            var allItems = guests.SelectMany(g => g.Items).ToList();
+            decimal subtotal = allItems.Sum(i => i.Price * i.Quantity);
+            decimal lowVat   = allItems.Where(i => i.VatRate == 0.09m).Sum(i => i.Price * i.Quantity * i.VatRate);
+            decimal highVat  = allItems.Where(i => i.VatRate == 0.21m).Sum(i => i.Price * i.Quantity * i.VatRate);
+
+            return new TableOrderViewModel
+            {
+                TableNumber = tableNumber,
+                Guests      = guests,
+                TotalAmount = subtotal + lowVat + highVat,
+                LowVAT      = lowVat,
+                HighVAT     = highVat
+            };
         }
 
         public int GetOrderCount(int tableNumber)
         {
             return _tableRepository.GetOrderCount(tableNumber);
+        }
+
+        public (bool HasFood, bool HasDrink) GetRunningOrderCategories(int tableNumber)
+        {
+            return _tableRepository.GetRunningOrderCategories(tableNumber);
+        }
+
+        public void SetFree(int tableNumber)
+        {
+            _tableRepository.SetFree(tableNumber);
         }
     }
 }

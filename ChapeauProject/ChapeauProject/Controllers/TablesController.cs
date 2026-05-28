@@ -16,11 +16,17 @@ namespace ChapeauProject.Controllers
 
         public IActionResult Index()
         {
-            var tables = _tableService.GetAll();
-            var viewModel = tables.Select(t => new TablesViewModel
+            var tables = _tableService.GetAllTables();
+            var viewModel = tables.Select(t =>
             {
-                Table = t,
-                OrderCount = _tableService.GetOrderCount(t.TableNumber)
+                var categories = _tableService.GetRunningOrderCategories(t.TableNumber);
+                return new TablesViewModel
+                {
+                    Table = t,
+                    OrderCount = _tableService.GetOrderCount(t.TableNumber),
+                    HasFoodOrder = categories.HasFood,
+                    HasDrinkOrder = categories.HasDrink
+                };
             }).ToList();
             return View(viewModel);
         }

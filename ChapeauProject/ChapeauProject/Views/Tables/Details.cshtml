@@ -1,36 +1,65 @@
-﻿@model ChapeauProject.ViewModels.TableOrderViewModel
+@model ChapeauProject.ViewModels.TableOrderViewModel
+@using ChapeauProject.Models
 
 @{
     ViewData["Title"] = "Table " + Model.TableNumber + " Orders";
 }
 
-<h2>Table @Model.TableNumber</h2>
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+    <h2>Table @Model.TableNumber</h2>
+    <a asp-action="Details" asp-route-id="@Model.TableNumber" class="complete-btn" style="display:inline-block; width:auto; padding:7px 20px; text-decoration:none;">&#8635; Refresh</a>
+</div>
 <hr />
 
-@foreach (var guest in Model.Guests)
+@if (!Model.Guests.Any() || Model.Guests.All(g => !g.Items.Any()))
 {
-    <h4>@guest.GuestName</h4>
-    <table class="table table-sm">
-        <thead>
-            <tr>
-                <th>Item</th>
-                <th>Qty</th>
-                <th>Price</th>
-                <th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in guest.Items)
-            {
-                <tr>
-                    <td>@item.ItemName</td>
-                    <td>@item.Quantity</td>
-                    <td>€@item.Price.ToString("F2")</td>
-                    <td>€@((item.Price * item.Quantity).ToString("F2"))</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <p style="color:#999;">No running orders for this table.</p>
+}
+else
+{
+    @foreach (var guest in Model.Guests)
+    {
+        if (guest.Items.Any())
+        {
+            <h4>@guest.GuestName</h4>
+            <table class="table table-sm" style="margin-bottom:1.5rem;">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in guest.Items)
+                    {
+                        <tr>
+                            <td>@item.ItemName</td>
+                            <td>@item.Quantity</td>
+                            <td>€@item.Price.ToString("F2")</td>
+                            <td>
+                                <form asp-action="ToggleItem" asp-controller="Orders" method="post" style="display:inline;">
+                                    <input type="hidden" name="orderItemId" value="@item.OrderItemID" />
+                                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Tables", new { id = Model.TableNumber })" />
+                                    @{
+                                        var (pillClass, label) = item.PreparationStatus switch
+                                        {
+                                            PreparationStatus.Pending   => ("status-pill status-ordered",   "Ordered"),
+                                            PreparationStatus.Preparing => ("status-pill status-preparing", "Being Prepared"),
+                                            PreparationStatus.Done      => ("status-pill status-ready",     "Ready to Serve"),
+                                            _                           => ("status-pill", item.PreparationStatus.ToString())
+                                        };
+                                    }
+                                    <button type="submit" class="@pillClass">@label</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
 }
 
 <hr />
@@ -39,3 +68,24 @@
 <h4>Total (incl. VAT): €@Model.TotalAmount.ToString("F2")</h4>
 
 <a asp-action="Index" class="btn btn-secondary">Back to Tables</a>
+<a asp-action="Pay" asp-controller="Bill" asp-route-id="@Model.TableNumber"
+   class="complete-btn" style="display:inline-block; width:auto; padding:10px 24px; text-decoration:none; margin-left:8px;">
+    Process Bill
+</a>
+
+<style>
+    .status-pill {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: opacity 0.15s;
+    }
+    .status-pill:hover { opacity: 0.8; }
+    .status-ordered   { background: #FFF3CD; color: #856404; }
+    .status-preparing { background: #CCE5FF; color: #004085; }
+    .status-ready     { background: #D4EDDA; color: #155724; }
+</style>

@@ -4,7 +4,7 @@ namespace ChapeauProject.Services
 {
     public interface IOrderService
     {
-        List<RunningOrderViewModel> GetRunningOrders();
+        List<RunningOrderViewModel> GetAllOrdersByStatus();
         void ToggleItemPreparation(int orderItemId);
         void CompleteOrder(int orderId);
     }

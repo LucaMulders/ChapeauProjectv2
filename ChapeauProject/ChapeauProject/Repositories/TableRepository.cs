@@ -1,27 +1,22 @@
 ﻿using ChapeauProject.Models;
-using ChapeauProject.ViewModels;
 using Microsoft.Data.SqlClient;
 
 namespace ChapeauProject.Repositories
 {
-    public class TableRepository : ITableRepository
+    public class TableRepository : RepositoryBase, ITableRepository
     {
-        private readonly string? _connectionString;
-
-        public TableRepository(IConfiguration configuration)
+        public TableRepository(IConfiguration configuration) : base(configuration)
         {
-            _connectionString = configuration.GetConnectionString("ChapeauProject");
         }
 
-        public List<Table> GetAll() //NOTE getalltables
+        public List<Table> GetAllTables()
         {
             var tables = new List<Table>();
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using (SqlConnection connection = GetConnection())
             {
                 string query = "SELECT TableNumber, Seats, IsOccupied FROM Tables";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    connection.Open();
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -36,13 +31,12 @@ namespace ChapeauProject.Repositories
 
         public Table? GetByTableNumber(int tableNumber)
         {
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using (SqlConnection connection = GetConnection())
             {
                 string query = "SELECT TableNumber, Seats, IsOccupied FROM Tables WHERE TableNumber = @TableNumber";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@TableNumber", tableNumber);
-                    connection.Open();
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -62,27 +56,23 @@ namespace ChapeauProject.Repositories
         }
         public void ToggleOccupied(int tableNumber)
         {
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using (SqlConnection connection = GetConnection())
             {
                 string query = "UPDATE Tables SET IsOccupied = ~IsOccupied WHERE TableNumber = @TableNumber";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@TableNumber", tableNumber);
-                    connection.Open();
                     command.ExecuteNonQuery();
                 }
             }
         }
 
-        //NOTE table orders or smth
-        public TableOrderViewModel GetTableOrders(int tableNumber)
+        public List<GuestOrder> GetTableOrders(int tableNumber)
         {
-            var guests = new List<GuestOrderViewModel>();
+            var guests = new List<GuestOrder>();
 
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using (SqlConnection connection = GetConnection())
             {
-                connection.Open();
-
                 // get all guests at this table
                 string guestQuery = "SELECT GuestID, FirstName, LastName FROM Guests WHERE TableNumber = @TableNumber";
                 using (SqlCommand cmd = new SqlCommand(guestQuery, connection))
@@ -92,26 +82,26 @@ namespace ChapeauProject.Repositories
                     {
                         while (reader.Read())
                         {
-                            guests.Add(new GuestOrderViewModel
+                            guests.Add(new GuestOrder
                             {
+                                GuestID   = reader.GetInt32(reader.GetOrdinal("GuestID")),
                                 GuestName = reader.GetString(reader.GetOrdinal("FirstName")) + " " + reader.GetString(reader.GetOrdinal("LastName")),
-                                GuestID = reader.GetInt32(reader.GetOrdinal("GuestID")),
-                                Items = new List<OrderItemViewModel>()
+                                Items     = new List<GuestOrderItem>()
                             });
                         }
                     }
                 }
 
-                // for each guest get their order items
+                // for each guest get their pending order items
                 foreach (var guest in guests)
                 {
                     string itemQuery = @"
-                SELECT mi.ItemName, mi.Price, mi.VatRate, SUM(oi.Quantity) as Quantity
-                FROM Orders o
-                JOIN OrderItems oi ON o.OrderID = oi.OrderID
-                JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
-                WHERE o.GuestID = @GuestID
-                GROUP BY mi.ItemName, mi.Price, mi.VatRate";
+                        SELECT oi.OrderItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus
+                        FROM Orders o
+                        JOIN OrderItems oi ON o.OrderID = oi.OrderID
+                        JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
+                        WHERE o.GuestID = @GuestID
+                          AND o.OrderStatus = 'Pending'";
 
                     using (SqlCommand cmd = new SqlCommand(itemQuery, connection))
                     {
@@ -120,12 +110,14 @@ namespace ChapeauProject.Repositories
                         {
                             while (reader.Read())
                             {
-                                guest.Items.Add(new OrderItemViewModel
+                                guest.Items.Add(new GuestOrderItem
                                 {
-                                    ItemName = reader.GetString(reader.GetOrdinal("ItemName")),
-                                    Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
-                                    Price = reader.GetDecimal(reader.GetOrdinal("Price")),
-                                    VatRate = reader.GetDecimal(reader.GetOrdinal("VatRate"))
+                                    OrderItemID       = reader.GetInt32(reader.GetOrdinal("OrderItemID")),
+                                    ItemName          = reader.GetString(reader.GetOrdinal("ItemName")),
+                                    Quantity          = reader.GetInt32(reader.GetOrdinal("Quantity")),
+                                    Price             = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                    VatRate           = reader.GetDecimal(reader.GetOrdinal("VatRate")),
+                                    PreparationStatus = Enum.Parse<PreparationStatus>(reader.GetString(reader.GetOrdinal("PreparationStatus")))
                                 });
                             }
                         }
@@ -133,36 +125,59 @@ namespace ChapeauProject.Repositories
                 }
             }
 
-            var allItems = guests.SelectMany(g => g.Items).ToList();
-            decimal subtotal = allItems.Sum(i => i.Price * i.Quantity);
-            decimal lowVat = allItems.Where(i => i.VatRate == 0.09m).Sum(i => i.Price * i.Quantity * i.VatRate);
-            decimal highVat = allItems.Where(i => i.VatRate == 0.21m).Sum(i => i.Price * i.Quantity * i.VatRate);
-
-            return new TableOrderViewModel //NOTE make model NO VIEWMODELS IN REPO PLEASE!!!!!!!!!!!!!!!!!!!!!!!!
-            {
-                TableNumber = tableNumber,
-                Guests = guests,
-                TotalAmount = subtotal + lowVat + highVat,
-                LowVAT = lowVat,
-                HighVAT = highVat
-            };
+            return guests;
         }
 
-        public int GetOrderCount(int tableNumber) //NOTE use orderitems.count
+        public int GetOrderCount(int tableNumber)
         {
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            return GetTableOrders(tableNumber).Sum(g => g.Items.Count);
+        }
+
+        public void SetFree(int tableNumber)
+        {
+            using (SqlConnection connection = GetConnection())
             {
-                string query = @"SELECT COUNT(*) FROM OrderItems oi
-                        JOIN Orders o ON oi.OrderID = o.OrderID
-                        JOIN Guests g ON o.GuestID = g.GuestID
-                        WHERE g.TableNumber = @TableNumber";
+                string query = "UPDATE Tables SET IsOccupied = 0 WHERE TableNumber = @TableNumber";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@TableNumber", tableNumber);
-                    connection.Open();
-                    return (int)command.ExecuteScalar();
+                    command.ExecuteNonQuery();
                 }
             }
+        }
+
+        public (bool HasFood, bool HasDrink) GetRunningOrderCategories(int tableNumber)
+        {
+            var cards = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = @"
+                    SELECT DISTINCT mi.MenuCard
+                    FROM Orders o
+                    JOIN Guests g ON o.GuestID = g.GuestID
+                    JOIN OrderItems oi ON o.OrderID = oi.OrderID
+                    JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
+                    WHERE g.TableNumber = @TableNumber
+                      AND o.OrderStatus = 'Pending'";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@TableNumber", tableNumber);
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            cards.Add(reader.GetString(0));
+                        }
+                    }
+                }
+            }
+
+            // MenuCard values are "Lunch", "Dinner" (food), and "Drinks"
+            bool hasFood  = cards.Contains("Lunch") || cards.Contains("Dinner");
+            bool hasDrink = cards.Contains("Drinks");
+            return (hasFood, hasDrink);
         }
     }
 }

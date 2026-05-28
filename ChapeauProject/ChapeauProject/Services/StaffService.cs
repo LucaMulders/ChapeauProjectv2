@@ -12,9 +12,9 @@ namespace ChapeauProject.Services
             _staffRepository = staffRepository;
         }
 
-        public List<Staff> GetAll()
+        public List<Staff> GetAllStaff()
         {
-            return _staffRepository.GetAll();
+            return _staffRepository.GetAllStaff();
         }
 
         public Staff? GetById(int id)

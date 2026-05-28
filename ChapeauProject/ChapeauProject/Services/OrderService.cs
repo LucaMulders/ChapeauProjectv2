@@ -12,9 +12,9 @@ namespace ChapeauProject.Services
             _orderRepository = orderRepository;
         }
 
-        public List<RunningOrderViewModel> GetRunningOrders()
+        public List<RunningOrderViewModel> GetAllOrdersByStatus()
         {
-            return _orderRepository.GetRunningOrders();
+            return _orderRepository.GetAllOrdersByStatus();
         }
 
         public void ToggleItemPreparation(int orderItemId)

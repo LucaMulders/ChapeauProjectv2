@@ -1,4 +1,6 @@
-﻿namespace ChapeauProject.ViewModels
+﻿using ChapeauProject.Models;
+
+namespace ChapeauProject.ViewModels
 {
     public class RunningOrderViewModel
     {
@@ -14,6 +16,6 @@
         public int OrderItemID { get; set; }
         public string ItemName { get; set; }
         public int Quantity { get; set; }
-        public bool IsPrepared { get; set; }
+        public PreparationStatus PreparationStatus { get; set; }
     }
 }

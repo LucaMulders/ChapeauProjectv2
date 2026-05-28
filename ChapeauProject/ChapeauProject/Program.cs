@@ -15,6 +15,8 @@ builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IBillRepository, BillRepository>();
+builder.Services.AddScoped<IBillService, BillService>();
 
 // enabling cookie-based authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

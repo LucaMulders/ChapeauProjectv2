@@ -4,7 +4,7 @@ namespace ChapeauProject.Repositories
 {
     public interface IOrderRepository
     {
-        List<RunningOrderViewModel> GetRunningOrders();
+        List<RunningOrderViewModel> GetAllOrdersByStatus();
         void ToggleItemPreparation(int orderItemId);
         void CompleteOrder(int orderId);
     }

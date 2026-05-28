@@ -14,14 +14,16 @@ namespace ChapeauProject.Controllers
 
         public IActionResult Index()
         {
-            var orders = _orderService.GetRunningOrders();
+            var orders = _orderService.GetAllOrdersByStatus();
             return View(orders);
         }
 
         [HttpPost]
-        public IActionResult ToggleItem(int orderItemId)
+        public IActionResult ToggleItem(int orderItemId, string? returnUrl)
         {
             _orderService.ToggleItemPreparation(orderItemId);
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
             return RedirectToAction("Index");
         }
 

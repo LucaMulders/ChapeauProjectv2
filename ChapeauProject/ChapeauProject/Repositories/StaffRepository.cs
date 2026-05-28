@@ -4,26 +4,21 @@ using Microsoft.Extensions.Configuration;
 
 namespace ChapeauProject.Repositories
 {
-    public class StaffRepository : IStaffRepository
+    public class StaffRepository : RepositoryBase, IStaffRepository
     {
-        private readonly string? _connectionString;
-
-        public StaffRepository(IConfiguration configuration)
+        public StaffRepository(IConfiguration configuration) : base(configuration)
         {
-            // get (database) connection string from appsettings
-            _connectionString = configuration.GetConnectionString("ChapeauProject");
         }
 
         public Staff? GetByLoginCredentials(int staffID, string password)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            using (var connection = GetConnection())
             {
                 const string query = "SELECT StaffID, FirstName, LastName, Role, Password FROM Staff WHERE StaffID = @StaffID";
                 using (var command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@StaffID", staffID);
 
-                    connection.Open();
                     using (var reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -36,15 +31,14 @@ namespace ChapeauProject.Repositories
             return null;
         }
 
-        public List<Staff> GetAll()
+        public List<Staff> GetAllStaff()
         {
             var staffList = new List<Staff>();
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using (SqlConnection connection = GetConnection())
             {
                 string query = "SELECT StaffID, FirstName, LastName, Role, Password FROM Staff";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    connection.Open();
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -70,14 +64,13 @@ namespace ChapeauProject.Repositories
 
         public Staff? GetById(int staffId)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            using (var connection = GetConnection())
             {
                 const string query = "SELECT StaffID, FirstName, LastName, Role, Password FROM Staff WHERE StaffID = @StaffID";
                 using (var command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@StaffID", staffId);
 
-                    connection.Open();
                     using (var reader = command.ExecuteReader())
                     {
                         if (reader.Read())
