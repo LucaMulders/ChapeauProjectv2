@@ -146,9 +146,15 @@ namespace ChapeauProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult SaveAndSendOrder()
+        public IActionResult SaveAndSendOrder(int guestId)
         {
             int currentTableId = _activeWorkingOrder.TableNumber;
+
+            if (guestId <= 0)
+            {
+                TempData["ErrorMessage"] = "Please select a guest before sending the order.";
+                return RedirectToAction("Details", "Tables", new { id = currentTableId });
+            }
 
             if (!_activeWorkingOrder.OrderItems.Any())
             {
@@ -156,6 +162,7 @@ namespace ChapeauProject.Controllers
                 return RedirectToAction("Details", "Tables", new { id = currentTableId });
             }
 
+            _activeWorkingOrder.GuestID = guestId;
             _orderService.SaveNewOrder(_activeWorkingOrder);
 
             TempData["SuccessMessage"] = "Order dispatched and stock adjusted successfully!";
@@ -185,6 +192,12 @@ namespace ChapeauProject.Controllers
         [HttpPost]
         public IActionResult CompleteOrder(int orderId)
         {
+            if (!_orderService.AllItemsReady(orderId))
+            {
+                TempData["ErrorMessage"] = "All items must be Ready before marking the order as served.";
+                return RedirectToAction("Index");
+            }
+
             _orderService.CompleteOrder(orderId);
             return RedirectToAction("Index");
         }

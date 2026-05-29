@@ -7,5 +7,6 @@
         public decimal TotalAmount { get; set; }
         public decimal LowVAT { get; set; }
         public decimal HighVAT { get; set; }
+        public decimal SubTotalAmount => TotalAmount - LowVAT - HighVAT;
     }
 }

@@ -1,15 +1,16 @@
 @model ChapeauProject.ViewModels.BillViewModel
+@using ChapeauProject.ViewModels
 
 @{
     ViewData["Title"] = "Bill – Table " + Model.TableNumber;
+    var methods = new[] { "Cash", "Credit Card", "Debit Card" };
 }
 
 <h2 style="font-family:'Playfair Display',serif; color:var(--bistro-text);">Bill – Table @Model.TableNumber</h2>
 <hr />
 
-<div style="max-width:520px;">
+<div style="max-width:600px;">
 
-    <!-- Order items per guest -->
     @foreach (var guest in Model.Guests)
     {
         <div class="order-card" style="margin-bottom:1rem;">
@@ -29,7 +30,6 @@
         </div>
     }
 
-    <!-- Order summary -->
     <div class="order-card" style="margin-bottom:1.5rem;">
         <div class="order-card-header">
             <div class="order-table-num">Order Summary</div>
@@ -54,50 +54,222 @@
         </table>
     </div>
 
-    <!-- Payment form -->
-    <form asp-action="Pay" asp-controller="Bill" method="post">
-        <input type="hidden" asp-for="TableNumber" />
-        <input type="hidden" asp-for="SubTotalAmount" />
-        <input type="hidden" asp-for="LowVAT" />
-        <input type="hidden" asp-for="HighVAT" />
-        <input type="hidden" asp-for="TotalAmount" />
-
-        <!-- Tip -->
-        <div style="margin-bottom:1rem;">
-            <label asp-for="TipAmount" style="font-weight:600; display:block; margin-bottom:4px;">Tip (€)</label>
-            <input asp-for="TipAmount" type="number" min="0" step="0.50"
-                   style="width:100%; padding:8px 12px; border:1px solid #d0c8b8; border-radius:6px; font-size:1rem;" />
-        </div>
-
-        <!-- Payment method -->
-        <div style="margin-bottom:1rem;">
-            <label style="font-weight:600; display:block; margin-bottom:8px;">Payment Method</label>
-            <div style="display:flex; gap:12px;">
-                @foreach (var method in new[] { "Cash", "Credit Card", "Debit Card" })
-                {
-                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-                        <input type="radio" name="PaymentMethod" value="@method"
-                               @(Model.PaymentMethod == method ? "checked" : "") />
-                        @method
-                    </label>
-                }
+    @if (Model.SplitMode == SplitMode.Single)
+    {
+        <div style="margin-bottom:1.5rem;">
+            <p style="font-weight:600; margin-bottom:8px;">How would you like to pay?</p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <form asp-action="SetSplitMode" asp-controller="Bill" method="post" style="margin:0;">
+                    <input type="hidden" name="tableNumber" value="@Model.TableNumber" />
+                    <input type="hidden" name="splitMode" value="@SplitMode.Single" />
+                    <button type="submit" class="complete-btn" style="background:#2b1810; padding:8px 18px;">Pay in Full</button>
+                </form>
+                <form asp-action="SetSplitMode" asp-controller="Bill" method="post" style="margin:0; display:flex; gap:6px; align-items:center;">
+                    <input type="hidden" name="tableNumber" value="@Model.TableNumber" />
+                    <input type="hidden" name="splitMode" value="@SplitMode.Equal" />
+                    <input type="number" name="splitCount" min="2" max="20" value="2"
+                           style="width:60px; padding:6px; border:1px solid #d0c8b8; border-radius:6px;" />
+                    <button type="submit" class="complete-btn" style="padding:8px 18px;">Split Equally</button>
+                </form>
+                <form asp-action="SetSplitMode" asp-controller="Bill" method="post" style="margin:0;">
+                    <input type="hidden" name="tableNumber" value="@Model.TableNumber" />
+                    <input type="hidden" name="splitMode" value="@SplitMode.Custom" />
+                    <button type="submit" class="complete-btn" style="padding:8px 18px;">Custom Split</button>
+                </form>
+                <form asp-action="SetSplitMode" asp-controller="Bill" method="post" style="margin:0;">
+                    <input type="hidden" name="tableNumber" value="@Model.TableNumber" />
+                    <input type="hidden" name="splitMode" value="@SplitMode.ByGuest" />
+                    <button type="submit" class="complete-btn" style="padding:8px 18px;">Split by Guest</button>
+                </form>
             </div>
         </div>
+    }
 
-        <!-- Feedback -->
-        <div style="margin-bottom:1.5rem;">
-            <label asp-for="Feedback" style="font-weight:600; display:block; margin-bottom:4px;">
-                Guest Feedback <span style="font-weight:400; color:#aaa;">(optional)</span>
-            </label>
-            <textarea asp-for="Feedback" rows="3" placeholder="e.g. The food was wonderful!"
-                      style="width:100%; padding:8px 12px; border:1px solid #d0c8b8; border-radius:6px; font-size:0.95rem; resize:vertical;"></textarea>
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div style="background:#A32D2D; color:white; padding:10px 16px; border-radius:6px; margin-bottom:1rem;">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@error.ErrorMessage</div>
+            }
         </div>
+    }
 
-        <div style="display:flex; gap:12px; align-items:center;">
-            <button type="submit" class="complete-btn" style="width:auto; padding:10px 28px; font-size:1rem;">
-                Confirm Payment
-            </button>
-            <a asp-action="Index" asp-controller="Bill" style="color:#888; text-decoration:none;">Cancel</a>
-        </div>
-    </form>
+    @if (Model.SplitMode == SplitMode.Single)
+    {
+        <form asp-action="Pay" asp-controller="Bill" method="post">
+            <input type="hidden" asp-for="TableNumber" />
+            <input type="hidden" asp-for="SubTotalAmount" />
+            <input type="hidden" asp-for="LowVAT" />
+            <input type="hidden" asp-for="HighVAT" />
+            <input type="hidden" asp-for="TotalAmount" />
+            <input type="hidden" asp-for="SplitMode" />
+
+            <div style="margin-bottom:1rem;">
+                <label style="font-weight:600; display:block; margin-bottom:4px;">Tip (€)</label>
+                <input asp-for="TipAmount" type="number" min="0" step="0.50"
+                       style="width:100%; padding:8px 12px; border:1px solid #d0c8b8; border-radius:6px; font-size:1rem;" />
+            </div>
+            <div style="margin-bottom:1rem;">
+                <label style="font-weight:600; display:block; margin-bottom:8px;">Payment Method</label>
+                <div style="display:flex; gap:12px;">
+                    @foreach (var method in methods)
+                    {
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                            <input type="radio" name="PaymentMethod" value="@method" @(Model.PaymentMethod == method ? "checked" : "") />
+                            @method
+                        </label>
+                    }
+                </div>
+            </div>
+            <div style="margin-bottom:1.5rem;">
+                <label style="font-weight:600; display:block; margin-bottom:4px;">Feedback <span style="font-weight:400; color:#aaa;">(optional)</span></label>
+                <textarea asp-for="Feedback" rows="2" style="width:100%; padding:8px 12px; border:1px solid #d0c8b8; border-radius:6px; font-size:0.95rem;"></textarea>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center;">
+                <button type="submit" class="complete-btn" style="width:auto; padding:10px 28px;">Confirm Payment</button>
+                <a asp-action="Index" asp-controller="Bill" style="color:#888; text-decoration:none;">Cancel</a>
+            </div>
+        </form>
+    }
+
+    @if (Model.SplitMode != SplitMode.Single && Model.Payers.Any())
+    {
+        <form asp-action="Pay" asp-controller="Bill" method="post">
+            <input type="hidden" asp-for="TableNumber" />
+            <input type="hidden" asp-for="SubTotalAmount" />
+            <input type="hidden" asp-for="LowVAT" />
+            <input type="hidden" asp-for="HighVAT" />
+            <input type="hidden" asp-for="TotalAmount" />
+            <input type="hidden" asp-for="SplitMode" />
+
+            @{
+                decimal remaining = Model.TotalAmount;
+            }
+
+            @for (int i = 0; i < Model.Payers.Count; i++)
+            {
+                var payer = Model.Payers[i];
+                <input type="hidden" name="Payers[@i].Name" value="@payer.Name" />
+                <input type="hidden" name="Payers[@i].GuestID" value="@payer.GuestID" />
+
+                <div class="order-card" style="margin-bottom:1rem;">
+                    <div class="order-card-header">
+                        <div class="order-table-num">@payer.Name</div>
+                        @if (Model.SplitMode == SplitMode.Custom)
+                        {
+                            <div class="order-meta">Remaining: €@remaining.ToString("F2")</div>
+                        }
+                        else
+                        {
+                            <div class="order-meta">Amount due: €@payer.AmountDue.ToString("F2")</div>
+                        }
+                    </div>
+
+                    @if (Model.SplitMode == SplitMode.Custom)
+                    {
+                        <div style="margin-bottom:0.75rem;">
+                            <label style="font-weight:600; font-size:0.9rem;">Amount paying (€)</label>
+                            <input type="number" name="Payers[@i].AmountDue" min="0" step="0.01" value="@payer.AmountDue"
+                                   style="width:100%; padding:6px 10px; border:1px solid #d0c8b8; border-radius:6px;" />
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="Payers[@i].AmountDue" value="@payer.AmountDue" />
+                    }
+
+                    <div style="margin-bottom:0.75rem;">
+                        <label style="font-weight:600; font-size:0.9rem;">Tip (€)</label>
+                        <input type="number" name="Payers[@i].TipAmount" min="0" step="0.50" value="0"
+                               style="width:100%; padding:6px 10px; border:1px solid #d0c8b8; border-radius:6px;" />
+                    </div>
+
+                    <div style="margin-bottom:0.75rem;">
+                        <label style="font-weight:600; font-size:0.9rem;">Payment Method</label>
+                        <div style="display:flex; gap:12px; margin-top:4px;">
+                            @foreach (var method in methods)
+                            {
+                                <label style="display:flex; align-items:center; gap:4px; font-size:0.9rem; cursor:pointer;">
+                                    <input type="radio" name="Payers[@i].PaymentMethod" value="@method" @(method == "Cash" ? "checked" : "") />
+                                    @method
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="font-weight:600; font-size:0.9rem;">Feedback <span style="font-weight:400; color:#aaa;">(optional)</span></label>
+                        <textarea name="Payers[@i].Feedback" rows="2"
+                                  style="width:100%; padding:6px 10px; border:1px solid #d0c8b8; border-radius:6px; font-size:0.9rem; margin-top:4px;"></textarea>
+                    </div>
+                </div>
+
+                remaining -= payer.AmountDue;
+            }
+
+            @if (Model.SplitMode == SplitMode.Custom)
+            {
+                <div id="payers-container"></div>
+                <button type="button" onclick="addPayer()" class="complete-btn"
+                        style="width:auto; padding:8px 18px; margin-bottom:1rem;">+ Add Person</button>
+                <p style="font-size:0.85rem; color:#888; margin-bottom:1rem;">
+                    Total must be at least €@Model.TotalAmount.ToString("F2").
+                </p>
+            }
+
+            <div style="display:flex; gap:12px; align-items:center;">
+                <button type="submit" class="complete-btn" style="width:auto; padding:10px 28px;">Confirm Payment</button>
+                <a asp-action="Pay" asp-controller="Bill" asp-route-TableNumber="@Model.TableNumber" style="color:#888; text-decoration:none;">Start Over</a>
+            </div>
+        </form>
+    }
 </div>
+
+@if (Model.SplitMode == SplitMode.Custom)
+{
+    <script>
+        let payerCount = @Model.Payers.Count;
+        const methods = ['Cash', 'Credit Card', 'Debit Card'];
+
+        function addPayer() {
+            const i = payerCount++;
+            const container = document.getElementById('payers-container');
+            const card = document.createElement('div');
+            card.className = 'order-card';
+            card.style.marginBottom = '1rem';
+            card.innerHTML = `
+                <div class="order-card-header">
+                    <div class="order-table-num">Person ${i + 1}</div>
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <label style="font-weight:600; font-size:0.9rem;">Amount paying (€)</label>
+                    <input type="number" name="Payers[${i}].AmountDue" min="0" step="0.01" value="0"
+                           style="width:100%; padding:6px 10px; border:1px solid #d0c8b8; border-radius:6px;" />
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <label style="font-weight:600; font-size:0.9rem;">Tip (€)</label>
+                    <input type="number" name="Payers[${i}].TipAmount" min="0" step="0.50" value="0"
+                           style="width:100%; padding:6px 10px; border:1px solid #d0c8b8; border-radius:6px;" />
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <label style="font-weight:600; font-size:0.9rem;">Payment Method</label>
+                    <div style="display:flex; gap:12px; margin-top:4px;">
+                        ${methods.map((m, mi) => `
+                            <label style="display:flex; align-items:center; gap:4px; font-size:0.9rem; cursor:pointer;">
+                                <input type="radio" name="Payers[${i}].PaymentMethod" value="${m}" ${mi === 0 ? 'checked' : ''} />
+                                ${m}
+                            </label>`).join('')}
+                    </div>
+                </div>
+                <div>
+                    <label style="font-weight:600; font-size:0.9rem;">Feedback <span style="font-weight:400; color:#aaa;">(optional)</span></label>
+                    <textarea name="Payers[${i}].Feedback" rows="2"
+                              style="width:100%; padding:6px 10px; border:1px solid #d0c8b8; border-radius:6px; font-size:0.9rem; margin-top:4px;"></textarea>
+                </div>
+                <input type="hidden" name="Payers[${i}].Name" value="Person ${i + 1}" />
+            `;
+            container.appendChild(card);
+        }
+    </script>
+}

@@ -19,29 +19,7 @@ namespace ChapeauProject.Repositories
         {
             using (SqlConnection connection = GetConnection())
             {
-                string getGuestSql = "SELECT TOP 1 GuestID FROM Guests WHERE TableNumber = @TableNumber ORDER BY GuestID DESC;";
-                int guestId = 0;
-
-                using (SqlCommand guestCmd = new SqlCommand(getGuestSql, connection))
-                {
-                    guestCmd.Parameters.AddWithValue("@TableNumber", order.TableNumber);
-                    object result = guestCmd.ExecuteScalar();
-
-                    if (result != null)
-                    {
-                        guestId = (int)result;
-                    }
-                    else
-                    {
-                        
-                        string createGuestSql = "INSERT INTO Guests (TableNumber, FirstName, LastName) VALUES (@TableNumber, 'Unnamed', 'Guest'); SELECT CAST(SCOPE_IDENTITY() as int);";
-                        using (SqlCommand createGuestCmd = new SqlCommand(createGuestSql, connection))
-                        {
-                            createGuestCmd.Parameters.AddWithValue("@TableNumber", order.TableNumber);
-                            guestId = (int)createGuestCmd.ExecuteScalar();
-                        }
-                    }
-                }
+                int guestId = order.GuestID;
 
        
                 string insertOrderSql = @"
@@ -87,7 +65,11 @@ namespace ChapeauProject.Repositories
             using (SqlConnection connection = GetConnection())
             {
               
-                string query = "SELECT OrderID, GuestID, OrderStatus, OrderTimeStamp FROM Orders WHERE OrderStatus = 'Pending';";
+                string query = @"
+                    SELECT O.OrderID, O.GuestID, O.OrderStatus, O.OrderTimeStamp, G.TableNumber
+                    FROM Orders O
+                    JOIN Guests G ON O.GuestID = G.GuestID
+                    WHERE O.OrderStatus = 'Pending'";
 
 
                 using (SqlCommand command = new SqlCommand(query, connection))
@@ -106,7 +88,7 @@ namespace ChapeauProject.Repositories
                                 OrderID = orderId,
                                 Status = reader["OrderStatus"].ToString(),
                                 
-                                TableNumber = reader["GuestID"] != System.DBNull.Value ? (int)reader["GuestID"] : 0,
+                                TableNumber = reader["TableNumber"] != System.DBNull.Value ? (int)reader["TableNumber"] : 0,
                                 OrderTime = timeStamp,
                                 // Initialize an empty so cannot be null!
                                 Items = new List<RunningOrderItemViewModel>()
@@ -181,18 +163,26 @@ namespace ChapeauProject.Repositories
         {
             using (SqlConnection connection = GetConnection())
             {
-               
-                string query = "UPDATE Orders SET OrderStatus = 'Complete' WHERE OrderID = @OrderID";
+                string query = "UPDATE Orders SET OrderStatus = 'Served' WHERE OrderID = @OrderID";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@OrderID", orderId);
-
-                    if (connection.State != System.Data.ConnectionState.Open)
-                    {
-                        connection.Open();
-                    }
-
                     command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public bool AllItemsReady(int orderId)
+        {
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = @"
+                    SELECT COUNT(*) FROM OrderItems
+                    WHERE OrderID = @OrderID AND PreparationStatus != 'Ready'";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@OrderID", orderId);
+                    return (int)command.ExecuteScalar() == 0;
                 }
             }
         }

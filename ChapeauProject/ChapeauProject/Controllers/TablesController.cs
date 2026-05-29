@@ -75,8 +75,7 @@ namespace ChapeauProject.Controllers
             ViewBag.CardFilter = cardFilter;
             ViewBag.CourseFilter = courseFilter;
             ViewBag.CurrentBasket = OrdersController.ActiveWorkingOrder;
-
-           
+            ViewBag.Guests = _tableService.GetGuestsByTable(id);
             ViewBag.MenuItems = _menuService.GetCourseFiltered(cardFilter, courseFilter);
 
          

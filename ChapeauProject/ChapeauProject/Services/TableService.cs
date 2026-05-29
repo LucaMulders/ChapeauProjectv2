@@ -18,6 +18,11 @@ namespace ChapeauProject.Services
             return _tableRepository.GetAllTables();
         }
 
+        public List<Table> GetAllOccupiedTables()
+        {
+            return _tableRepository.GetAllOccupiedTables();
+        }
+
         public Table? GetByTableNumber(int tableNumber)
         {
             return _tableRepository.GetByTableNumber(tableNumber);
@@ -70,6 +75,11 @@ namespace ChapeauProject.Services
         public int GetGuestCount(int tableNumber)
         {
             return _tableRepository.GetGuestCount(tableNumber);
+        }
+
+        public List<(int GuestID, string GuestName)> GetGuestsByTable(int tableNumber)
+        {
+            return _tableRepository.GetGuestsByTable(tableNumber);
         }
 
         public (bool HasFood, bool HasDrink) GetRunningOrderCategories(int tableNumber)

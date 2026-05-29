@@ -19,7 +19,6 @@ namespace ChapeauProject.Services
         {
             var now = DateTime.Now;
 
-            // 1. Create a Bill record for this table's session.
             var bill = new Bill
             {
                 TotalAmount    = model.TotalAmount,
@@ -29,22 +28,35 @@ namespace ChapeauProject.Services
             };
             int billId = _billRepository.CreateBill(bill);
 
-            // 2. Create a Payment record linked to the Bill.
-            var payment = new Payment
+            if (model.SplitMode == SplitMode.Single)
             {
-                BillID           = billId,
-                PaymentAmount    = model.TotalAmount + model.TipAmount,
-                PaymentMethod    = model.PaymentMethod,
-                TipAmount        = model.TipAmount,
-                PaymentTimeStamp = now,
-                Feedback         = string.IsNullOrWhiteSpace(model.Feedback) ? null : model.Feedback
-            };
-            _billRepository.CreatePayment(payment);
+                _billRepository.CreatePayment(new Payment
+                {
+                    BillID           = billId,
+                    PaymentAmount    = model.TotalAmount + model.TipAmount,
+                    PaymentMethod    = model.PaymentMethod,
+                    TipAmount        = model.TipAmount,
+                    PaymentTimeStamp = now,
+                    Feedback         = string.IsNullOrWhiteSpace(model.Feedback) ? null : model.Feedback
+                });
+            }
+            else
+            {
+                foreach (var payer in model.Payers)
+                {
+                    _billRepository.CreatePayment(new Payment
+                    {
+                        BillID           = billId,
+                        PaymentAmount    = payer.AmountDue + payer.TipAmount,
+                        PaymentMethod    = payer.PaymentMethod,
+                        TipAmount        = payer.TipAmount,
+                        PaymentTimeStamp = now,
+                        Feedback         = string.IsNullOrWhiteSpace(payer.Feedback) ? null : payer.Feedback
+                    });
+                }
+            }
 
-            // 3. Mark all pending orders for this table as Complete.
             _billRepository.CompleteOrdersForTable(model.TableNumber);
-
-            // 4. Set the table to free.
             _tableRepository.SetFree(model.TableNumber);
         }
     }

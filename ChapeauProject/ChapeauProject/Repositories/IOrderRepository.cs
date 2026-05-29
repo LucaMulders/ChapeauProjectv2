@@ -9,6 +9,7 @@ namespace ChapeauProject.Repositories
         List<RunningOrderViewModel> GetAllOrdersByStatus();
         void ToggleItemPreparation(int orderItemId);
         void CompleteOrder(int orderId);
+        bool AllItemsReady(int orderId);
         void SaveNewOrder(Order order);
     }
 }

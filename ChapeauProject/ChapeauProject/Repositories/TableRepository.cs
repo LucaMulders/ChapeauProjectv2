@@ -29,6 +29,26 @@ namespace ChapeauProject.Repositories
             return tables;
         }
 
+        public List<Table> GetAllOccupiedTables()
+        {
+            var tables = new List<Table>();
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = "SELECT TableNumber, Seats, IsOccupied FROM Tables WHERE IsOccupied = 1";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            tables.Add(ReadTable(reader));
+                        }
+                    }
+                }
+            }
+            return tables;
+        }
+
         public Table? GetByTableNumber(int tableNumber)
         {
             using (SqlConnection connection = GetConnection())
@@ -146,6 +166,30 @@ namespace ChapeauProject.Repositories
                     return (int)command.ExecuteScalar();
                 }
             }
+        }
+
+        public List<(int GuestID, string GuestName)> GetGuestsByTable(int tableNumber)
+        {
+            var guests = new List<(int, string)>();
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = "SELECT GuestID, FirstName, LastName FROM Guests WHERE TableNumber = @TableNumber";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@TableNumber", tableNumber);
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int id = reader.GetInt32(reader.GetOrdinal("GuestID"));
+                            string name = (reader.GetString(reader.GetOrdinal("FirstName")) + " " + reader.GetString(reader.GetOrdinal("LastName"))).Trim();
+                            if (string.IsNullOrWhiteSpace(name)) name = "Unnamed Guest";
+                            guests.Add((id, name));
+                        }
+                    }
+                }
+            }
+            return guests;
         }
 
         public void SetFree(int tableNumber)

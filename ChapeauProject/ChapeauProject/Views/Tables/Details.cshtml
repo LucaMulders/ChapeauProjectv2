@@ -19,7 +19,7 @@
 @if (TempData["ErrorMessage"] != null)
 {
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <strong>Stock Alert:</strong> @TempData["ErrorMessage"]
+        @TempData["ErrorMessage"]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
@@ -229,6 +229,13 @@ else
                     <div class="mt-4 pt-3 border-top">
                         <div class="d-grid gap-2">
                             <form asp-controller="Orders" asp-action="SaveAndSendOrder" method="post" class="m-0 w-100">
+                                <select name="guestId" class="form-select mb-2" style="border-radius: 8px; border-color: #cda45e;" required>
+                                    <option value="0" disabled selected>— Select guest —</option>
+                                    @foreach (var guest in (List<(int GuestID, string GuestName)>)ViewBag.Guests)
+                                    {
+                                        <option value="@guest.GuestID">@guest.GuestName</option>
+                                    }
+                                </select>
                                 <button type="submit" class="btn text-white w-100 py-2 fw-bold shadow-sm" style="background-color: #2b1810; border-radius: 8px;">
                                     🚀 Send to Kitchen / Bar
                                 </button>
