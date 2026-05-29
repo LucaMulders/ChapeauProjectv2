@@ -1,5 +1,7 @@
-﻿using ChapeauProject.Repositories;
+﻿using ChapeauProject.Models;
+using ChapeauProject.Repositories;
 using ChapeauProject.ViewModels;
+using System.Collections.Generic;
 
 namespace ChapeauProject.Services
 {
@@ -25,6 +27,12 @@ namespace ChapeauProject.Services
         public void CompleteOrder(int orderId)
         {
             _orderRepository.CompleteOrder(orderId);
+        }
+
+        // FIXED: Added missing implementation to fulfill your interface contract requirement
+        public void SaveNewOrder(Order order)
+        {
+            _orderRepository.SaveNewOrder(order);
         }
     }
 }

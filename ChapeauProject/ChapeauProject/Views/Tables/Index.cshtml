@@ -1,4 +1,5 @@
-﻿@model IEnumerable<ChapeauProject.ViewModels.TablesViewModel>
+﻿ 
+@model IEnumerable<ChapeauProject.ViewModels.TablesViewModel>
 
 @{
     ViewData["Title"] = "Tables";
@@ -47,10 +48,21 @@
                     </div>
                 }
             </form>
-            <a asp-action="Details" asp-controller="Tables"
-                   asp-route-id="@item.Table.TableNumber" class="view-orders-btn">
-                View Orders
-            </a>
+
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 6px; margin-top: auto; padding-top: 10px;">
+
+                <form asp-action="StartNewOrder" asp-controller="Orders" method="post" style="width:100%; margin: 0;">
+                    <input type="hidden" name="tableNumber" value="@item.Table.TableNumber" />
+                    <button type="submit" class="complete-btn" style="width: 100%; display: block; border: none; text-align: center; padding: 8px 0; font-size: 0.9rem; font-weight: bold; background-color: #cda45e; color: white;">
+                        📝 Take New Order
+                    </button>
+                </form>
+
+                <a asp-action="Details" asp-controller="Tables" asp-route-id="@item.Table.TableNumber" class="view-orders-btn" style="text-align: center; display: block; margin: 0;">
+                    View Orders
+                </a>
+            </div>
+
         </div>
     }
 </div>

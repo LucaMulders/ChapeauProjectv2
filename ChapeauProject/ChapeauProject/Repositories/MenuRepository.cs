@@ -2,32 +2,22 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
-using System.Data;
 
 namespace ChapeauProject.Repositories
 {
     public class MenuRepository : RepositoryBase, IMenuRepository
     {
-        public MenuRepository(IConfiguration configuration) : base(configuration)
-        {
-        }
+        public MenuRepository(IConfiguration configuration) : base(configuration) { }
 
-        public List<MenuItem> GetFiltered(string cardFilter, string courseFilter) //NOTE improve name of getfiltered
+        public List<MenuItem> GetCourseFiltered(MenuCard cardFilter, string courseFilter)
         {
             List<MenuItem> items = new List<MenuItem>();
 
             using (SqlConnection connection = GetConnection())
             {
-                // LEFT JOIN ensures items appear even if Stock or Course links are missing [cite: 7, 13, 19]
-                // UPPER() handles potential case-sensitivity issues between C# and SQL
                 string query = @"
-                    SELECT 
-                        MI.MenuItemID, 
-                        MI.ItemName, 
-                        MI.Price, 
-                        ISNULL(S.Quantity, 0) AS Quantity, 
-                        ISNULL(C.CourseName, 'N/A') AS CourseName, 
-                        MI.MenuCard 
+                    SELECT MI.MenuItemID, MI.ItemName, MI.Price, ISNULL(S.Quantity, 0) AS Quantity, 
+                           ISNULL(C.CourseName, 'N/A') AS CourseName, MI.MenuCard 
                     FROM MenuItems MI
                     LEFT JOIN Stock S ON MI.MenuItemID = S.MenuItemID
                     LEFT JOIN Courses C ON MI.CourseID = C.CourseID
@@ -40,19 +30,65 @@ namespace ChapeauProject.Repositories
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@MenuCard", cardFilter);
+                    command.Parameters.AddWithValue("@MenuCard", cardFilter.ToString());
 
                     if (courseFilter != "All")
                     {
                         command.Parameters.AddWithValue("@CourseName", courseFilter);
                     }
 
+                    if (connection.State != System.Data.ConnectionState.Open)
+                    {
+                        connection.Open();
+                    }
+
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            // Mapping database columns to the MenuItem model
-                            MenuItem item = new MenuItem(
+                            items.Add(new MenuItem(
+                                (int)reader["MenuItemID"],
+                                (string)reader["ItemName"],
+                                (decimal)reader["Price"],
+                                (int)reader["Quantity"],
+                                (string)reader["CourseName"],
+                                (string)reader["MenuCard"]
+                            ));
+                        }
+                    }
+                }
+            }
+            return items;
+        }
+
+   
+        public MenuItem GetById(int menuItemID)
+        {
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = @"
+                    SELECT MI.MenuItemID, MI.ItemName, MI.Price, ISNULL(S.Quantity, 0) AS Quantity, 
+                           ISNULL(C.CourseName, 'N/A') AS CourseName, MI.MenuCard 
+                    FROM MenuItems MI
+                    LEFT JOIN Stock S ON MI.MenuItemID = S.MenuItemID
+                    LEFT JOIN Courses C ON MI.CourseID = C.CourseID
+                    WHERE MI.MenuItemID = @MenuItemID";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@MenuItemID", menuItemID);
+
+                    
+                    if (connection.State != System.Data.ConnectionState.Open)
+                    {
+                        connection.Open();
+                    }
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new MenuItem(
                                 (int)reader["MenuItemID"],
                                 (string)reader["ItemName"],
                                 (decimal)reader["Price"],
@@ -60,12 +96,32 @@ namespace ChapeauProject.Repositories
                                 (string)reader["CourseName"],
                                 (string)reader["MenuCard"]
                             );
-                            items.Add(item);
                         }
                     }
                 }
             }
-            return items;
+            return null;
+        }
+
+        public void DeductStockQuantity(int menuItemID, int amountToDeduct)
+        {
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = "UPDATE Stock SET Quantity = Quantity - @Amount WHERE MenuItemID = @MenuItemID";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Amount", amountToDeduct);
+                    command.Parameters.AddWithValue("@MenuItemID", menuItemID);
+
+              
+                    if (connection.State != System.Data.ConnectionState.Open)
+                    {
+                        connection.Open();
+                    }
+
+                    command.ExecuteNonQuery();
+                }
+            }
         }
     }
 }

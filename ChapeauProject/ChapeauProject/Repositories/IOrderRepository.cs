@@ -1,4 +1,6 @@
-﻿using ChapeauProject.ViewModels;
+﻿using ChapeauProject.Models;
+using ChapeauProject.ViewModels;
+using System.Collections.Generic;
 
 namespace ChapeauProject.Repositories
 {
@@ -7,5 +9,6 @@ namespace ChapeauProject.Repositories
         List<RunningOrderViewModel> GetAllOrdersByStatus();
         void ToggleItemPreparation(int orderItemId);
         void CompleteOrder(int orderId);
+        void SaveNewOrder(Order order);
     }
 }

@@ -9,6 +9,7 @@ namespace ChapeauProject.ViewModels
         public DateTime OrderTime { get; set; }
         public TimeSpan WaitingTime => DateTime.Now - OrderTime;
         public List<RunningOrderItemViewModel> Items { get; set; }
+        public string? Status { get; internal set; }
     }
 
     public class RunningOrderItemViewModel
