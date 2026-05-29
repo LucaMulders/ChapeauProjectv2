@@ -86,33 +86,72 @@ namespace ChapeauProject.Repositories
             }
         }
 
-        
+
         public List<RunningOrderViewModel> GetAllOrdersByStatus()
         {
             List<RunningOrderViewModel> orders = new List<RunningOrderViewModel>();
 
             using (SqlConnection connection = GetConnection())
             {
-               
-                string query = "SELECT OrderID, GuestID, OrderStatus FROM Orders WHERE OrderStatus = 'Pending';";
+              
+                string query = "SELECT OrderID, GuestID, OrderStatus, OrderTimeStamp FROM Orders WHERE OrderStatus = 'Pending';";
+
+                if (connection.State != System.Data.ConnectionState.Open)
+                {
+                    connection.Open();
+                }
+
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    if (connection.State != System.Data.ConnectionState.Open)
-                    {
-                        connection.Open();
-                    }
-
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
+                            int orderId = (int)reader["OrderID"];
+                            System.DateTime timeStamp = reader["OrderTimeStamp"] != System.DBNull.Value
+                                ? (System.DateTime)reader["OrderTimeStamp"]
+                                : System.DateTime.Now;
+
                             orders.Add(new RunningOrderViewModel
                             {
-                                OrderID = (int)reader["OrderID"],
+                                OrderID = orderId,
                                 Status = reader["OrderStatus"].ToString(),
                                 
-                                TableNumber = reader["GuestID"] != System.DBNull.Value ? (int)reader["GuestID"] : 0
+                                TableNumber = reader["GuestID"] != System.DBNull.Value ? (int)reader["GuestID"] : 0,
+                                OrderTime = timeStamp,
+                                // Initialize an empty so cannot be null!
+                                Items = new List<RunningOrderItemViewModel>()
                             });
+                        }
+                    }
+                }
+
+                foreach (var order in orders)
+                {
+                    string itemsQuery = @"
+                SELECT OI.OrderItemID, MI.ItemName, OI.Quantity, OI.PreparationStatus 
+                FROM OrderItems OI
+                JOIN MenuItems MI ON OI.MenuItemID = MI.MenuItemID
+                WHERE OI.OrderID = @OrderID;";
+
+                    using (SqlCommand itemCommand = new SqlCommand(itemsQuery, connection))
+                    {
+                        itemCommand.Parameters.AddWithValue("@OrderID", order.OrderID);
+
+                        using (SqlDataReader itemReader = itemCommand.ExecuteReader())
+                        {
+                            while (itemReader.Read())
+                            {
+                                
+                                order.Items.Add(new RunningOrderItemViewModel
+                                {
+                                    OrderItemID = (int)itemReader["OrderItemID"],
+                                    ItemName = itemReader["ItemName"].ToString(),
+                                    Quantity = (int)itemReader["Quantity"],
+                                    
+                                    PreparationStatus = System.Enum.Parse<PreparationStatus>(itemReader["PreparationStatus"].ToString(), true)
+                                });
+                            }
                         }
                     }
                 }
