@@ -69,7 +69,7 @@ else
                                         {
                                             PreparationStatus.Pending => ("status-pill status-ordered", "Ordered"),
                                             PreparationStatus.Preparing => ("status-pill status-preparing", "Being Prepared"),
-                                            PreparationStatus.Done => ("status-pill status-ready", "Ready to Serve"),
+                                            PreparationStatus.Ready => ("status-pill status-ready", "Ready to Serve"),
                                             _ => ("status-pill", item.PreparationStatus.ToString())
                                         };
                                     }

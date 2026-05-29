@@ -4,6 +4,6 @@
     {
         Pending,
         Preparing,
-        Done
+        Ready
     }
 }

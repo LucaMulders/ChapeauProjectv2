@@ -29,14 +29,14 @@ else
                     <div class="order-item-row">
                         <form asp-action="ToggleItem" asp-controller="Orders" method="post" style="display:contents;">
                             <input type="hidden" name="orderItemId" value="@item.OrderItemID" />
-                            <span class="order-item-name @(item.PreparationStatus == PreparationStatus.Done ? "done" : "")">@item.ItemName</span>
+                            <span class="order-item-name @(item.PreparationStatus == PreparationStatus.Ready ? "done" : "")">@item.ItemName</span>
                             <span class="order-item-qty">x@(item.Quantity)</span>
                             @{
                                 var (pillClass, label) = item.PreparationStatus switch
                                 {
                                     PreparationStatus.Pending   => ("status-pill status-ordered",   "Ordered"),
                                     PreparationStatus.Preparing => ("status-pill status-preparing", "Being Prepared"),
-                                    PreparationStatus.Done      => ("status-pill status-ready",     "Ready to Serve"),
+                                    PreparationStatus.Ready      => ("status-pill status-ready",     "Ready to Serve"),
                                     _                           => ("status-pill", item.PreparationStatus.ToString())
                                 };
                             }

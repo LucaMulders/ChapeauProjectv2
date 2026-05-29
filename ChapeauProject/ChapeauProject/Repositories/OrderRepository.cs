@@ -149,7 +149,9 @@ namespace ChapeauProject.Repositories
                                     ItemName = itemReader["ItemName"].ToString(),
                                     Quantity = (int)itemReader["Quantity"],
                                     
-                                    PreparationStatus = System.Enum.Parse<PreparationStatus>(itemReader["PreparationStatus"].ToString(), true)
+                                    PreparationStatus = itemReader["PreparationStatus"].ToString() == "Done"
+                                        ? PreparationStatus.Ready
+                                        : System.Enum.Parse<PreparationStatus>(itemReader["PreparationStatus"].ToString(), true)
                                 });
                             }
                         }
@@ -165,10 +167,11 @@ namespace ChapeauProject.Repositories
             {
                 string query = @"
                     UPDATE OrderItems 
-                    SET PreparationStatus = CASE 
-                        WHEN PreparationStatus = 'Pending' THEN 'Ready' 
-                        ELSE 'Pending' 
-                    END 
+                    SET PreparationStatus = CASE
+                        WHEN PreparationStatus = 'Pending' THEN 'Preparing'
+                        WHEN PreparationStatus = 'Preparing' THEN 'Ready'
+                        ELSE 'Pending'
+                    END
                     WHERE OrderItemID = @OrderItemID";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
