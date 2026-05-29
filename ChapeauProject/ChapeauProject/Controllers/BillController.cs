@@ -16,6 +16,7 @@ namespace ChapeauProject.Controllers
         }
 
         // Lists all occupied tables that have pending orders.
+        //NOTE Getalloccupiedtables
         public IActionResult Index()
         {
             var tables = _tableService.GetAllTables()
@@ -37,6 +38,7 @@ namespace ChapeauProject.Controllers
         }
 
         // Shows the bill + payment form for a specific table.
+        //NOTE Change id to object and do the calculations to models
         [HttpGet]
         public IActionResult Pay(int id)
         {
@@ -45,6 +47,7 @@ namespace ChapeauProject.Controllers
             var viewModel = new BillViewModel
             {
                 TableNumber    = id,
+                Guests         = orders.Guests,
                 SubTotalAmount = orders.TotalAmount - orders.LowVAT - orders.HighVAT,
                 LowVAT         = orders.LowVAT,
                 HighVAT        = orders.HighVAT,

@@ -28,6 +28,7 @@ namespace ChapeauProject.Controllers
                 {
                     Table = t,
                     OrderCount = _tableService.GetOrderCount(t.TableNumber),
+                    GuestCount = t.IsOccupied ? _tableService.GetGuestCount(t.TableNumber) : 0,
                     HasFoodOrder = categories.HasFood,
                     HasDrinkOrder = categories.HasDrink
                 };
@@ -38,6 +39,17 @@ namespace ChapeauProject.Controllers
         [HttpPost]
         public IActionResult ToggleOccupied(int tableNumber)
         {
+            var table = _tableService.GetByTableNumber(tableNumber);
+            if (table != null && table.IsOccupied)
+            {
+                int pendingOrders = _tableService.GetOrderCount(tableNumber);
+                if (pendingOrders > 0)
+                {
+                    TempData["Error"] = $"Table {tableNumber} still has {pendingOrders} pending order(s) and cannot be marked as free.";
+                    return RedirectToAction("Index");
+                }
+            }
+
             _tableService.ToggleOccupied(tableNumber);
             return RedirectToAction("Index");
         }

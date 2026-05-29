@@ -19,13 +19,6 @@ namespace ChapeauProject.Repositories
         {
             using (SqlConnection connection = GetConnection())
             {
-              
-                if (connection.State != System.Data.ConnectionState.Open)
-                {
-                    connection.Open();
-                }
-
-          
                 string getGuestSql = "SELECT TOP 1 GuestID FROM Guests WHERE TableNumber = @TableNumber ORDER BY GuestID DESC;";
                 int guestId = 0;
 
@@ -41,7 +34,7 @@ namespace ChapeauProject.Repositories
                     else
                     {
                         
-                        string createGuestSql = "INSERT INTO Guests (TableNumber, FirstName, LastName) VALUES (@TableNumber, 'Table', @TableNumber); SELECT CAST(SCOPE_IDENTITY() as int);";
+                        string createGuestSql = "INSERT INTO Guests (TableNumber, FirstName, LastName) VALUES (@TableNumber, 'Unnamed', 'Guest'); SELECT CAST(SCOPE_IDENTITY() as int);";
                         using (SqlCommand createGuestCmd = new SqlCommand(createGuestSql, connection))
                         {
                             createGuestCmd.Parameters.AddWithValue("@TableNumber", order.TableNumber);
@@ -96,10 +89,6 @@ namespace ChapeauProject.Repositories
               
                 string query = "SELECT OrderID, GuestID, OrderStatus, OrderTimeStamp FROM Orders WHERE OrderStatus = 'Pending';";
 
-                if (connection.State != System.Data.ConnectionState.Open)
-                {
-                    connection.Open();
-                }
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {

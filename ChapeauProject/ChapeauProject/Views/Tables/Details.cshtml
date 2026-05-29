@@ -33,27 +33,31 @@
 
 <h3 class="mb-3 mt-2" style="font-family: 'Playfair Display'; color: #3d2514;">Active Table Consumption Log</h3>
 
-@if (!Model.Guests.Any() || Model.Guests.All(g => !g.Items.Any()))
+@if (!Model.Guests.Any())
 {
-    <p style="color:#999;" class="fitalic py-2">No running processing orders found processing on this table.</p>
+    <p style="color:#999;" class="fitalic py-2">No guests found on this table.</p>
 }
 else
 {
     @foreach (var guest in Model.Guests)
     {
-        if (guest.Items.Any())
-        {
-            <h4>@guest.GuestName</h4>
-            <table class="table table-sm align-middle" style="margin-bottom:1.5rem;">
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Qty</th>
-                        <th>Price</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
+        <h4>@guest.GuestName</h4>
+        <table class="table table-sm align-middle" style="margin-bottom:1.5rem;">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!guest.Items.Any())
+                {
+                    <tr><td colspan="4" style="color:#999; font-style:italic;">No orders yet</td></tr>
+                }
+                else
+                {
                     @foreach (var item in guest.Items)
                     {
                         <tr>
@@ -78,9 +82,9 @@ else
                             </td>
                         </tr>
                     }
-                </tbody>
-            </table>
-        }
+                }
+            </tbody>
+        </table>
     }
 }
 

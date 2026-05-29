@@ -85,7 +85,9 @@ namespace ChapeauProject.Repositories
                             guests.Add(new GuestOrder
                             {
                                 GuestID   = reader.GetInt32(reader.GetOrdinal("GuestID")),
-                                GuestName = reader.GetString(reader.GetOrdinal("FirstName")) + " " + reader.GetString(reader.GetOrdinal("LastName")),
+                                GuestName = string.IsNullOrWhiteSpace(reader.GetString(reader.GetOrdinal("FirstName")) + " " + reader.GetString(reader.GetOrdinal("LastName")).Trim())
+                                    ? "Unnamed Guest"
+                                    : (reader.GetString(reader.GetOrdinal("FirstName")) + " " + reader.GetString(reader.GetOrdinal("LastName"))).Trim(),
                                 Items     = new List<GuestOrderItem>()
                             });
                         }
@@ -131,6 +133,19 @@ namespace ChapeauProject.Repositories
         public int GetOrderCount(int tableNumber)
         {
             return GetTableOrders(tableNumber).Sum(g => g.Items.Count);
+        }
+
+        public int GetGuestCount(int tableNumber)
+        {
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = "SELECT COUNT(*) FROM Guests WHERE TableNumber = @TableNumber";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@TableNumber", tableNumber);
+                    return (int)command.ExecuteScalar();
+                }
+            }
         }
 
         public void SetFree(int tableNumber)

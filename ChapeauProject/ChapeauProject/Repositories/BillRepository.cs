@@ -1,3 +1,4 @@
+//NOTE fix orderitems not showing in bill
 using ChapeauProject.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;

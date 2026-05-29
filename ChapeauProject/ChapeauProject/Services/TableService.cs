@@ -67,6 +67,11 @@ namespace ChapeauProject.Services
             return _tableRepository.GetOrderCount(tableNumber);
         }
 
+        public int GetGuestCount(int tableNumber)
+        {
+            return _tableRepository.GetGuestCount(tableNumber);
+        }
+
         public (bool HasFood, bool HasDrink) GetRunningOrderCategories(int tableNumber)
         {
             return _tableRepository.GetRunningOrderCategories(tableNumber);

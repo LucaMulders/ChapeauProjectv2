@@ -9,6 +9,7 @@ namespace ChapeauProject.Repositories
         void ToggleOccupied(int tableNumber);
         List<GuestOrder> GetTableOrders(int tableNumber);
         int GetOrderCount(int tableNumber);
+        int GetGuestCount(int tableNumber);
         (bool HasFood, bool HasDrink) GetRunningOrderCategories(int tableNumber);
         void SetFree(int tableNumber);
     }

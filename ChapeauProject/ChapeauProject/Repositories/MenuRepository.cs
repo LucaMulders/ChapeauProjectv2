@@ -28,6 +28,8 @@ namespace ChapeauProject.Repositories
                     query += " AND UPPER(C.CourseName) = UPPER(@CourseName)";
                 }
 
+                query += " ORDER BY ISNULL(S.Quantity, 0) ASC";
+
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@MenuCard", cardFilter.ToString());
@@ -35,11 +37,6 @@ namespace ChapeauProject.Repositories
                     if (courseFilter != "All")
                     {
                         command.Parameters.AddWithValue("@CourseName", courseFilter);
-                    }
-
-                    if (connection.State != System.Data.ConnectionState.Open)
-                    {
-                        connection.Open();
                     }
 
                     using (SqlDataReader reader = command.ExecuteReader())
@@ -79,11 +76,6 @@ namespace ChapeauProject.Repositories
                     command.Parameters.AddWithValue("@MenuItemID", menuItemID);
 
                     
-                    if (connection.State != System.Data.ConnectionState.Open)
-                    {
-                        connection.Open();
-                    }
-
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())

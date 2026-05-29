@@ -6,6 +6,7 @@ namespace ChapeauProject.Models
     public class Order
     {
         public int OrderID { get; set; }
+        //NOTE change to table
         public int TableNumber { get; set; }
         public DateTime OrderTimeStamp { get; set; } = DateTime.Now;
         public OrderStatus Status { get; set; } = OrderStatus.Pending;

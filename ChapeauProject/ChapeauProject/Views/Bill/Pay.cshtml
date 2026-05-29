@@ -9,6 +9,26 @@
 
 <div style="max-width:520px;">
 
+    <!-- Order items per guest -->
+    @foreach (var guest in Model.Guests)
+    {
+        <div class="order-card" style="margin-bottom:1rem;">
+            <div class="order-card-header">
+                <div class="order-table-num">@guest.GuestName</div>
+            </div>
+            <table style="width:100%; font-size:0.9rem; border-collapse:collapse;">
+                @foreach (var item in guest.Items)
+                {
+                    <tr>
+                        <td style="padding:4px 0;">@item.ItemName</td>
+                        <td style="text-align:center; color:#888;">x@(item.Quantity)</td>
+                        <td style="text-align:right;">€@((item.Price * item.Quantity).ToString("F2"))</td>
+                    </tr>
+                }
+            </table>
+        </div>
+    }
+
     <!-- Order summary -->
     <div class="order-card" style="margin-bottom:1.5rem;">
         <div class="order-card-header">
