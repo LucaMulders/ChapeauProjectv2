@@ -63,12 +63,45 @@ namespace ChapeauProject.Repositories
                     UPDATE Orders
                     SET    OrderStatus = 'Complete'
                     WHERE  GuestID IN (SELECT GuestID FROM Guests WHERE TableNumber = @TableNumber)
-                      AND  OrderStatus = 'Pending'";
+                      AND  OrderStatus IN ('Pending', 'Served')";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@TableNumber", tableNumber);
                     command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public int? GetBillIdForTable(int tableNumber)
+        {
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = @"
+                    SELECT TOP 1 B.BillID FROM Bills B
+                    JOIN Orders O ON B.OrderID = O.OrderID
+                    JOIN Guests G ON O.GuestID = G.GuestID
+                    WHERE G.TableNumber = @TableNumber
+                    ORDER BY B.BillTimeStamp DESC";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@TableNumber", tableNumber);
+                    object result = command.ExecuteScalar();
+                    return result != null ? (int?)result : null;
+                }
+            }
+        }
+
+        public decimal GetAmountPaidForBill(int billId)
+        {
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = "SELECT ISNULL(SUM(PaymentAmount), 0) FROM Payments WHERE BillID = @BillID";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@BillID", billId);
+                    return (decimal)command.ExecuteScalar();
                 }
             }
         }

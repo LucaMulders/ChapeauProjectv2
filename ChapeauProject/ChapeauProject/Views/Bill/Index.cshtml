@@ -30,7 +30,7 @@ else
                     @if (!item.HasFoodOrder && !item.HasDrinkOrder)
                     { <span style="color:#aaa; font-size:0.8rem;">No pending orders</span> }
                 </div>
-                <a asp-action="Pay" asp-controller="Bill" asp-route-id="@item.Table.TableNumber"
+                <a asp-action="Pay" asp-controller="Bill" asp-route-TableNumber="@item.Table.TableNumber"
                    class="view-orders-btn" style="margin-top:8px;">
                     Process Bill
                 </a>

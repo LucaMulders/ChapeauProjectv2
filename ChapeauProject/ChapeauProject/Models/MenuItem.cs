@@ -5,9 +5,9 @@
         public int MenuItemID { get; set; }
         public string ItemName { get; set; }
         public decimal Price { get; set; }
-        public int StockQuantity { get; set; } 
-        public string CourseName { get; set; }  //NOTE make enum
-        public string MenuCard { get; set; }    //NOTE change to menuID
+        public int StockQuantity { get; set; }
+        public CourseName Course { get; set; }
+        public MenuCard Card { get; set; }
 
         public MenuItem(int id, string name, decimal price, int stock, string course, string card)
         {
@@ -15,10 +15,10 @@
             ItemName = name;
             Price = price;
             StockQuantity = stock;
-            CourseName = course;
-            MenuCard = card;
+
+            // Parses database strings directly into your new clean Enums
+            Course = System.Enum.TryParse(course, true, out CourseName parsedCourse) ? parsedCourse : CourseName.Starter;
+            Card = System.Enum.TryParse(card, true, out MenuCard parsedCard) ? parsedCard : MenuCard.Lunch;
         }
     }
 }
-//NOTE change to menu 
-//NOTE enum for category 

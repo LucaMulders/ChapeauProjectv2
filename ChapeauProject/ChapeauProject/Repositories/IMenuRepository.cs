@@ -5,7 +5,9 @@ namespace ChapeauProject.Repositories
 {
     public interface IMenuRepository
     {
-        // Filters by card (Lunch/Dinner) and course (Starters/Mains/etc.) 
-        List<MenuItem> GetFiltered(string cardFilter, string courseFilter); //NOTE change to enum
+        
+        List<MenuItem> GetCourseFiltered(MenuCard cardFilter, string courseFilter);
+        MenuItem GetById(int menuItemID);
+        void DeductStockQuantity(int menuItemID, int amountToDeduct);
     }
 }
