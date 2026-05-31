@@ -106,11 +106,6 @@ namespace ChapeauProject.Repositories
                     command.Parameters.AddWithValue("@MenuItemID", menuItemID);
 
               
-                    if (connection.State != System.Data.ConnectionState.Open)
-                    {
-                        connection.Open();
-                    }
-
                     command.ExecuteNonQuery();
                 }
             }

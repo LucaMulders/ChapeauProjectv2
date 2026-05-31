@@ -19,9 +19,19 @@ namespace ChapeauProject.Services
             return _orderRepository.GetAllOrdersByStatus();
         }
 
+        public List<RunningOrderViewModel> GetFinishedOrdersToday()
+        {
+            return _orderRepository.GetFinishedOrdersToday();
+        }
+
         public void ToggleItemPreparation(int orderItemId)
         {
             _orderRepository.ToggleItemPreparation(orderItemId);
+        }
+
+        public void ToggleCoursePreparation(int orderId, string courseName)
+        {
+            _orderRepository.ToggleCoursePreparation(orderId, courseName);
         }
 
         public void CompleteOrder(int orderId)

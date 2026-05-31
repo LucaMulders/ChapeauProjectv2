@@ -20,5 +20,6 @@ namespace ChapeauProject.ViewModels
         public PreparationStatus PreparationStatus { get; set; }
         public string MenuCard { get; set; } = string.Empty;
         public string CourseName { get; set; } = string.Empty;
+        public string? Comment { get; set; }
     }
 }

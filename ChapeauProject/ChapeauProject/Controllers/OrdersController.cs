@@ -25,9 +25,13 @@ namespace ChapeauProject.Controllers
             _menuService = menuService;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string filter = "running")
         {
-            var orders = _orderService.GetAllOrdersByStatus();
+            var orders = filter == "finished"
+                ? _orderService.GetFinishedOrdersToday()
+                : _orderService.GetAllOrdersByStatus();
+
+            ViewBag.Filter = filter;
             return View(orders);
         }
 
@@ -178,6 +182,13 @@ namespace ChapeauProject.Controllers
             _activeWorkingOrder = new Order();
             TempData["InfoMessage"] = "Order sheet reset.";
             return RedirectToAction("Index", "Tables");
+        }
+
+        [HttpPost]
+        public IActionResult ToggleCourse(int orderId, string courseName)
+        {
+            _orderService.ToggleCoursePreparation(orderId, courseName);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

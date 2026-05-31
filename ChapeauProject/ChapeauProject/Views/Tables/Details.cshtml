@@ -73,13 +73,8 @@ else
                                         {
                                             PreparationStatus.Pending => ("status-pill status-ordered", "Ordered"),
                                             PreparationStatus.Preparing => ("status-pill status-preparing", "Being Prepared"),
-<<<<<<< HEAD
-                                            PreparationStatus.Ready      => ("status-pill status-ready",     "Ready to Serve"),
+                                            PreparationStatus.Ready     => ("status-pill status-ready",     "Ready to Serve"),
                                             _                           => ("status-pill", item.PreparationStatus.ToString())
-=======
-                                            PreparationStatus.Ready => ("status-pill status-ready", "Ready to Serve"),
-                                            _ => ("status-pill", item.PreparationStatus.ToString())
->>>>>>> 30510b82cd4e3de0231429c8b51cee21878212d0
                                         };
                                     }
                                     <button type="submit" class="@pillClass">@label</button>
