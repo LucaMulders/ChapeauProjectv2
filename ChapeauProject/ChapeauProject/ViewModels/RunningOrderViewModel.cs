@@ -17,5 +17,7 @@ namespace ChapeauProject.ViewModels
         public string ItemName { get; set; }
         public int Quantity { get; set; }
         public PreparationStatus PreparationStatus { get; set; }
+        public string MenuCard { get; set; } = string.Empty;
+        public string CourseName { get; set; } = string.Empty;
     }
 }

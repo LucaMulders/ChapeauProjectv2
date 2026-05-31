@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "Running Orders";
+    var courseOrder = new[] { "Starters", "Main", "Desserts", "Other" };
 }
 
 <h2 style="font-family:'Playfair Display',serif; color:var(--bistro-text);">Running Orders</h2>
@@ -24,25 +25,68 @@ else
                     <div class="order-wait">Wait: @order.WaitingTime.Hours h @order.WaitingTime.Minutes m</div>
                 </div>
 
-                @foreach (var item in order.Items)
+                @{
+                    var foodItems  = order.Items.Where(i => i.MenuCard == "Lunch" || i.MenuCard == "Dinner").ToList();
+                    var drinkItems = order.Items.Where(i => i.MenuCard == "Drinks").ToList();
+                }
+
+                @* ── Food items grouped by course ── *@
+                @if (foodItems.Any())
                 {
-                    <div class="order-item-row">
-                        <form asp-action="ToggleItem" asp-controller="Orders" method="post" style="display:contents;">
-                            <input type="hidden" name="orderItemId" value="@item.OrderItemID" />
-                            <span class="order-item-name @(item.PreparationStatus == PreparationStatus.Done ? "done" : "")">@item.ItemName</span>
-                            <span class="order-item-qty">x@(item.Quantity)</span>
-                            @{
-                                var (pillClass, label) = item.PreparationStatus switch
-                                {
-                                    PreparationStatus.Pending   => ("status-pill status-ordered",   "Ordered"),
-                                    PreparationStatus.Preparing => ("status-pill status-preparing", "Being Prepared"),
-                                    PreparationStatus.Done      => ("status-pill status-ready",     "Ready to Serve"),
-                                    _                           => ("status-pill", item.PreparationStatus.ToString())
-                                };
+                    @foreach (var course in courseOrder)
+                    {
+                        var courseItems = foodItems.Where(i => i.CourseName == course).ToList();
+                        if (courseItems.Any())
+                        {
+                            <div class="course-header">@course</div>
+                            @foreach (var item in courseItems)
+                            {
+                                <div class="order-item-row">
+                                    <form asp-action="ToggleItem" asp-controller="Orders" method="post" style="display:contents;">
+                                        <input type="hidden" name="orderItemId" value="@item.OrderItemID" />
+                                        <span class="order-item-name @(item.PreparationStatus == PreparationStatus.Ready ? "done" : "")">@item.ItemName</span>
+                                        <span class="order-item-qty">x@(item.Quantity)</span>
+                                        @{
+                                            var (pillClass, label) = item.PreparationStatus switch
+                                            {
+                                                PreparationStatus.Pending   => ("status-pill status-ordered",   "Ordered"),
+                                                PreparationStatus.Preparing => ("status-pill status-preparing", "Being Prepared"),
+                                                PreparationStatus.Ready      => ("status-pill status-ready",     "Ready to Serve"),
+                                                _                           => ("status-pill", item.PreparationStatus.ToString())
+                                            };
+                                        }
+                                        <button type="submit" class="@pillClass">@label</button>
+                                    </form>
+                                </div>
                             }
-                            <button type="submit" class="@pillClass">@label</button>
-                        </form>
-                    </div>
+                        }
+                    }
+                }
+
+                @* ── Drink items (no course grouping) ── *@
+                @if (drinkItems.Any())
+                {
+                    <div class="course-header">Drinks</div>
+                    @foreach (var item in drinkItems)
+                    {
+                        <div class="order-item-row">
+                            <form asp-action="ToggleItem" asp-controller="Orders" method="post" style="display:contents;">
+                                <input type="hidden" name="orderItemId" value="@item.OrderItemID" />
+                                <span class="order-item-name @(item.PreparationStatus == PreparationStatus.Ready ? "done" : "")">@item.ItemName</span>
+                                <span class="order-item-qty">x@(item.Quantity)</span>
+                                @{
+                                    var (pillClass, label) = item.PreparationStatus switch
+                                    {
+                                        PreparationStatus.Pending   => ("status-pill status-ordered",   "Ordered"),
+                                        PreparationStatus.Preparing => ("status-pill status-preparing", "Being Prepared"),
+                                        PreparationStatus.Ready      => ("status-pill status-ready",     "Ready to Serve"),
+                                        _                           => ("status-pill", item.PreparationStatus.ToString())
+                                    };
+                                }
+                                <button type="submit" class="@pillClass">@label</button>
+                            </form>
+                        </div>
+                    }
                 }
 
                 <form asp-action="CompleteOrder" asp-controller="Orders" method="post">
@@ -74,4 +118,14 @@ else
     .status-ordered   { background: #FFF3CD; color: #856404; }
     .status-preparing { background: #CCE5FF; color: #004085; }
     .status-ready     { background: #D4EDDA; color: #155724; }
+    .course-header {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--bistro-gold, #b8952a);
+        margin: 10px 0 4px;
+        border-bottom: 1px solid #e0d6c8;
+        padding-bottom: 2px;
+    }
 </style>
