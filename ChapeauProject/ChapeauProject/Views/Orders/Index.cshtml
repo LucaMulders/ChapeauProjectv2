@@ -58,7 +58,6 @@ else
                             var drinkItems = order.Items.Where(i => i.MenuCard == "Drinks").ToList();
                         }
 
-                        @* ── Food items grouped by course ── *@
                         @if (foodItems.Any())
                         {
                             @foreach (var course in courseOrder)
@@ -109,7 +108,6 @@ else
                             }
                         }
 
-                        @* ── Drink items (no course grouping) ── *@
                         @if (drinkItems.Any())
                         {
                             <div class="course-header">Drinks</div>

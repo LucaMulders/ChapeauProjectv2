@@ -87,6 +87,7 @@ namespace ChapeauProject.Repositories
             }
         }
 
+        //NOTE: Split into two methods
         public List<GuestOrder> GetTableOrders(int tableNumber)
         {
             var guests = new List<GuestOrder>();

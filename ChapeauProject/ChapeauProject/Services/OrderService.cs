@@ -44,7 +44,6 @@ namespace ChapeauProject.Services
             return _orderRepository.AllItemsReady(orderId);
         }
 
-        // FIXED: Added missing implementation to fulfill your interface contract requirement
         public void SaveNewOrder(Order order)
         {
             _orderRepository.SaveNewOrder(order);

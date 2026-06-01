@@ -15,6 +15,7 @@ namespace ChapeauProject.Repositories
             _menuRepository = menuRepository;
         }
 
+        //NOTE: Split into two methods?
         public void SaveNewOrder(Order order)
         {
             using (SqlConnection connection = GetConnection())
@@ -171,10 +172,6 @@ namespace ChapeauProject.Repositories
         {
             using (SqlConnection connection = GetConnection())
             {
-                // Determine the next status based on the current minimum status of the course.
-                // If any item is Pending  → advance all to Preparing.
-                // If all are Preparing   → advance all to Ready.
-                // If all are Ready       → cycle back to Pending.
                 string query = @"
                     UPDATE oi
                     SET oi.PreparationStatus =

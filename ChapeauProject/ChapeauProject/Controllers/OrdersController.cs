@@ -43,7 +43,7 @@ namespace ChapeauProject.Controllers
                 TableNumber = tableNumber,
                 OrderItems = new System.Collections.Generic.List<OrderItem>()
             };
-            // FIXED: Automatically redirects to Table Details so everything displays in one view
+
             return RedirectToAction("Details", "Tables", new { id = tableNumber });
         }
 
@@ -84,7 +84,6 @@ namespace ChapeauProject.Controllers
                 });
             }
 
-            // FIXED: Redirection path linked right back into the active Details log grid view context
             return RedirectToAction("Details", "Tables", new { id = _activeWorkingOrder.TableNumber });
         }
 

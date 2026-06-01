@@ -16,7 +16,6 @@
             Price = price;
             StockQuantity = stock;
 
-            // Parses database strings directly into your new clean Enums
             Course = System.Enum.TryParse(course, true, out CourseName parsedCourse) ? parsedCourse : CourseName.Starter;
             Card = System.Enum.TryParse(card, true, out MenuCard parsedCard) ? parsedCard : MenuCard.Lunch;
         }

@@ -9,6 +9,7 @@ namespace ChapeauProject.Repositories
     {
         public MenuRepository(IConfiguration configuration) : base(configuration) { }
 
+        //NOTE: Split into two methods
         public List<MenuItem> GetCourseFiltered(MenuCard cardFilter, string courseFilter)
         {
             List<MenuItem> items = new List<MenuItem>();
