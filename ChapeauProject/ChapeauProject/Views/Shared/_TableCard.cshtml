@@ -1,0 +1,37 @@
+@model ChapeauProject.ViewModels.TablesViewModel
+
+<div class="table-card">
+    <form asp-action="ToggleOccupied" asp-controller="Tables" method="post" class="table-card-form">
+        <input type="hidden" name="tableNumber" value="@Model.Table.TableNumber" />
+        <button type="submit" class="table-toggle-btn">
+            <div class="table-shape @(Model.Table.Seats <= 2 ? "round" : Model.Table.Seats <= 4 ? "rect" : "large") @(Model.Table.IsOccupied ? "occupied" : "free")">
+                <i class="ti ti-armchair"></i>
+            </div>
+        </button>
+        <div class="table-num">Table @Model.Table.TableNumber</div>
+        <div class="table-seats">@Model.GuestCount / @Model.Table.Seats guests</div>
+        <span class="status-badge @(Model.Table.IsOccupied ? "badge-occupied" : "badge-free")">
+            @(Model.Table.IsOccupied ? "Occupied" : "Free")
+        </span>
+        <span class="table-seats">@Model.OrderCount orders</span>
+        @if (Model.HasFoodOrder || Model.HasDrinkOrder)
+        {
+            <div class="order-icons">
+                @if (Model.HasFoodOrder)
+                {
+                    <span class="order-icon" title="Running food order">🍽️</span>
+                }
+                @if (Model.HasDrinkOrder)
+                {
+                    <span class="order-icon" title="Running drink order">🍷</span>
+                }
+            </div>
+        }
+    </form>
+
+    <div class="table-card-actions">
+        <a asp-action="Details" asp-controller="Tables" asp-route-id="@Model.Table.TableNumber" class="view-orders-btn">
+            Add / View Orders
+        </a>
+    </div>
+</div>

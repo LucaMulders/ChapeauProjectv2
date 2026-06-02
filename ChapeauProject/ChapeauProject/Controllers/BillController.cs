@@ -66,8 +66,16 @@ namespace ChapeauProject.Controllers
                 HighVAT        = orders.HighVAT,
                 TotalAmount    = orders.TotalAmount,
                 SplitMode      = splitMode,
-                SplitCount     = splitMode == SplitMode.Equal ? Math.Max(1, splitCount) : 1
             };
+
+            if (splitMode == SplitMode.Equal)
+            {
+                viewModel.SplitCount = Math.Max(1, splitCount);
+            }
+            else
+            {
+                viewModel.SplitCount = 1;
+            }
 
             if (splitMode == SplitMode.Equal)
             {
@@ -94,10 +102,15 @@ namespace ChapeauProject.Controllers
                 foreach (var guest in orders.Guests)
                 {
                     decimal guestTotal = guest.Items.Sum(i => i.Price * i.Quantity);
-                    // Distribute VAT proportionally
-                    decimal vatShare = orders.TotalAmount > 0
-                        ? guestTotal * (orders.TotalAmount / orders.SubTotalAmount)
-                        : guestTotal;
+                    decimal vatShare;
+                    if (orders.TotalAmount > 0)
+                    {
+                        vatShare = guestTotal * (orders.TotalAmount / orders.SubTotalAmount);
+                    }
+                    else
+                    {
+                        vatShare = guestTotal;
+                    }
 
                     viewModel.Payers.Add(new SplitPayerViewModel
                     {

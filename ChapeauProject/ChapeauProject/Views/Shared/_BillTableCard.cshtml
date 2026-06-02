@@ -1,0 +1,18 @@
+@model ChapeauProject.ViewModels.TablesViewModel
+
+<div class="table-card">
+    <div class="table-shape @(Model.Table.Seats <= 2 ? "round" : Model.Table.Seats <= 4 ? "rect" : "large") occupied table-shape-centered">
+        <i class="ti ti-armchair"></i>
+    </div>
+    <div class="table-num">Table @Model.Table.TableNumber</div>
+    <div class="table-seats">@Model.Table.Seats seats</div>
+    <div class="order-icons-bill">
+        @if (Model.HasFoodOrder) { <span title="Food order">🍽️</span> }
+        @if (Model.HasDrinkOrder) { <span title="Drink order">🍷</span> }
+        @if (!Model.HasFoodOrder && !Model.HasDrinkOrder)
+        { <span class="no-orders-label">No pending orders</span> }
+    </div>
+    <a asp-action="Pay" asp-controller="Bill" asp-route-TableNumber="@Model.Table.TableNumber" class="view-orders-btn">
+        Process Bill
+    </a>
+</div>

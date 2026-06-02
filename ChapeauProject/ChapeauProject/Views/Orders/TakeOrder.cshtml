@@ -1,4 +1,4 @@
-﻿@using ChapeauProject.Models
+@using ChapeauProject.Models
 @model List<ChapeauProject.Models.MenuItem>
 
 @{
@@ -17,7 +17,7 @@
 
     <div class="row">
         <div class="col-md-7 pe-4">
-            <h2 class="mb-4" style="font-family: 'Playfair Display'; color: #3d2514;">Menu Selection</h2>
+            <h2 class="mb-4 menu-heading">Menu Selection</h2>
 
             <div class="d-flex mb-3">
                 <div class="btn-group">
@@ -38,19 +38,19 @@
 
             <div class="table-responsive bg-white rounded shadow-sm">
                 <table class="table table-hover align-middle mb-0">
-                    <thead style="background-color: #2b1810; color: #fdfaf6;">
+                    <thead class="menu-thead">
                         <tr>
                             <th class="py-3 ps-3">Item Name</th>
                             <th class="py-3">Price</th>
                             <th class="py-3">Stock Status</th>
-                            <th class="py-3 text-center pe-3" style="width: 80px;">Add</th>
+                            <th class="py-3 text-center pe-3" style="width:80px;">Add</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var item in Model)
                         {
                             <tr>
-                                <td class="fw-bold py-3 ps-3" style="color: #2b1810;">@item.ItemName</td>
+                                <td class="fw-bold py-3 ps-3 menu-item-name">@item.ItemName</td>
                                 <td class="text-secondary">€@item.Price.ToString("0.00")</td>
                                 <td>
                                     @if (item.StockQuantity == 0)
@@ -69,11 +69,7 @@
                                 <td class="text-center pe-3">
                                     <form asp-action="AddItemToOrder" method="post" class="m-0">
                                         <input type="hidden" name="menuItemID" value="@item.MenuItemID" />
-                                        <button type="submit" class="btn btn-sm text-white fw-bold d-flex align-items-center justify-content-center mx-auto"
-                                                style="background-color: #cda45e; border-radius: 50%; width: 32px; height: 32px; border: none;"
-                                                @(item.StockQuantity == 0 ? "disabled" : "")>
-                                            +
-                                        </button>
+                                        <button type="submit" class="add-item-btn" @(item.StockQuantity == 0 ? "disabled" : "")>+</button>
                                     </form>
                                 </td>
                             </tr>
@@ -84,17 +80,15 @@
         </div>
 
         <div class="col-md-5">
-            <div class="card shadow-sm border-0 position-sticky mb-4" style="top: 20px; border-radius: 16px; background-color: #fdfaf6;">
+            <div class="card shadow-sm border-0 position-sticky basket-card mb-4">
                 <div class="card-body p-4">
 
                     <div class="text-center pb-3 mb-4 border-bottom">
-                        <h3 class="fw-bold m-0" style="font-family: 'Playfair Display'; color: #2b1810;">
-                            Table @(activeBasket?.TableNumber ?? 0)
-                        </h3>
+                        <h3 class="fw-bold m-0 basket-heading">Table @(activeBasket?.TableNumber ?? 0)</h3>
                         <small class="text-muted fw-semibold">Active Workspace Overview</small>
                     </div>
 
-                    <div class="basket-items-list overflow-auto pe-1" style="max-height: 400px;">
+                    <div class="basket-items-list overflow-auto pe-1">
                         @if (activeBasket == null || !activeBasket.OrderItems.Any())
                         {
                             <div class="text-center py-5 text-muted">
@@ -106,12 +100,9 @@
                         {
                             @foreach (var basketItem in activeBasket.OrderItems)
                             {
-                                <div class="p-3 mb-3 border rounded bg-white shadow-sm" style="border-left: 5px solid #cda45e !important;">
+                                <div class="p-3 mb-3 border rounded bg-white shadow-sm basket-item">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <span class="fw-bold text-dark pe-2" style="font-size: 0.95rem;">
-                                            @basketItem.MenuItem?.ItemName
-                                        </span>
-
+                                        <span class="fw-bold text-dark pe-2 basket-item-name">@basketItem.MenuItem?.ItemName</span>
                                         <form asp-action="RemoveRow" method="post" class="m-0">
                                             <input type="hidden" name="menuItemID" value="@basketItem.MenuItemID" />
                                             <button type="submit" class="btn btn-sm p-0 border-0 text-muted hover-danger" title="Remove Item">🗑️</button>
@@ -119,23 +110,17 @@
                                     </div>
 
                                     <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
-
                                         <div class="d-flex align-items-center bg-light rounded border px-1">
                                             <form asp-action="DecreaseQuantity" method="post" class="m-0">
                                                 <input type="hidden" name="menuItemID" value="@basketItem.MenuItemID" />
-                                                <button type="submit" class="btn btn-sm fw-bold px-2 py-1 border-0 text-secondary" style="box-shadow: none;">-</button>
+                                                <button type="submit" class="btn btn-sm fw-bold px-2 py-1 border-0 text-secondary">-</button>
                                             </form>
-
-                                            <span class="px-3 fw-bold text-dark" style="font-size: 0.9rem; min-width: 35px; text-align: center;">
-                                                @basketItem.Quantity
-                                            </span>
-
+                                            <span class="px-3 fw-bold text-dark basket-item-qty">@basketItem.Quantity</span>
                                             <form asp-action="IncreaseQuantity" method="post" class="m-0">
                                                 <input type="hidden" name="menuItemID" value="@basketItem.MenuItemID" />
-                                                <button type="submit" class="btn btn-sm fw-bold px-2 py-1 border-0 text-secondary" style="box-shadow: none;">+</button>
+                                                <button type="submit" class="btn btn-sm fw-bold px-2 py-1 border-0 text-secondary">+</button>
                                             </form>
                                         </div>
-
                                         <span class="text-secondary fw-semibold small">
                                             €@((basketItem.MenuItem != null ? basketItem.MenuItem.Price * basketItem.Quantity : 0).ToString("0.00"))
                                         </span>
@@ -147,8 +132,7 @@
                                             <span class="input-group-text bg-light text-muted border-end-0">📝</span>
                                             <input type="text" name="comment" value="@basketItem.Comment"
                                                    placeholder="Add special notes ('no salt', 'rare')..."
-                                                   class="form-control border-start-0 ps-1 bg-light"
-                                                   style="font-size: 0.82rem;"
+                                                   class="form-control border-start-0 ps-1 bg-light comment-input"
                                                    onchange="this.form.submit();" />
                                         </form>
                                     </div>
@@ -162,15 +146,11 @@
                         <div class="mt-4 pt-3 border-top">
                             <div class="d-grid gap-2">
                                 <form asp-action="SaveAndSendOrder" method="post" class="m-0 w-100">
-                                    <button type="submit" class="btn text-white w-100 py-2.5 fw-bold shadow-sm" style="background-color: #2b1810; border-radius: 8px;">
-                                        🚀 Send to Kitchen / Bar
-                                    </button>
+                                    <button type="submit" class="send-order-btn">🚀 Send to Kitchen / Bar</button>
                                 </form>
-
                                 <form asp-action="CancelWholeOrder" method="post" class="m-0 w-100">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100 py-2"
-                                            onclick="return confirm('Are you sure you want to cancel and wipe out this entire working order?');"
-                                            style="border-radius: 8px;">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100 py-2 cancel-order-btn"
+                                            onclick="return confirm('Are you sure you want to cancel and wipe out this entire working order?');">
                                         Cancel Order
                                     </button>
                                 </form>
@@ -181,46 +161,5 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
-
-<style>
-   
-    .hover-danger:hover {
-        color: #dc3545 !important;
-        transition: color 0.2s;
-    }
-
-    .btn-outline-dark.active {
-        background-color: #2b1810 !important;
-        border-color: #2b1810 !important;
-        color: #fdfaf6 !important;
-    }
-
-    .btn-outline-dark {
-        color: #2b1810;
-        border-color: #2b1810;
-    }
-
-        .btn-outline-dark:hover {
-            background-color: #cda45e;
-            border-color: #cda45e;
-            color: white;
-        }
-
-    .btn-light.active {
-        background-color: #cda45e !important;
-        color: white !important;
-        border-color: #cda45e !important;
-    }
-
-    .basket-items-list::-webkit-scrollbar {
-        width: 5px;
-    }
-
-    .basket-items-list::-webkit-scrollbar-thumb {
-        background: #cda45e;
-        border-radius: 4px;
-    }
-</style>

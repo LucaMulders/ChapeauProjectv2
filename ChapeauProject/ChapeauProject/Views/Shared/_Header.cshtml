@@ -1,0 +1,39 @@
+<header>
+    <nav class="navbar navbar-expand-sm">
+        <div class="container">
+            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <img src="~/images/logo_small.png" alt="Chapeau" />
+            </a>
+            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <ul class="navbar-nav flex-grow-1">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Tables" asp-action="Index">Tables</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Menu" asp-action="Index">Menu</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Orders" asp-action="Index">Orders</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Bill" asp-action="Index">Bill</a>
+                    </li>
+                </ul>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a class="btn btn-dark text-decoration-none" href="/Account/Logoff">Logoff</a>
+                }
+                else
+                {
+                    <a class="btn btn-dark text-decoration-none" href="/Account/Login">Login</a>
+                }
+            </div>
+        </div>
+    </nav>
+</header>

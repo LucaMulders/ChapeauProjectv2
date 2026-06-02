@@ -11,46 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@tabler/icons-webfont@@latest/tabler-icons.min.css" />
 </head>
 <body>
-    <header>
-       
-        <nav class="navbar navbar-expand-sm">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/images/logo_small.png" alt="Chapeau" />
-                </a>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Tables" asp-action="Index">Tables</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Menu" asp-action="Index">Menu</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Orders" asp-action="Index">Orders</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Bill" asp-action="Index">Bill</a>
-                        </li>
-                    </ul>
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <a class="btn btn-dark text-decoration-none" href="/Account/Logoff">Logoff</a>
-                    }
-                    else
-                    {
-                        <a class="btn btn-dark text-decoration-none" href="/Account/Login">Login</a>
-                    }
-                </div>
-            </div>
-        </nav>
-    </header>
+    @await Html.PartialAsync("_Header")
 
 
     <div class="welcome-area-wrapper">
@@ -61,12 +22,7 @@
         </div>
     </div>
 
-    <footer class="text-center">
-        <div class="container">
-            <div style="width: 50px; height: 1px; background: var(--bistro-gold); margin: 0 auto 15px;"></div>
-            &copy; 2026 - <span style="font-family: 'Playfair Display';">CHAPEAU PROJECT</span>
-        </div>
-    </footer>
+    @await Html.PartialAsync("_Footer")
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

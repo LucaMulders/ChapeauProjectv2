@@ -1,12 +1,14 @@
 ﻿using ChapeauProject.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ChapeauProject.Services;
 using System.Security.Claims;
 
 namespace ChapeauProject.Controllers
 {
+    [AllowAnonymous]
     public class AccountController : Controller
     {
         private readonly IStaffService _staffService;

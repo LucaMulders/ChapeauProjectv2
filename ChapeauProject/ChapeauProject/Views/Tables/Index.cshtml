@@ -1,4 +1,4 @@
-﻿ 
+
 @model IEnumerable<ChapeauProject.ViewModels.TablesViewModel>
 
 @{
@@ -9,60 +9,22 @@
 
 @if (TempData["Error"] != null)
 {
-    <div style="background:#A32D2D; color:white; padding:10px 16px; border-radius:6px; margin-bottom:1rem;">
-        @TempData["Error"]
-    </div>
+    <div class="alert-banner">@TempData["Error"]</div>
 }
 
-<div style="text-align:right; margin-bottom:0.5rem;">
-    <a asp-action="Index" class="complete-btn" style="display:inline-block; width:auto; padding:7px 20px; text-decoration:none;">&#8635; Refresh</a>
+<div class="header-bar-right">
+    <a asp-action="Index" class="complete-btn btn-inline">&#8635; Refresh</a>
 </div>
 
-<div style="display:flex; gap:12px; margin-bottom:1.5rem;">
+<div class="stat-bar">
     <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">@Model.Count()</div></div>
-    <div class="stat-card"><div class="stat-label">Free</div><div class="stat-value" style="color:#3B6D11">@free</div></div>
-    <div class="stat-card"><div class="stat-label">Occupied</div><div class="stat-value" style="color:#A32D2D">@occupied</div></div>
+    <div class="stat-card"><div class="stat-label">Free</div><div class="stat-value stat-value-free">@free</div></div>
+    <div class="stat-card"><div class="stat-label">Occupied</div><div class="stat-value stat-value-occupied">@occupied</div></div>
 </div>
 
 <div class="tables-grid">
     @foreach (var item in Model.OrderBy(t => t.Table.TableNumber))
     {
-        <div class="table-card">
-            <form asp-action="ToggleOccupied" asp-controller="Tables" method="post" style="width:100%; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                <input type="hidden" name="tableNumber" value="@item.Table.TableNumber" />
-                <button type="submit" class="table-toggle-btn">
-                    <div class="table-shape @(item.Table.Seats <= 2 ? "round" : item.Table.Seats <= 4 ? "rect" : "large") @(item.Table.IsOccupied ? "occupied" : "free")">
-                        <i class="ti ti-armchair"></i>
-                    </div>
-                </button>
-                <div class="table-num">Table @item.Table.TableNumber</div>
-                <div class="table-seats">@item.GuestCount / @item.Table.Seats guests</div>
-                <span class="status-badge @(item.Table.IsOccupied ? "badge-occupied" : "badge-free")">
-                    @(item.Table.IsOccupied ? "Occupied" : "Free")
-                </span>
-                <span class="table-seats">@item.OrderCount orders</span>
-                @if (item.HasFoodOrder || item.HasDrinkOrder)
-                {
-                    <div style="display:flex; gap:6px; justify-content:center; margin-top:2px;">
-                        @if (item.HasFoodOrder)
-                        {
-                            <span title="Running food order" style="font-size:1.15rem;">🍽️</span>
-                        }
-                        @if (item.HasDrinkOrder)
-                        {
-                            <span title="Running drink order" style="font-size:1.15rem;">🍷</span>
-                        }
-                    </div>
-                }
-            </form>
-
-            <div style="width: 100%; display: flex; flex-direction: column; gap: 6px; margin-top: auto; padding-top: 10px;">
-
-                <a asp-action="Details" asp-controller="Tables" asp-route-id="@item.Table.TableNumber" class="view-orders-btn" style="text-align: center; display: block; margin: 0;">
-                    Add / View Orders
-                </a>
-            </div>
-
-        </div>
+        @await Html.PartialAsync("_TableCard", item)
     }
 </div>

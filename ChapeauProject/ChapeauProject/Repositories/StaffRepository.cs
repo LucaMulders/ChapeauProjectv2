@@ -57,7 +57,15 @@ namespace ChapeauProject.Repositories
             string firstName = reader.GetString(reader.GetOrdinal("FirstName"));
             string lastName = reader.GetString(reader.GetOrdinal("LastName"));
             string role = reader.GetString(reader.GetOrdinal("Role"));
-            string password = reader.IsDBNull(reader.GetOrdinal("Password")) ? "" : reader.GetString(reader.GetOrdinal("Password"));
+            string password;
+            if (reader.IsDBNull(reader.GetOrdinal("Password")))
+            {
+                password = "";
+            }
+            else
+            {
+                password = reader.GetString(reader.GetOrdinal("Password"));
+            }
 
             return new Staff(id, firstName, lastName, role, password);
         }

@@ -1,3 +1,3 @@
 Luca Mulders: Login model, Seating status, Table Orders/Guest's orders, Bill system
-Christabel Boateng: View menu items 
-Sophie Alkema: View running orders
+Christabel Boateng: View menu items, Taking/Changing orders
+Sophie Alkema: View running orders, View done orders, Course status

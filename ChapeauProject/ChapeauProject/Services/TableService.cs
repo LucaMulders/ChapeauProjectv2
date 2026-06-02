@@ -56,7 +56,6 @@ namespace ChapeauProject.Services
             decimal subtotal = allItems.Sum(i => i.Price * i.Quantity);
             decimal lowVat   = allItems.Where(i => i.VatRate == 0.09m).Sum(i => i.Price * i.Quantity * i.VatRate);
             decimal highVat  = allItems.Where(i => i.VatRate == 0.21m).Sum(i => i.Price * i.Quantity * i.VatRate);
-            //NOTE: Check
             return new TableOrderViewModel
             {
                 TableNumber = tableNumber,

@@ -30,6 +30,16 @@ namespace ChapeauProject.Services
 
             if (model.SplitMode == SplitMode.Single)
             {
+                string? singleFeedback;
+                if (string.IsNullOrWhiteSpace(model.Feedback))
+                {
+                    singleFeedback = null;
+                }
+                else
+                {
+                    singleFeedback = model.Feedback;
+                }
+
                 _billRepository.CreatePayment(new Payment
                 {
                     BillID           = billId,
@@ -37,13 +47,23 @@ namespace ChapeauProject.Services
                     PaymentMethod    = model.PaymentMethod,
                     TipAmount        = model.TipAmount,
                     PaymentTimeStamp = now,
-                    Feedback         = string.IsNullOrWhiteSpace(model.Feedback) ? null : model.Feedback
+                    Feedback         = singleFeedback
                 });
             }
             else
             {
                 foreach (var payer in model.Payers)
                 {
+                    string? payerFeedback;
+                    if (string.IsNullOrWhiteSpace(payer.Feedback))
+                    {
+                        payerFeedback = null;
+                    }
+                    else
+                    {
+                        payerFeedback = payer.Feedback;
+                    }
+
                     _billRepository.CreatePayment(new Payment
                     {
                         BillID           = billId,
@@ -51,7 +71,7 @@ namespace ChapeauProject.Services
                         PaymentMethod    = payer.PaymentMethod,
                         TipAmount        = payer.TipAmount,
                         PaymentTimeStamp = now,
-                        Feedback         = string.IsNullOrWhiteSpace(payer.Feedback) ? null : payer.Feedback
+                        Feedback         = payerFeedback
                     });
                 }
             }

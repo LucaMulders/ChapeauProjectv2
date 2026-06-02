@@ -22,13 +22,19 @@ namespace ChapeauProject.Services
             return _staffRepository.GetById(id);
         }
         
-        //NOTE: Change to if and else as taught in class 
         public Staff? GetByLoginCredentials(int staffID, string password)
         {
             Staff? staff = _staffRepository.GetByLoginCredentials(staffID, password);
             if (staff == null) return null;
 
-            return BCrypt.Net.BCrypt.Verify(password, staff.Password) ? staff : null;
+            if (BCrypt.Net.BCrypt.Verify(password, staff.Password))
+            {
+                return staff;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

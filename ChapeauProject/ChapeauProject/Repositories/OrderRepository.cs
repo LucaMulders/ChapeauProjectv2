@@ -15,43 +15,50 @@ namespace ChapeauProject.Repositories
             _menuRepository = menuRepository;
         }
 
-        //NOTE: Split into two methods?
         public void SaveNewOrder(Order order)
         {
             using (SqlConnection connection = GetConnection())
             {
-                string insertOrderSql = @"
-                    INSERT INTO Orders (GuestID, OrderTimeStamp, OrderStatus)
-                    VALUES (@GuestID, @OrderTimeStamp, @OrderStatus);
-                    SELECT CAST(SCOPE_IDENTITY() as int);";
+                int generatedOrderID = InsertOrder(order, connection);
+                InsertOrderItems(order.OrderItems, generatedOrderID, connection);
+            }
+        }
 
-                int generatedOrderID;
-                using (SqlCommand orderCmd = new SqlCommand(insertOrderSql, connection))
+        private int InsertOrder(Order order, SqlConnection connection)
+        {
+            string sql = @"
+                INSERT INTO Orders (GuestID, OrderTimeStamp, OrderStatus)
+                VALUES (@GuestID, @OrderTimeStamp, @OrderStatus);
+                SELECT CAST(SCOPE_IDENTITY() as int);";
+
+            using (SqlCommand cmd = new SqlCommand(sql, connection))
+            {
+                cmd.Parameters.AddWithValue("@GuestID",        order.GuestID);
+                cmd.Parameters.AddWithValue("@OrderTimeStamp", order.OrderTimeStamp);
+                cmd.Parameters.AddWithValue("@OrderStatus",    order.Status.ToString());
+                return (int)cmd.ExecuteScalar();
+            }
+        }
+
+        private void InsertOrderItems(List<OrderItem> items, int orderId, SqlConnection connection)
+        {
+            string sql = @"
+                INSERT INTO OrderItems (OrderID, MenuItemID, Quantity, PreparationStatus, Comment)
+                VALUES (@OrderID, @MenuItemID, @Quantity, @PrepStatus, @Comment);";
+
+            foreach (var item in items)
+            {
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
                 {
-                    orderCmd.Parameters.AddWithValue("@GuestID",         order.GuestID);
-                    orderCmd.Parameters.AddWithValue("@OrderTimeStamp",  order.OrderTimeStamp);
-                    orderCmd.Parameters.AddWithValue("@OrderStatus",     order.Status.ToString());
-                    generatedOrderID = (int)orderCmd.ExecuteScalar();
+                    cmd.Parameters.AddWithValue("@OrderID",    orderId);
+                    cmd.Parameters.AddWithValue("@MenuItemID", item.MenuItemID);
+                    cmd.Parameters.AddWithValue("@Quantity",   item.Quantity);
+                    cmd.Parameters.AddWithValue("@PrepStatus", item.PreparationStatus.ToString());
+                    cmd.Parameters.AddWithValue("@Comment",    (object?)item.Comment ?? DBNull.Value);
+                    cmd.ExecuteNonQuery();
                 }
 
-                foreach (var item in order.OrderItems)
-                {
-                    string insertItemSql = @"
-                        INSERT INTO OrderItems (OrderID, MenuItemID, Quantity, PreparationStatus, Comment)
-                        VALUES (@OrderID, @MenuItemID, @Quantity, @PrepStatus, @Comment);";
-
-                    using (SqlCommand itemCmd = new SqlCommand(insertItemSql, connection))
-                    {
-                        itemCmd.Parameters.AddWithValue("@OrderID",    generatedOrderID);
-                        itemCmd.Parameters.AddWithValue("@MenuItemID", item.MenuItemID);
-                        itemCmd.Parameters.AddWithValue("@Quantity",   item.Quantity);
-                        itemCmd.Parameters.AddWithValue("@PrepStatus", item.PreparationStatus.ToString());
-                        itemCmd.Parameters.AddWithValue("@Comment",    (object?)item.Comment ?? DBNull.Value);
-                        itemCmd.ExecuteNonQuery();
-                    }
-
-                    _menuRepository.DeductStockQuantity(item.MenuItemID, item.Quantity);
-                }
+                _menuRepository.DeductStockQuantity(item.MenuItemID, item.Quantity);
             }
         }
 
@@ -93,6 +100,16 @@ namespace ChapeauProject.Repositories
                                 };
                             }
 
+                            string? comment;
+                            if (reader.IsDBNull(reader.GetOrdinal("Comment")))
+                            {
+                                comment = null;
+                            }
+                            else
+                            {
+                                comment = reader.GetString(reader.GetOrdinal("Comment"));
+                            }
+
                             orders[orderID].Items.Add(new RunningOrderItemViewModel
                             {
                                 OrderItemID       = reader.GetInt32(reader.GetOrdinal("OrderItemID")),
@@ -101,7 +118,7 @@ namespace ChapeauProject.Repositories
                                 PreparationStatus = Enum.Parse<PreparationStatus>(reader.GetString(reader.GetOrdinal("PreparationStatus"))),
                                 MenuCard          = reader.GetString(reader.GetOrdinal("MenuCard")),
                                 CourseName        = reader.GetString(reader.GetOrdinal("CourseName")),
-                                Comment           = reader.IsDBNull(reader.GetOrdinal("Comment")) ? null : reader.GetString(reader.GetOrdinal("Comment"))
+                                Comment           = comment
                             });
                         }
                     }
@@ -150,6 +167,16 @@ namespace ChapeauProject.Repositories
                                 };
                             }
 
+                            string? comment;
+                            if (reader.IsDBNull(reader.GetOrdinal("Comment")))
+                            {
+                                comment = null;
+                            }
+                            else
+                            {
+                                comment = reader.GetString(reader.GetOrdinal("Comment"));
+                            }
+
                             orders[orderID].Items.Add(new RunningOrderItemViewModel
                             {
                                 OrderItemID       = reader.GetInt32(reader.GetOrdinal("OrderItemID")),
@@ -158,7 +185,7 @@ namespace ChapeauProject.Repositories
                                 PreparationStatus = Enum.Parse<PreparationStatus>(reader.GetString(reader.GetOrdinal("PreparationStatus"))),
                                 MenuCard          = reader.GetString(reader.GetOrdinal("MenuCard")),
                                 CourseName        = reader.GetString(reader.GetOrdinal("CourseName")),
-                                Comment           = reader.IsDBNull(reader.GetOrdinal("Comment")) ? null : reader.GetString(reader.GetOrdinal("Comment"))
+                                Comment           = comment
                             });
                         }
                     }

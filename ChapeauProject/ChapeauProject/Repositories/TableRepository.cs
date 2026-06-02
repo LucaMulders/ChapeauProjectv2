@@ -87,68 +87,90 @@ namespace ChapeauProject.Repositories
             }
         }
 
-        //NOTE: Split into two methods
         public List<GuestOrder> GetTableOrders(int tableNumber)
+        {
+            using (SqlConnection connection = GetConnection())
+            {
+                var guests = GetGuestsAtTable(tableNumber, connection);
+
+                foreach (var guest in guests)
+                {
+                    guest.Items = GetItemsForGuest(guest.GuestID, connection);
+                }
+
+                return guests;
+            }
+        }
+
+        private List<GuestOrder> GetGuestsAtTable(int tableNumber, SqlConnection connection)
         {
             var guests = new List<GuestOrder>();
 
-            using (SqlConnection connection = GetConnection())
+            string query = "SELECT GuestID, FirstName, LastName FROM Guests WHERE TableNumber = @TableNumber";
+            using (SqlCommand cmd = new SqlCommand(query, connection))
             {
-                // get all guests at this table
-                string guestQuery = "SELECT GuestID, FirstName, LastName FROM Guests WHERE TableNumber = @TableNumber";
-                using (SqlCommand cmd = new SqlCommand(guestQuery, connection))
+                cmd.Parameters.AddWithValue("@TableNumber", tableNumber);
+                using (SqlDataReader reader = cmd.ExecuteReader())
                 {
-                    cmd.Parameters.AddWithValue("@TableNumber", tableNumber);
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    while (reader.Read())
                     {
-                        while (reader.Read())
+                        string fullName = (reader.GetString(reader.GetOrdinal("FirstName")) + " " + reader.GetString(reader.GetOrdinal("LastName"))).Trim();
+                        string guestName;
+                        if (string.IsNullOrWhiteSpace(fullName))
                         {
-                            guests.Add(new GuestOrder
-                            {
-                                GuestID   = reader.GetInt32(reader.GetOrdinal("GuestID")),
-                                GuestName = string.IsNullOrWhiteSpace(reader.GetString(reader.GetOrdinal("FirstName")) + " " + reader.GetString(reader.GetOrdinal("LastName")).Trim())
-                                    ? "Unnamed Guest"
-                                    : (reader.GetString(reader.GetOrdinal("FirstName")) + " " + reader.GetString(reader.GetOrdinal("LastName"))).Trim(),
-                                Items     = new List<GuestOrderItem>()
-                            });
+                            guestName = "Unnamed Guest";
                         }
-                    }
-                }
-
-                // for each guest get their pending order items
-                foreach (var guest in guests)
-                {
-                    string itemQuery = @"
-                        SELECT oi.OrderItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus
-                        FROM Orders o
-                        JOIN OrderItems oi ON o.OrderID = oi.OrderID
-                        JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
-                        WHERE o.GuestID = @GuestID
-                          AND o.OrderStatus = 'Pending'";
-
-                    using (SqlCommand cmd = new SqlCommand(itemQuery, connection))
-                    {
-                        cmd.Parameters.AddWithValue("@GuestID", guest.GuestID);
-                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        else
                         {
-                            while (reader.Read())
-                            {
-                                guest.Items.Add(new GuestOrderItem
-                                {
-                                    OrderItemID       = reader.GetInt32(reader.GetOrdinal("OrderItemID")),
-                                    ItemName          = reader.GetString(reader.GetOrdinal("ItemName")),
-                                    Quantity          = reader.GetInt32(reader.GetOrdinal("Quantity")),
-                                    Price             = reader.GetDecimal(reader.GetOrdinal("Price")),
-                                    VatRate           = reader.GetDecimal(reader.GetOrdinal("VatRate")),
-                                    PreparationStatus = Enum.Parse<PreparationStatus>(reader.GetString(reader.GetOrdinal("PreparationStatus")))
-                                });
-                            }
+                            guestName = fullName;
                         }
+
+                        guests.Add(new GuestOrder
+                        {
+                            GuestID   = reader.GetInt32(reader.GetOrdinal("GuestID")),
+                            GuestName = guestName,
+                            Items     = new List<GuestOrderItem>()
+                        });
                     }
                 }
             }
 
             return guests;
+        }
+
+        private List<GuestOrderItem> GetItemsForGuest(int guestId, SqlConnection connection)
+        {
+            var items = new List<GuestOrderItem>();
+
+            string query = @"
+                SELECT oi.OrderItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus
+                FROM Orders o
+                JOIN OrderItems oi ON o.OrderID = oi.OrderID
+                JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
+                WHERE o.GuestID = @GuestID
+                  AND o.OrderStatus = 'Pending'";
+
+            using (SqlCommand cmd = new SqlCommand(query, connection))
+            {
+                cmd.Parameters.AddWithValue("@GuestID", guestId);
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        items.Add(new GuestOrderItem
+                        {
+                            OrderItemID       = reader.GetInt32(reader.GetOrdinal("OrderItemID")),
+                            ItemName          = reader.GetString(reader.GetOrdinal("ItemName")),
+                            Quantity          = reader.GetInt32(reader.GetOrdinal("Quantity")),
+                            Price             = reader.GetDecimal(reader.GetOrdinal("Price")),
+                            VatRate           = reader.GetDecimal(reader.GetOrdinal("VatRate")),
+                            PreparationStatus = Enum.Parse<PreparationStatus>(reader.GetString(reader.GetOrdinal("PreparationStatus")))
+                        });
+                    }
+                }
+            }
+
+            return items;
         }
 
         public int GetOrderCount(int tableNumber)

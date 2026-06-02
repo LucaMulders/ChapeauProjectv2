@@ -3,16 +3,14 @@
 
 @{
     ViewData["Title"] = "Table " + Model.TableNumber + " Orders";
-
-   
     var menuItems = ViewBag.MenuItems as List<ChapeauProject.Models.MenuItem>;
     var activeBasket = ViewBag.CurrentBasket as ChapeauProject.Models.Order;
     var currentCard = (MenuCard)ViewBag.CardFilter;
 }
 
-<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+<div class="page-header">
     <h2>Table @Model.TableNumber Workspace</h2>
-    <a asp-action="Details" asp-route-id="@Model.TableNumber" class="complete-btn" style="display:inline-block; width:auto; padding:7px 20px; text-decoration:none;">&#8635; Refresh</a>
+    <a asp-action="Details" asp-route-id="@Model.TableNumber" class="complete-btn btn-inline">&#8635; Refresh</a>
 </div>
 <hr />
 
@@ -31,18 +29,18 @@
     </div>
 }
 
-<h3 class="mb-3 mt-2" style="font-family: 'Playfair Display'; color: #3d2514;">Active Table Consumption Log</h3>
+<h3 class="mb-3 mt-2 menu-heading">Active Table Consumption Log</h3>
 
 @if (!Model.Guests.Any())
 {
-    <p style="color:#999;" class="fitalic py-2">No guests found on this table.</p>
+    <p class="text-muted fst-italic py-2">No guests found on this table.</p>
 }
 else
 {
     @foreach (var guest in Model.Guests)
     {
         <h4>@guest.GuestName</h4>
-        <table class="table table-sm align-middle" style="margin-bottom:1.5rem;">
+        <table class="table table-sm align-middle mb-4">
             <thead>
                 <tr>
                     <th>Item</th>
@@ -54,7 +52,7 @@ else
             <tbody>
                 @if (!guest.Items.Any())
                 {
-                    <tr><td colspan="4" style="color:#999; font-style:italic;">No orders yet</td></tr>
+                    <tr><td colspan="4" class="text-muted fst-italic">No orders yet</td></tr>
                 }
                 else
                 {
@@ -65,13 +63,13 @@ else
                             <td>@item.Quantity</td>
                             <td>€@item.Price.ToString("F2")</td>
                             <td>
-                                <form asp-action="ToggleItem" asp-controller="Orders" method="post" style="display:inline;">
+                                <form asp-action="ToggleItem" asp-controller="Orders" method="post" class="form-inline">
                                     <input type="hidden" name="orderItemId" value="@item.OrderItemID" />
                                     <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Tables", new { id = Model.TableNumber })" />
                                     @{
                                         var (pillClass, label) = item.PreparationStatus switch
                                         {
-                                            PreparationStatus.Pending => ("status-pill status-ordered", "Ordered"),
+                                            PreparationStatus.Pending   => ("status-pill status-ordered",   "Ordered"),
                                             PreparationStatus.Preparing => ("status-pill status-preparing", "Being Prepared"),
                                             PreparationStatus.Ready     => ("status-pill status-ready",     "Ready to Serve"),
                                             _                           => ("status-pill", item.PreparationStatus.ToString())
@@ -88,26 +86,26 @@ else
     }
 }
 
-<div class="bg-light p-3 rounded mb-4 border shadow-sm" style="max-width: 400px;">
+<div class="bg-light p-3 rounded mb-4 border shadow-sm vat-summary">
     <p class="mb-1 small text-secondary">Low VAT (9%): <span class="fw-bold text-dark float-end">€@Model.LowVAT.ToString("F2")</span></p>
     <p class="mb-2 small text-secondary">High VAT (21%): <span class="fw-bold text-dark float-end">€@Model.HighVAT.ToString("F2")</span></p>
-    <h5 class="m-0 pt-2 border-top fw-bold" style="color: #2b1810;">Total (incl. VAT): <span class="float-end">€@Model.TotalAmount.ToString("F2")</span></h5>
+    <h5 class="m-0 pt-2 border-top fw-bold menu-item-name">Total (incl. VAT): <span class="float-end">€@Model.TotalAmount.ToString("F2")</span></h5>
 </div>
 
 <div class="mb-4">
     <a asp-action="Index" class="btn btn-secondary py-2 px-3">Back to Tables Grid</a>
     <a asp-action="Pay" asp-controller="Bill" asp-route-id="@Model.TableNumber"
-       class="complete-btn" style="display:inline-block; width:auto; padding:10px 24px; text-decoration:none; margin-left:8px;">
+       class="complete-btn btn-inline" style="padding:10px 24px; margin-left:8px;">
         Process Bill Checkout
     </a>
 </div>
 
-<hr class="my-5" style="border-top: 2px dashed #cda45e;" />
+<hr class="details-divider my-5" />
 
 <div class="row pt-2">
 
     <div class="col-md-7 pe-4">
-        <h3 class="mb-4" style="font-family: 'Playfair Display'; color: #3d2514;">Add Items to Order</h3>
+        <h3 class="mb-4 menu-heading">Add Items to Order</h3>
 
         <div class="d-flex mb-3">
             <div class="btn-group">
@@ -128,27 +126,23 @@ else
 
         <div class="table-responsive bg-white rounded shadow-sm border">
             <table class="table table-hover align-middle mb-0">
-                <thead style="background-color: #2b1810; color: #fdfaf6;">
+                <thead class="menu-thead">
                     <tr>
                         <th class="py-3 ps-3">Item Name</th>
                         <th class="py-3">Price</th>
-                        <th class="py-3 text-center pe-3" style="width: 80px;">Add</th>
+                        <th class="py-3 text-center pe-3" style="width:80px;">Add</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in menuItems)
                     {
                         <tr>
-                            <td class="fw-bold py-3 ps-3" style="color: #2b1810;">@item.ItemName</td>
+                            <td class="fw-bold py-3 ps-3 menu-item-name">@item.ItemName</td>
                             <td class="text-secondary">€@item.Price.ToString("0.00")</td>
                             <td class="text-center pe-3">
                                 <form asp-controller="Orders" asp-action="AddItemToOrder" method="post" class="m-0">
                                     <input type="hidden" name="menuItemID" value="@item.MenuItemID" />
-                                    <button type="submit" class="btn btn-sm text-white fw-bold d-flex align-items-center justify-content-center mx-auto"
-                                            style="background-color: #cda45e; border-radius: 50%; width: 32px; height: 32px; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
-                                            @(item.StockQuantity == 0 ? "disabled" : "")>
-                                        +
-                                    </button>
+                                    <button type="submit" class="add-item-btn" @(item.StockQuantity == 0 ? "disabled" : "")>+</button>
                                 </form>
                             </td>
                         </tr>
@@ -159,30 +153,29 @@ else
     </div>
 
     <div class="col-md-5">
-        <div class="card shadow-sm border-0 position-sticky bg-white" style="top: 20px; border-radius: 16px; border: 1px solid #e3dfda !important; background-color: #fdfaf6 !important;">
+        <div class="card shadow-sm border-0 position-sticky basket-card details-basket mb-4">
             <div class="card-body p-4">
 
                 <div class="text-center pb-2 mb-4 border-bottom">
-                    <h4 class="fw-bold m-0" style="color: #2b1810; font-family: 'Playfair Display';">New Order Ticket</h4>
+                    <h4 class="fw-bold m-0 basket-heading">New Order Ticket</h4>
                     <small class="text-muted fw-semibold">Table @Model.TableNumber Processing Drawer</small>
                 </div>
 
-                <div class="basket-items-list overflow-auto pe-1" style="max-height: 400px;">
+                <div class="basket-items-list overflow-auto pe-1">
                     @if (activeBasket == null || !activeBasket.OrderItems.Any())
                     {
                         <div class="text-center py-5 text-muted">
                             <p class="m-0 fs-5">Basket is empty.</p>
-                            <small class="small">Tap the circular "+" button next to any dish item on the left panel to build out this order.</small>
+                            <small>Tap the circular "+" button next to any dish item on the left panel to build out this order.</small>
                         </div>
                     }
                     else
                     {
                         @foreach (var basketItem in activeBasket.OrderItems)
                         {
-                            <div class="p-3 mb-3 border rounded bg-white shadow-sm" style="border-left: 5px solid #cda45e !important;">
+                            <div class="p-3 mb-3 border rounded bg-white shadow-sm basket-item">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <span class="fw-bold text-dark small pe-2">@basketItem.MenuItem?.ItemName</span>
-
                                     <form asp-controller="Orders" asp-action="RemoveRow" method="post" class="m-0">
                                         <input type="hidden" name="menuItemID" value="@basketItem.MenuItemID" />
                                         <button type="submit" class="btn btn-sm p-0 border-0 text-muted hover-danger" title="Remove row item completely">🗑️</button>
@@ -195,15 +188,12 @@ else
                                             <input type="hidden" name="menuItemID" value="@basketItem.MenuItemID" />
                                             <button type="submit" class="btn btn-sm border-0 px-2 py-0 fw-bold text-secondary">-</button>
                                         </form>
-
-                                        <span class="px-2 small fw-bold text-dark" style="min-width: 25px; text-align: center;">@basketItem.Quantity</span>
-
+                                        <span class="px-2 small fw-bold text-dark basket-item-qty">@basketItem.Quantity</span>
                                         <form asp-controller="Orders" asp-action="IncreaseQuantity" method="post" class="m-0">
                                             <input type="hidden" name="menuItemID" value="@basketItem.MenuItemID" />
                                             <button type="submit" class="btn btn-sm border-0 px-2 py-0 fw-bold text-secondary">+</button>
                                         </form>
                                     </div>
-
                                     <span class="text-secondary small fw-bold">
                                         €@((basketItem.MenuItem != null ? basketItem.MenuItem.Price * basketItem.Quantity : 0).ToString("0.00"))
                                     </span>
@@ -215,7 +205,7 @@ else
                                         <span class="input-group-text bg-light text-muted border-end-0">📝</span>
                                         <input type="text" name="comment" value="@basketItem.Comment"
                                                placeholder="Add instructions ('no salt', 'rare')..."
-                                               class="form-control bg-light border-start-0 ps-1" style="font-size: 0.8rem;"
+                                               class="form-control bg-light border-start-0 ps-1 comment-input"
                                                onchange="this.form.submit();" />
                                     </form>
                                 </div>
@@ -229,20 +219,18 @@ else
                     <div class="mt-4 pt-3 border-top">
                         <div class="d-grid gap-2">
                             <form asp-controller="Orders" asp-action="SaveAndSendOrder" method="post" class="m-0 w-100">
-                                <select name="guestId" class="form-select mb-2" style="border-radius: 8px; border-color: #cda45e;" required>
+                                <select name="guestId" class="form-select mb-2 guest-select" required>
                                     <option value="0" disabled selected>— Select guest —</option>
                                     @foreach (var guest in (List<(int GuestID, string GuestName)>)ViewBag.Guests)
                                     {
                                         <option value="@guest.GuestID">@guest.GuestName</option>
                                     }
                                 </select>
-                                <button type="submit" class="btn text-white w-100 py-2 fw-bold shadow-sm" style="background-color: #2b1810; border-radius: 8px;">
-                                    🚀 Send to Kitchen / Bar
-                                </button>
+                                <button type="submit" class="send-order-btn">🚀 Send to Kitchen / Bar</button>
                             </form>
                             <form asp-controller="Orders" asp-action="CancelWholeOrder" method="post" class="m-0 w-100">
-                                <button type="submit" class="btn btn-outline-danger btn-sm w-100 py-1.5"
-                                        onclick="return confirm('Wipe out and reset this local workspace basket entirely?');" style="border-radius: 8px;">
+                                <button type="submit" class="btn btn-outline-danger btn-sm w-100 py-1 cancel-order-btn"
+                                        onclick="return confirm('Wipe out and reset this local workspace basket entirely?');">
                                     Cancel Selection
                                 </button>
                             </form>
@@ -255,72 +243,3 @@ else
     </div>
 
 </div>
-
-<style>
-    .status-pill {
-        display: inline-block;
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        cursor: pointer;
-        border: none;
-        transition: opacity 0.15s;
-    }
-
-        .status-pill:hover {
-            opacity: 0.8;
-        }
-
-    .status-ordered {
-        background: #FFF3CD;
-        color: #856404;
-    }
-
-    .status-preparing {
-        background: #CCE5FF;
-        color: #004085;
-    }
-
-    .status-ready {
-        background: #D4EDDA;
-        color: #155724;
-    }
-
-    .hover-danger:hover {
-        color: #dc3545 !important;
-        transition: color 0.15s;
-    }
-
-    .btn-outline-dark.active {
-        background-color: #2b1810 !important;
-        border-color: #2b1810 !important;
-        color: #fdfaf6 !important;
-    }
-
-    .btn-outline-dark {
-        color: #2b1810;
-        border-color: #2b1810;
-    }
-
-        .btn-outline-dark:hover {
-            background-color: #cda45e;
-            border-color: #cda45e;
-            color: white;
-        }
-
-    .btn-light.active {
-        background-color: #cda45e !important;
-        color: white !important;
-        border-color: #cda45e !important;
-    }
-
-    .basket-items-list::-webkit-scrollbar {
-        width: 4px;
-    }
-
-    .basket-items-list::-webkit-scrollbar-thumb {
-        background: #cda45e;
-        border-radius: 4px;
-    }
-</style>

@@ -9,28 +9,14 @@ namespace ChapeauProject.Repositories
     {
         public MenuRepository(IConfiguration configuration) : base(configuration) { }
 
-        //NOTE: Split into two methods
         public List<MenuItem> GetCourseFiltered(MenuCard cardFilter, string courseFilter)
         {
+            string query = BuildCourseFilterQuery(courseFilter);
+
             List<MenuItem> items = new List<MenuItem>();
 
             using (SqlConnection connection = GetConnection())
             {
-                string query = @"
-                    SELECT MI.MenuItemID, MI.ItemName, MI.Price, ISNULL(S.Quantity, 0) AS Quantity, 
-                           ISNULL(C.CourseName, 'N/A') AS CourseName, MI.MenuCard 
-                    FROM MenuItems MI
-                    LEFT JOIN Stock S ON MI.MenuItemID = S.MenuItemID
-                    LEFT JOIN Courses C ON MI.CourseID = C.CourseID
-                    WHERE UPPER(MI.MenuCard) = UPPER(@MenuCard)";
-
-                if (courseFilter != "All")
-                {
-                    query += " AND UPPER(C.CourseName) = UPPER(@CourseName)";
-                }
-
-                query += " ORDER BY ISNULL(S.Quantity, 0) ASC";
-
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@MenuCard", cardFilter.ToString());
@@ -44,19 +30,44 @@ namespace ChapeauProject.Repositories
                     {
                         while (reader.Read())
                         {
-                            items.Add(new MenuItem(
-                                (int)reader["MenuItemID"],
-                                (string)reader["ItemName"],
-                                (decimal)reader["Price"],
-                                (int)reader["Quantity"],
-                                (string)reader["CourseName"],
-                                (string)reader["MenuCard"]
-                            ));
+                            items.Add(ReadMenuItem(reader));
                         }
                     }
                 }
             }
             return items;
+        }
+
+        private string BuildCourseFilterQuery(string courseFilter)
+        {
+            string query = @"
+                SELECT MI.MenuItemID, MI.ItemName, MI.Price, ISNULL(S.Quantity, 0) AS Quantity,
+                       ISNULL(C.CourseName, 'N/A') AS CourseName, MI.MenuCard
+                FROM MenuItems MI
+                LEFT JOIN Stock S ON MI.MenuItemID = S.MenuItemID
+                LEFT JOIN Courses C ON MI.CourseID = C.CourseID
+                WHERE UPPER(MI.MenuCard) = UPPER(@MenuCard)";
+
+            if (courseFilter != "All")
+            {
+                query += " AND UPPER(C.CourseName) = UPPER(@CourseName)";
+            }
+
+            query += " ORDER BY ISNULL(S.Quantity, 0) ASC";
+
+            return query;
+        }
+
+        private MenuItem ReadMenuItem(SqlDataReader reader)
+        {
+            return new MenuItem(
+                (int)reader["MenuItemID"],
+                (string)reader["ItemName"],
+                (decimal)reader["Price"],
+                (int)reader["Quantity"],
+                (string)reader["CourseName"],
+                (string)reader["MenuCard"]
+            );
         }
 
    
@@ -81,14 +92,7 @@ namespace ChapeauProject.Repositories
                     {
                         if (reader.Read())
                         {
-                            return new MenuItem(
-                                (int)reader["MenuItemID"],
-                                (string)reader["ItemName"],
-                                (decimal)reader["Price"],
-                                (int)reader["Quantity"],
-                                (string)reader["CourseName"],
-                                (string)reader["MenuCard"]
-                            );
+                            return ReadMenuItem(reader);
                         }
                     }
                 }

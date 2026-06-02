@@ -24,14 +24,22 @@ namespace ChapeauProject.Controllers
             var viewModel = tables.Select(t =>
             {
                 var categories = _tableService.GetRunningOrderCategories(t.TableNumber);
-                return new TablesViewModel
+                var vm = new TablesViewModel
                 {
                     Table = t,
                     OrderCount = _tableService.GetOrderCount(t.TableNumber),
-                    GuestCount = t.IsOccupied ? _tableService.GetGuestCount(t.TableNumber) : 0,
                     HasFoodOrder = categories.HasFood,
                     HasDrinkOrder = categories.HasDrink
                 };
+                if (t.IsOccupied)
+                {
+                    vm.GuestCount = _tableService.GetGuestCount(t.TableNumber);
+                }
+                else
+                {
+                    vm.GuestCount = 0;
+                }
+                return vm;
             }).ToList();
             return View(viewModel);
         }
