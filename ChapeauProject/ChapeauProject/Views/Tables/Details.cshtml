@@ -210,9 +210,11 @@ else
                     <div class="mt-4 pt-3 border-top">
                         <div class="d-grid gap-2">
                             <form asp-controller="Orders" asp-action="SaveAndSendOrder" method="post" class="m-0 w-100">
-                                <select name="guestId" class="form-select mb-2 guest-select" required>
+                                <input type="hidden" name="guest.GuestName" id="guestNameInput" value="" />
+                                <select name="guest.GuestID" class="form-select mb-2 guest-select" required
+                                        onchange="document.getElementById('guestNameInput').value = this.options[this.selectedIndex].text">
                                     <option value="0" disabled selected>— Select guest —</option>
-                                    @foreach (var guest in (List<(int GuestID, string GuestName)>)ViewBag.Guests)
+                                    @foreach (var guest in (List<ChapeauProject.Models.Guest>)ViewBag.Guests)
                                     {
                                         <option value="@guest.GuestID">@guest.GuestName</option>
                                     }

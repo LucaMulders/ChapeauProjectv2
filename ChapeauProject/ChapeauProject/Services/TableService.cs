@@ -76,7 +76,7 @@ namespace ChapeauProject.Services
             return _tableRepository.GetGuestCount(tableNumber);
         }
 
-        public List<(int GuestID, string GuestName)> GetGuestsByTable(int tableNumber)
+        public List<Guest> GetGuestsByTable(int tableNumber)
         {
             return _tableRepository.GetGuestsByTable(tableNumber);
         }

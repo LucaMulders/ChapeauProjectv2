@@ -191,9 +191,9 @@ namespace ChapeauProject.Repositories
             }
         }
 
-        public List<(int GuestID, string GuestName)> GetGuestsByTable(int tableNumber)
+        public List<Guest> GetGuestsByTable(int tableNumber)
         {
-            var guests = new List<(int, string)>();
+            var guests = new List<Guest>();
             using (SqlConnection connection = GetConnection())
             {
                 string query = "SELECT GuestID, FirstName, LastName FROM Guests WHERE TableNumber = @TableNumber";
@@ -207,7 +207,7 @@ namespace ChapeauProject.Repositories
                             int id = reader.GetInt32(reader.GetOrdinal("GuestID"));
                             string name = (reader.GetString(reader.GetOrdinal("FirstName")) + " " + reader.GetString(reader.GetOrdinal("LastName"))).Trim();
                             if (string.IsNullOrWhiteSpace(name)) name = "Unnamed Guest";
-                            guests.Add((id, name));
+                            guests.Add(new Guest(id, name));
                         }
                     }
                 }

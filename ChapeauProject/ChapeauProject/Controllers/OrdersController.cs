@@ -1,5 +1,6 @@
 ﻿using ChapeauProject.Models;
 using ChapeauProject.Services;
+using ChapeauProject.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 
@@ -9,20 +10,13 @@ namespace ChapeauProject.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly IMenuService _menuService;
+        private readonly IOrderStateService _orderState;
 
-        private static Order _activeWorkingOrder = new Order();
-
-        
-        public static Order ActiveWorkingOrder
-        {
-            get => _activeWorkingOrder;
-            set => _activeWorkingOrder = value;
-        }
-
-        public OrdersController(IOrderService orderService, IMenuService menuService)
+        public OrdersController(IOrderService orderService, IMenuService menuService, IOrderStateService orderState)
         {
             _orderService = orderService;
             _menuService = menuService;
+            _orderState = orderState;
         }
 
         public IActionResult Index(string filter = "running")
@@ -50,7 +44,7 @@ namespace ChapeauProject.Controllers
         [HttpPost]
         public IActionResult StartNewOrder(int tableNumber)
         {
-            _activeWorkingOrder = new Order
+            _orderState.ActiveWorkingOrder = new Order
             {
                 TableNumber = tableNumber,
                 OrderItems = new System.Collections.Generic.List<OrderItem>()
@@ -64,15 +58,15 @@ namespace ChapeauProject.Controllers
         {
             var item = _menuService.GetById(menuItemID);
             if (item == null)
-                return RedirectToAction("Details", "Tables", new { id = _activeWorkingOrder.TableNumber });
+                return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
 
             if (item.StockQuantity <= 0)
             {
                 TempData["ErrorMessage"] = $"{item.ItemName} is out of stock!";
-                return RedirectToAction("Details", "Tables", new { id = _activeWorkingOrder.TableNumber });
+                return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
             }
 
-            var existingItem = _activeWorkingOrder.OrderItems
+            var existingItem = _orderState.ActiveWorkingOrder.OrderItems
                 .FirstOrDefault(oi => oi.MenuItemID == menuItemID);
 
             if (existingItem != null)
@@ -80,13 +74,13 @@ namespace ChapeauProject.Controllers
                 if (existingItem.Quantity >= item.StockQuantity)
                 {
                     TempData["ErrorMessage"] = $"Stock ceiling reached for {item.ItemName}.";
-                    return RedirectToAction("Details", "Tables", new { id = _activeWorkingOrder.TableNumber });
+                    return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
                 }
                 existingItem.Quantity++;
             }
             else
             {
-                _activeWorkingOrder.OrderItems.Add(new OrderItem
+                _orderState.ActiveWorkingOrder.OrderItems.Add(new OrderItem
                 {
                     MenuItemID = menuItemID,
                     MenuItem = item,
@@ -96,13 +90,13 @@ namespace ChapeauProject.Controllers
                 });
             }
 
-            return RedirectToAction("Details", "Tables", new { id = _activeWorkingOrder.TableNumber });
+            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
         }
 
         [HttpPost]
         public IActionResult IncreaseQuantity(int menuItemID)
         {
-            var basketItem = _activeWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItemID == menuItemID);
+            var basketItem = _orderState.ActiveWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItemID == menuItemID);
             var dbItem = _menuService.GetById(menuItemID);
 
             if (basketItem != null && dbItem != null)
@@ -117,72 +111,71 @@ namespace ChapeauProject.Controllers
                 }
             }
 
-            return RedirectToAction("Details", "Tables", new { id = _activeWorkingOrder.TableNumber });
+            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
         }
 
         [HttpPost]
         public IActionResult DecreaseQuantity(int menuItemID)
         {
-            var basketItem = _activeWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItemID == menuItemID);
+            var basketItem = _orderState.ActiveWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItemID == menuItemID);
             if (basketItem != null)
             {
                 basketItem.Quantity--;
                 if (basketItem.Quantity <= 0)
                 {
-                    _activeWorkingOrder.OrderItems.Remove(basketItem);
+                    _orderState.ActiveWorkingOrder.OrderItems.Remove(basketItem);
                 }
             }
             
-            return RedirectToAction("Details", "Tables", new { id = _activeWorkingOrder.TableNumber });
+            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
         }
 
         [HttpPost]
         public IActionResult RemoveRow(int menuItemID)
         {
-            var basketItem = _activeWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItemID == menuItemID);
+            var basketItem = _orderState.ActiveWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItemID == menuItemID);
             if (basketItem != null)
             {
-                _activeWorkingOrder.OrderItems.Remove(basketItem);
+                _orderState.ActiveWorkingOrder.OrderItems.Remove(basketItem);
             }
            
-            return RedirectToAction("Details", "Tables", new { id = _activeWorkingOrder.TableNumber });
+            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
         }
 
         [HttpPost]
         public IActionResult UpdateItemComment(int menuItemID, string comment)
         {
-            var basketItem = _activeWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItemID == menuItemID);
+            var basketItem = _orderState.ActiveWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItemID == menuItemID);
             if (basketItem != null)
             {
                 basketItem.Comment = comment ?? string.Empty;
             }
        
-            return RedirectToAction("Details", "Tables", new { id = _activeWorkingOrder.TableNumber });
+            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
         }
 
-        //NOTE change to object 
         [HttpPost]
-        public IActionResult SaveAndSendOrder(int guestId)
+        public IActionResult SaveAndSendOrder(Guest guest)
         {
-            int currentTableId = _activeWorkingOrder.TableNumber;
+            int currentTableId = _orderState.ActiveWorkingOrder.TableNumber;
 
-            if (guestId <= 0)
+            if (guest.GuestID <= 0)
             {
                 TempData["ErrorMessage"] = "Please select a guest before sending the order.";
                 return RedirectToAction("Details", "Tables", new { id = currentTableId });
             }
 
-            if (!_activeWorkingOrder.OrderItems.Any())
+            if (!_orderState.ActiveWorkingOrder.OrderItems.Any())
             {
                 TempData["ErrorMessage"] = "The active order sheet cannot be blank.";
                 return RedirectToAction("Details", "Tables", new { id = currentTableId });
             }
 
-            _activeWorkingOrder.GuestID = guestId;
-            _orderService.SaveNewOrder(_activeWorkingOrder);
+            _orderState.ActiveWorkingOrder.Guest = guest;
+            _orderService.SaveNewOrder(_orderState.ActiveWorkingOrder);
 
             TempData["SuccessMessage"] = "Order dispatched and stock adjusted successfully!";
-            _activeWorkingOrder = new Order();
+            _orderState.ActiveWorkingOrder = new Order();
 
            
             return RedirectToAction("Index", "Tables");
@@ -191,7 +184,7 @@ namespace ChapeauProject.Controllers
         [HttpPost]
         public IActionResult CancelWholeOrder()
         {
-            _activeWorkingOrder = new Order();
+            _orderState.ActiveWorkingOrder = new Order();
             TempData["InfoMessage"] = "Order sheet reset.";
             return RedirectToAction("Index", "Tables");
         }

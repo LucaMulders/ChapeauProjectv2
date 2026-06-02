@@ -9,13 +9,14 @@ namespace ChapeauProject.Controllers
     public class TablesController : Controller
     {
         private readonly ITableService _tableService;
-        private readonly IMenuService _menuService; 
+        private readonly IMenuService _menuService;
+        private readonly IOrderStateService _orderState;
 
-        
-        public TablesController(ITableService tableService, IMenuService menuService)
+        public TablesController(ITableService tableService, IMenuService menuService, IOrderStateService orderState)
         {
             _tableService = tableService;
             _menuService = menuService;
+            _orderState = orderState;
         }
 
         public IActionResult Index()
@@ -73,19 +74,18 @@ namespace ChapeauProject.Controllers
             if (viewModel == null) return NotFound();
 
           
-            if (((Order)OrdersController.ActiveWorkingOrder).TableNumber != id)
+            if (_orderState.ActiveWorkingOrder.TableNumber != id)
             {
-                OrdersController.ActiveWorkingOrder = new Order
+                _orderState.ActiveWorkingOrder = new Order
                 {
                     TableNumber = id,
                     OrderItems = new System.Collections.Generic.List<OrderItem>()
                 };
             }
 
-            
             ViewBag.CardFilter = cardFilter;
             ViewBag.CourseFilter = courseFilter;
-            ViewBag.CurrentBasket = OrdersController.ActiveWorkingOrder;
+            ViewBag.CurrentBasket = _orderState.ActiveWorkingOrder;
             ViewBag.Guests = _tableService.GetGuestsByTable(id);
             ViewBag.MenuItems = _menuService.GetCourseFiltered(cardFilter, courseFilter);
 

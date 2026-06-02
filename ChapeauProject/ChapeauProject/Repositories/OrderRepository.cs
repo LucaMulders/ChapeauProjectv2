@@ -33,7 +33,7 @@ namespace ChapeauProject.Repositories
 
             using (SqlCommand cmd = new SqlCommand(sql, connection))
             {
-                cmd.Parameters.AddWithValue("@GuestID",        order.GuestID);
+                cmd.Parameters.AddWithValue("@GuestID",        order.Guest.GuestID);
                 cmd.Parameters.AddWithValue("@OrderTimeStamp", order.OrderTimeStamp);
                 cmd.Parameters.AddWithValue("@OrderStatus",    order.Status.ToString());
                 return (int)cmd.ExecuteScalar();

@@ -14,10 +14,11 @@ namespace ChapeauProject.Repositories
         {
             using (var connection = GetConnection())
             {
-                const string query = "SELECT StaffID, FirstName, LastName, Role, Password FROM Staff WHERE StaffID = @StaffID";
+                const string query = "SELECT StaffID, FirstName, LastName, Role, Password FROM Staff WHERE StaffID = @StaffID AND Password = @Password";
                 using (var command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@StaffID", staffID);
+                    command.Parameters.AddWithValue("@Password", password);
 
                     using (var reader = command.ExecuteReader())
                     {

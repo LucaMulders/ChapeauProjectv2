@@ -1,5 +1,7 @@
 ﻿using ChapeauProject.Models;
 using ChapeauProject.Repositories;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ChapeauProject.Services
 {
@@ -21,21 +23,18 @@ namespace ChapeauProject.Services
         {
             return _staffRepository.GetById(id);
         }
-        
 
-        //NOTE
         public Staff? GetByLoginCredentials(int staffID, string password)
         {
-            Staff? staff = _staffRepository.GetByLoginCredentials(staffID, password);
-            if (staff == null) return null;
+            return _staffRepository.GetByLoginCredentials(staffID, HashPassword(password));
+        }
 
-            if (BCrypt.Net.BCrypt.Verify(password, staff.Password))
+        private string HashPassword(string password)
+        {
+            using (SHA256 sha256 = SHA256.Create())
             {
-                return staff;
-            }
-            else
-            {
-                return null;
+                byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return Convert.ToBase64String(hashBytes);
             }
         }
     }

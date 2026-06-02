@@ -52,13 +52,20 @@ namespace ChapeauProject.Controllers
             return View(viewModel);
         }
 
-        //NOTE shorter
         [HttpPost]
         public IActionResult SetSplitMode(int tableNumber, SplitMode splitMode, int splitCount = 1)
         {
             TableOrderViewModel orders = _tableService.GetTableOrders(tableNumber);
 
-            var viewModel = new BillViewModel
+            var viewModel = BuildBillViewModel(orders, splitMode, splitCount);
+            AddPayers(viewModel, orders, splitMode);
+
+            return View("Pay", viewModel);
+        }
+
+        private BillViewModel BuildBillViewModel(TableOrderViewModel orders, SplitMode splitMode, int splitCount)
+        {
+            return new BillViewModel
             {
                 TableNumber    = orders.TableNumber,
                 Guests         = orders.Guests,
@@ -67,62 +74,50 @@ namespace ChapeauProject.Controllers
                 HighVAT        = orders.HighVAT,
                 TotalAmount    = orders.TotalAmount,
                 SplitMode      = splitMode,
+                SplitCount     = splitMode == SplitMode.Equal ? Math.Max(1, splitCount) : 1
             };
+        }
 
+        private void AddPayers(BillViewModel viewModel, TableOrderViewModel orders, SplitMode splitMode)
+        {
             if (splitMode == SplitMode.Equal)
-            {
-                viewModel.SplitCount = Math.Max(1, splitCount);
-            }
-            else
-            {
-                viewModel.SplitCount = 1;
-            }
-
-            if (splitMode == SplitMode.Equal)
-            {
-                decimal share = Math.Round(orders.TotalAmount / viewModel.SplitCount, 2);
-                for (int i = 1; i <= viewModel.SplitCount; i++)
-                {
-                    viewModel.Payers.Add(new SplitPayerViewModel
-                    {
-                        Name      = $"Person {i}",
-                        AmountDue = share
-                    });
-                }
-            }
+                AddEqualPayers(viewModel);
             else if (splitMode == SplitMode.Custom)
+                AddCustomPayers(viewModel);
+            else if (splitMode == SplitMode.ByGuest)
+                AddByGuestPayers(viewModel, orders);
+        }
+
+        private void AddEqualPayers(BillViewModel viewModel)
+        {
+            decimal share = Math.Round(viewModel.TotalAmount / viewModel.SplitCount, 2);
+            for (int i = 1; i <= viewModel.SplitCount; i++)
             {
+                viewModel.Payers.Add(new SplitPayerViewModel { Name = $"Person {i}", AmountDue = share });
+            }
+        }
+
+        private void AddCustomPayers(BillViewModel viewModel)
+        {
+            viewModel.Payers.Add(new SplitPayerViewModel { Name = "Person 1", AmountDue = 0 });
+        }
+
+        private void AddByGuestPayers(BillViewModel viewModel, TableOrderViewModel orders)
+        {
+            foreach (var guest in orders.Guests)
+            {
+                decimal guestTotal = guest.Items.Sum(i => i.Price * i.Quantity);
+                decimal vatShare = orders.TotalAmount > 0
+                    ? guestTotal * (orders.TotalAmount / orders.SubTotalAmount)
+                    : guestTotal;
+
                 viewModel.Payers.Add(new SplitPayerViewModel
                 {
-                    Name      = "Person 1",
-                    AmountDue = 0
+                    Name      = guest.GuestName,
+                    GuestID   = guest.GuestID,
+                    AmountDue = Math.Round(vatShare, 2)
                 });
             }
-            else if (splitMode == SplitMode.ByGuest)
-            {
-                foreach (var guest in orders.Guests)
-                {
-                    decimal guestTotal = guest.Items.Sum(i => i.Price * i.Quantity);
-                    decimal vatShare;
-                    if (orders.TotalAmount > 0)
-                    {
-                        vatShare = guestTotal * (orders.TotalAmount / orders.SubTotalAmount);
-                    }
-                    else
-                    {
-                        vatShare = guestTotal;
-                    }
-
-                    viewModel.Payers.Add(new SplitPayerViewModel
-                    {
-                        Name      = guest.GuestName,
-                        GuestID   = guest.GuestID,
-                        AmountDue = Math.Round(vatShare, 2)
-                    });
-                }
-            }
-
-            return View("Pay", viewModel);
         }
 
         [HttpPost]
@@ -131,14 +126,12 @@ namespace ChapeauProject.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            // Custom mode: validate sum of payments >= total
             if (model.SplitMode == SplitMode.Custom)
             {
                 decimal totalPaying = model.Payers.Sum(p => p.AmountDue + p.TipAmount);
                 if (totalPaying < model.TotalAmount)
                 {
                     ModelState.AddModelError("", $"Total payments (€{totalPaying:F2}) are less than the bill total (€{model.TotalAmount:F2}).");
-                    // Reload guest data for the view
                     var orders = _tableService.GetTableOrders(model.TableNumber);
                     model.Guests = orders.Guests;
                     return View(model);

@@ -11,7 +11,7 @@ namespace ChapeauProject.Repositories
         List<GuestOrder> GetTableOrders(int tableNumber);
         int GetOrderCount(int tableNumber);
         int GetGuestCount(int tableNumber);
-        List<(int GuestID, string GuestName)> GetGuestsByTable(int tableNumber);
+        List<Guest> GetGuestsByTable(int tableNumber);
         (bool HasFood, bool HasDrink) GetRunningOrderCategories(int tableNumber);
         void SetFree(int tableNumber);
     }
