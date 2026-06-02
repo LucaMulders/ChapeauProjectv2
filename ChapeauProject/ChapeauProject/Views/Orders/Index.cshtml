@@ -1,22 +1,17 @@
-@model IEnumerable<ChapeauProject.ViewModels.RunningOrderViewModel>
+@model IEnumerable<ChapeauProject.ViewModels.TableOrderGroupViewModel>
 
 @{
     ViewData["Title"] = "Running Orders";
-}
-
-@{
-    string activeFilter = ViewBag.Filter as string ?? "running";
+    string filter = ViewBag.Filter as string ?? "running";
 }
 
 <div class="page-header">
-    <h2 class="page-title">
-        @(activeFilter == "finished" ? "Finished Orders Today" : "Running Orders")
-    </h2>
+    <h2 class="page-title">@ViewBag.PageTitle</h2>
     <div class="filter-tabs">
         <a asp-action="Index" asp-route-filter="running"
-           class="filter-tab @(activeFilter == "running" ? "filter-tab-active" : "")">Running</a>
+           class="filter-tab @(filter == "running" ? "filter-tab-active" : "")">Running</a>
         <a asp-action="Index" asp-route-filter="finished"
-           class="filter-tab @(activeFilter == "finished" ? "filter-tab-active" : "")">Finished Today</a>
+           class="filter-tab @(filter == "finished" ? "filter-tab-active" : "")">Finished Today</a>
     </div>
 </div>
 <hr />
@@ -28,24 +23,22 @@
 
 @if (!Model.Any())
 {
-    <p class="text-muted">
-        @(activeFilter == "finished" ? "No finished orders today yet." : "No running orders at the moment.")
-    </p>
+    <p class="text-muted">@ViewBag.EmptyMessage</p>
 }
 else
 {
     <div class="orders-grid">
-        @foreach (var tableGroup in Model.GroupBy(o => o.TableNumber).OrderBy(g => g.Key))
+        @foreach (var tableGroup in Model)
         {
             <div class="order-card">
                 <div class="order-card-header">
-                    <div class="order-table-num">Table @tableGroup.Key</div>
+                    <div class="order-table-num">Table @tableGroup.TableNumber</div>
                 </div>
 
-                @foreach (var order in tableGroup)
+                @for (int i = 0; i < tableGroup.Orders.Count; i++)
                 {
-                    @await Html.PartialAsync("_OrderGroup", order)
-                    @if (order != tableGroup.Last())
+                    @await Html.PartialAsync("_OrderGroup", tableGroup.Orders[i])
+                    @if (i < tableGroup.Orders.Count - 1)
                     {
                         <hr class="order-divider" />
                     }

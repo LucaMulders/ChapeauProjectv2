@@ -66,16 +66,7 @@ else
                                 <form asp-action="ToggleItem" asp-controller="Orders" method="post" class="form-inline">
                                     <input type="hidden" name="orderItemId" value="@item.OrderItemID" />
                                     <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Tables", new { id = Model.TableNumber })" />
-                                    @{
-                                        var (pillClass, label) = item.PreparationStatus switch
-                                        {
-                                            PreparationStatus.Pending   => ("status-pill status-ordered",   "Ordered"),
-                                            PreparationStatus.Preparing => ("status-pill status-preparing", "Being Prepared"),
-                                            PreparationStatus.Ready     => ("status-pill status-ready",     "Ready to Serve"),
-                                            _                           => ("status-pill", item.PreparationStatus.ToString())
-                                        };
-                                    }
-                                    <button type="submit" class="@pillClass">@label</button>
+                                    <button type="submit" class="@item.StatusPillClass">@item.StatusLabel</button>
                                 </form>
                             </td>
                         </tr>

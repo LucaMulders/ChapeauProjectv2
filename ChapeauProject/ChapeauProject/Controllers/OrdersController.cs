@@ -31,8 +31,20 @@ namespace ChapeauProject.Controllers
                 ? _orderService.GetFinishedOrdersToday()
                 : _orderService.GetAllOrdersByStatus();
 
-            ViewBag.Filter = filter;
-            return View(orders);
+            var tableGroups = orders
+                .GroupBy(o => o.TableNumber)
+                .OrderBy(g => g.Key)
+                .Select(g => new TableOrderGroupViewModel
+                {
+                    TableNumber = g.Key,
+                    Orders      = g.ToList()
+                })
+                .ToList();
+
+            ViewBag.Filter       = filter;
+            ViewBag.PageTitle    = filter == "finished" ? "Finished Orders Today" : "Running Orders";
+            ViewBag.EmptyMessage = filter == "finished" ? "No finished orders today yet." : "No running orders at the moment.";
+            return View(tableGroups);
         }
 
         [HttpPost]

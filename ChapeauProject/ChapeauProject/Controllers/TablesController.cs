@@ -40,7 +40,10 @@ namespace ChapeauProject.Controllers
                     vm.GuestCount = 0;
                 }
                 return vm;
-            }).ToList();
+            }).OrderBy(t => t.Table.TableNumber).ToList();
+
+            ViewBag.FreeCount     = viewModel.Count(t => !t.Table.IsOccupied);
+            ViewBag.OccupiedCount = viewModel.Count(t =>  t.Table.IsOccupied);
             return View(viewModel);
         }
 

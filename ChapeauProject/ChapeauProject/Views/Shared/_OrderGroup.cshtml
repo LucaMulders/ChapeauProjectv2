@@ -1,88 +1,57 @@
 @model ChapeauProject.ViewModels.RunningOrderViewModel
-@using ChapeauProject.Models
-
-@{
-    var courseOrder = new[] { "Starters", "Main", "Desserts", "Other" };
-    var foodItems  = Model.Items.Where(i => i.MenuCard == "Lunch" || i.MenuCard == "Dinner").ToList();
-    var drinkItems = Model.Items.Where(i => i.MenuCard == "Drinks").ToList();
-    bool allReady  = Model.Items.All(i => i.PreparationStatus == PreparationStatus.Ready);
-}
 
 <div class="order-group">
     <div class="order-meta">
         Order #@Model.OrderID &bull; @Model.OrderTime.ToString("HH:mm") &bull; Wait: @Model.WaitingTime.Hours h @Model.WaitingTime.Minutes m
     </div>
 
-    @if (foodItems.Any())
+    @foreach (var course in Model.FoodItemsByCourse)
     {
-        @foreach (var course in courseOrder)
-        {
-            var courseItems = foodItems.Where(i => i.CourseName == course).ToList();
-            if (courseItems.Any())
-            {
-                <div class="course-header">
-                    <span>@course</span>
-                    <form asp-action="ToggleCourse" asp-controller="Orders" method="post" class="split-mode-form">
-                        <input type="hidden" name="orderId" value="@Model.OrderID" />
-                        <input type="hidden" name="courseName" value="@course" />
-                        @{
-                            var allCourseReady     = courseItems.All(i => i.PreparationStatus == PreparationStatus.Ready);
-                            var allCoursePreparing = !allCourseReady && courseItems.All(i => i.PreparationStatus != PreparationStatus.Pending);
-                            var courseNextLabel    = allCourseReady ? "↺ Reset" : allCoursePreparing ? "▶ All Ready" : "▶ All Preparing";
-                        }
-                        <button type="submit" class="course-advance-btn">@courseNextLabel</button>
-                    </form>
-                </div>
-                @foreach (var item in courseItems)
-                {
-                    <div class="order-item-row">
-                        <form asp-action="ToggleItem" asp-controller="Orders" method="post" style="display:contents;">
-                            <input type="hidden" name="orderItemId" value="@item.OrderItemID" />
-                            <span class="order-item-name @(item.PreparationStatus == PreparationStatus.Ready ? "done" : "")">
-                                @item.ItemName
-                                @if (!string.IsNullOrWhiteSpace(item.Comment))
-                                {
-                                    <span class="order-item-comment">📝 @item.Comment</span>
-                                }
-                            </span>
-                            <span class="order-item-qty">x@(item.Quantity)</span>
-                            @{
-                                var (pillClass, label) = item.PreparationStatus switch
-                                {
-                                    PreparationStatus.Pending   => ("status-pill status-ordered",   "Ordered"),
-                                    PreparationStatus.Preparing => ("status-pill status-preparing", "Being Prepared"),
-                                    PreparationStatus.Ready     => ("status-pill status-ready",     "Ready to Serve"),
-                                    _                           => ("status-pill", item.PreparationStatus.ToString())
-                                };
-                            }
-                            <button type="submit" class="@pillClass">@label</button>
-                        </form>
-                    </div>
-                }
-            }
-        }
-    }
+        <div class="course-header">
+            <span>@course.CourseName</span>
+            <form asp-action="ToggleCourse" asp-controller="Orders" method="post" class="split-mode-form">
+                <input type="hidden" name="orderId"    value="@Model.OrderID" />
+                <input type="hidden" name="courseName" value="@course.CourseName" />
+                <button type="submit" class="course-advance-btn">@course.CourseAdvanceLabel</button>
+            </form>
+        </div>
 
-    @if (drinkItems.Any())
-    {
-        <div class="course-header">Drinks</div>
-        @foreach (var item in drinkItems)
+        @foreach (var item in course.Items)
         {
             <div class="order-item-row">
                 <form asp-action="ToggleItem" asp-controller="Orders" method="post" style="display:contents;">
                     <input type="hidden" name="orderItemId" value="@item.OrderItemID" />
-                    <span class="order-item-name @(item.PreparationStatus == PreparationStatus.Ready ? "done" : "")">@item.ItemName</span>
-                    <span class="order-item-qty">x@(item.Quantity)</span>
-                    @{
-                        var (pillClass, label) = item.PreparationStatus switch
+                    <span class="@item.NameCssClass">
+                        @item.ItemName
+                        @if (!string.IsNullOrWhiteSpace(item.Comment))
                         {
-                            PreparationStatus.Pending   => ("status-pill status-ordered",   "Ordered"),
-                            PreparationStatus.Preparing => ("status-pill status-preparing", "Being Prepared"),
-                            PreparationStatus.Ready     => ("status-pill status-ready",     "Ready to Serve"),
-                            _                           => ("status-pill", item.PreparationStatus.ToString())
-                        };
-                    }
-                    <button type="submit" class="@pillClass">@label</button>
+                            <span class="order-item-comment">📝 @item.Comment</span>
+                        }
+                    </span>
+                    <span class="order-item-qty">x@(item.Quantity)</span>
+                    <button type="submit" class="@item.StatusPillClass">@item.StatusLabel</button>
+                </form>
+            </div>
+        }
+    }
+
+    @if (Model.DrinkItems.Any())
+    {
+        <div class="course-header">Drinks</div>
+        @foreach (var item in Model.DrinkItems)
+        {
+            <div class="order-item-row">
+                <form asp-action="ToggleItem" asp-controller="Orders" method="post" style="display:contents;">
+                    <input type="hidden" name="orderItemId" value="@item.OrderItemID" />
+                    <span class="@item.NameCssClass">
+                        @item.ItemName
+                        @if (!string.IsNullOrWhiteSpace(item.Comment))
+                        {
+                            <span class="order-item-comment">📝 @item.Comment</span>
+                        }
+                    </span>
+                    <span class="order-item-qty">x@(item.Quantity)</span>
+                    <button type="submit" class="@item.StatusPillClass">@item.StatusLabel</button>
                 </form>
             </div>
         }
@@ -90,8 +59,8 @@
 
     <form asp-action="CompleteOrder" asp-controller="Orders" method="post" class="complete-order-form">
         <input type="hidden" name="orderId" value="@Model.OrderID" />
-        <button type="submit" class="complete-btn @(allReady ? "" : "btn-disabled")"
-                @(allReady ? "" : "disabled title=\"All items must be Ready first\"")>
+        <button type="submit" class="complete-btn @(Model.AllItemsReady ? "" : "btn-disabled")"
+                @(Model.AllItemsReady ? "" : "disabled title=\"All items must be Ready first\"")>
             Mark as Served
         </button>
     </form>
