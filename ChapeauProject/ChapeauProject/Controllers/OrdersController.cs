@@ -148,6 +148,7 @@ namespace ChapeauProject.Controllers
             return RedirectToAction("Details", "Tables", new { id = _activeWorkingOrder.TableNumber });
         }
 
+        //NOTE change to object 
         [HttpPost]
         public IActionResult SaveAndSendOrder(int guestId)
         {

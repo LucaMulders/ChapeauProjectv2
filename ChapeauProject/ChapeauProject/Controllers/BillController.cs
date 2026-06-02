@@ -52,6 +52,7 @@ namespace ChapeauProject.Controllers
             return View(viewModel);
         }
 
+        //NOTE shorter
         [HttpPost]
         public IActionResult SetSplitMode(int tableNumber, SplitMode splitMode, int splitCount = 1)
         {

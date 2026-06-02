@@ -22,6 +22,8 @@ namespace ChapeauProject.Services
             return _staffRepository.GetById(id);
         }
         
+
+        //NOTE
         public Staff? GetByLoginCredentials(int staffID, string password)
         {
             Staff? staff = _staffRepository.GetByLoginCredentials(staffID, password);
