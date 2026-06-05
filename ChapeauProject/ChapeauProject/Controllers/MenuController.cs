@@ -19,7 +19,7 @@ namespace ChapeauProject.Controllers
         public IActionResult Index(string menuCard = "Lunch", string category = "All")
         {
          
-            List<MenuItem> filteredItems = _menuService.GetMenuForWaiter(menuCard, category);
+            List<MenuItem> filteredItems = _menuService.GetMenuItemForWaiter(menuCard, category);
 
             // Using the ViewModel to pass data to the View
             MenuViewModel viewModel = new MenuViewModel
