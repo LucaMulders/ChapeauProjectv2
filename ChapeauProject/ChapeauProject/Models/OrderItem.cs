@@ -1,5 +1,6 @@
 ﻿namespace ChapeauProject.Models
 {
+    //NOTE OrderItem still has raw int MenuItemID and int OrderID, needs to be objects
     public class OrderItem
     {
         public int OrderItemID { get; set; }

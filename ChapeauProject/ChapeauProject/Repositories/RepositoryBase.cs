@@ -9,7 +9,7 @@ namespace ChapeauProject.Repositories
 
         protected RepositoryBase(IConfiguration configuration)
         {
-            // get the (database) connection string from appsettings
+            // get the connection string from appsettings
             _connectionString = configuration.GetConnectionString("ChapeauProject");
         }
 

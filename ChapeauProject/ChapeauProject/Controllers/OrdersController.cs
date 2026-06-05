@@ -6,17 +6,20 @@ using System.Linq;
 
 namespace ChapeauProject.Controllers
 {
+    //NOTE No exception handling in this controller, needs to be added
     public class OrdersController : Controller
     {
         private readonly IOrderService _orderService;
         private readonly IMenuService _menuService;
         private readonly IOrderStateService _orderState;
+        private readonly ITableService _tableService;
 
-        public OrdersController(IOrderService orderService, IMenuService menuService, IOrderStateService orderState)
+        public OrdersController(IOrderService orderService, IMenuService menuService, IOrderStateService orderState, ITableService tableService)
         {
             _orderService = orderService;
             _menuService = menuService;
             _orderState = orderState;
+            _tableService = tableService;
         }
 
         public IActionResult Index(string filter = "running")
@@ -46,7 +49,7 @@ namespace ChapeauProject.Controllers
         {
             _orderState.ActiveWorkingOrder = new Order
             {
-                TableNumber = tableNumber,
+                Table = _tableService.GetByTableNumber(tableNumber) ?? new Table { TableNumber = tableNumber },
                 OrderItems = new System.Collections.Generic.List<OrderItem>()
             };
 
@@ -58,12 +61,12 @@ namespace ChapeauProject.Controllers
         {
             var item = _menuService.GetById(menuItemID);
             if (item == null)
-                return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
+                return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.Table.TableNumber });
 
             if (item.StockQuantity <= 0)
             {
                 TempData["ErrorMessage"] = $"{item.ItemName} is out of stock!";
-                return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
+                return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.Table.TableNumber });
             }
 
             var existingItem = _orderState.ActiveWorkingOrder.OrderItems
@@ -74,7 +77,7 @@ namespace ChapeauProject.Controllers
                 if (existingItem.Quantity >= item.StockQuantity)
                 {
                     TempData["ErrorMessage"] = $"Stock ceiling reached for {item.ItemName}.";
-                    return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
+                    return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.Table.TableNumber });
                 }
                 existingItem.Quantity++;
             }
@@ -90,7 +93,7 @@ namespace ChapeauProject.Controllers
                 });
             }
 
-            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
+            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.Table.TableNumber });
         }
 
         [HttpPost]
@@ -111,7 +114,7 @@ namespace ChapeauProject.Controllers
                 }
             }
 
-            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
+            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.Table.TableNumber });
         }
 
         [HttpPost]
@@ -127,7 +130,7 @@ namespace ChapeauProject.Controllers
                 }
             }
             
-            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
+            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.Table.TableNumber });
         }
 
         [HttpPost]
@@ -139,7 +142,7 @@ namespace ChapeauProject.Controllers
                 _orderState.ActiveWorkingOrder.OrderItems.Remove(basketItem);
             }
            
-            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
+            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.Table.TableNumber });
         }
 
         [HttpPost]
@@ -151,13 +154,13 @@ namespace ChapeauProject.Controllers
                 basketItem.Comment = comment ?? string.Empty;
             }
        
-            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.TableNumber });
+            return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.Table.TableNumber });
         }
 
         [HttpPost]
         public IActionResult SaveAndSendOrder(Guest guest)
         {
-            int currentTableId = _orderState.ActiveWorkingOrder.TableNumber;
+            int currentTableId = _orderState.ActiveWorkingOrder.Table.TableNumber;
 
             if (guest.GuestID <= 0)
             {

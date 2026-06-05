@@ -3,11 +3,12 @@ using System.Collections.Generic;
 
 namespace ChapeauProject.Models
 {
+    //NOTE Order is missing a Staff/Employee object
+    //NOTE Order is missing behavior methods
     public class Order
     {
         public int OrderID { get; set; }
-        //change to table (respectfully I disagree I think tablenumber is better so im not gonna do this :P)
-        public int TableNumber { get; set; }
+        public Table Table { get; set; } = new Table();
         public Guest Guest { get; set; } = new Guest();
         public DateTime OrderTimeStamp { get; set; } = DateTime.Now;
         public OrderStatus Status { get; set; } = OrderStatus.Pending;

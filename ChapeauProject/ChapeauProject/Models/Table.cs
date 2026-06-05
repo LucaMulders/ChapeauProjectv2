@@ -6,6 +6,8 @@
         public int Seats { get; set; }
         public bool IsOccupied { get; set; }
 
+        public Table() { }
+
         public Table(int tableNumber, int seats, bool isOccupied)
         {
             TableNumber = tableNumber;

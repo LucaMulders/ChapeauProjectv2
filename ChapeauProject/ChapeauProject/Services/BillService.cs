@@ -15,6 +15,7 @@ namespace ChapeauProject.Services
             _tableRepository = tableRepository;
         }
 
+        //NOTE Split into seperate methods
         public void ProcessPayment(BillViewModel model)
         {
             var now = DateTime.Now;

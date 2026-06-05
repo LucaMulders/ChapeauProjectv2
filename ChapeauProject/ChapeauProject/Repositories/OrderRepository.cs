@@ -62,6 +62,7 @@ namespace ChapeauProject.Repositories
             }
         }
 
+        //NOTE strings 'Pending', 'Served', 'Complete', 'Preparing', 'Ready' are hardcoded, need to be constant instead
         public List<RunningOrderViewModel> GetAllOrdersByStatus()
         {
             var orders = new Dictionary<int, RunningOrderViewModel>();

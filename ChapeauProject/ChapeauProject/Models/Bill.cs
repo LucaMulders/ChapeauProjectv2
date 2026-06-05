@@ -1,5 +1,6 @@
 namespace ChapeauProject.Models
 {
+    //NOTE Bill uses raw int? OrderID and int? GuestID, needs to change to object
     public class Bill
     {
         public int BillID { get; set; }

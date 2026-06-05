@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace ChapeauProject.Controllers
 {
+    //NOTE: No exception handling in this controller — rubric requires exceptions are handled and should not crash the application
     public class TablesController : Controller
     {
         private readonly ITableService _tableService;
@@ -74,11 +75,11 @@ namespace ChapeauProject.Controllers
             if (viewModel == null) return NotFound();
 
           
-            if (_orderState.ActiveWorkingOrder.TableNumber != id)
+            if (_orderState.ActiveWorkingOrder.Table.TableNumber != id)
             {
                 _orderState.ActiveWorkingOrder = new Order
                 {
-                    TableNumber = id,
+                    Table = _tableService.GetByTableNumber(id) ?? new Table { TableNumber = id },
                     OrderItems = new System.Collections.Generic.List<OrderItem>()
                 };
             }

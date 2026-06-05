@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChapeauProject.Controllers
 {
+    //NOTE No exception handling in this controller, needs to be added
     public class BillController : Controller
     {
         private readonly ITableService _tableService;
