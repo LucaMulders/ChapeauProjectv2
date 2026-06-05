@@ -51,7 +51,7 @@ namespace ChapeauProject.Repositories
         private string GetSqlForFilteredMenu(string courseFilter)
         {
             string query = @"
-                SELECT MI.MenuItemID, MI.ItemName, MI.Price, ISNULL(S.Quantity, 0) AS Quantity,
+                SELECT MI.MenuItemID, MI.ItemName, MI.Price, MI.VatRate, ISNULL(S.Quantity, 0) AS Quantity,
                        ISNULL(C.CourseName, 'N/A') AS CourseName, MI.MenuCard
                 FROM MenuItems MI
                 LEFT JOIN Stock S ON MI.MenuItemID = S.MenuItemID
@@ -84,6 +84,7 @@ namespace ChapeauProject.Repositories
                 (int)reader["MenuItemID"],
                 (string)reader["ItemName"],
                 (decimal)reader["Price"],
+                (decimal)reader["VatRate"],
                 (int)reader["Quantity"],
                 associatedMenu
             );
@@ -97,8 +98,8 @@ namespace ChapeauProject.Repositories
                 using (SqlConnection connection = GetConnection())
                 {
                     string query = @"
-                        SELECT MI.MenuItemID, MI.ItemName, MI.Price, ISNULL(S.Quantity, 0) AS Quantity, 
-                               ISNULL(C.CourseName, 'N/A') AS CourseName, MI.MenuCard 
+                        SELECT MI.MenuItemID, MI.ItemName, MI.Price, MI.VatRate, ISNULL(S.Quantity, 0) AS Quantity,
+                               ISNULL(C.CourseName, 'N/A') AS CourseName, MI.MenuCard
                         FROM MenuItems MI
                         LEFT JOIN Stock S ON MI.MenuItemID = S.MenuItemID
                         LEFT JOIN Courses C ON MI.CourseID = C.CourseID

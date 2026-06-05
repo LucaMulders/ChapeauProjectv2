@@ -37,13 +37,14 @@ namespace ChapeauProject.Repositories
         private int InsertOrder(Order order, SqlConnection connection)
         {
             string sql = @"
-                INSERT INTO Orders (GuestID, OrderTimeStamp, OrderStatus)
-                VALUES (@GuestID, @OrderTimeStamp, @OrderStatus);
+                INSERT INTO Orders (GuestID, StaffID, OrderTimeStamp, OrderStatus)
+                VALUES (@GuestID, @StaffID, @OrderTimeStamp, @OrderStatus);
                 SELECT CAST(SCOPE_IDENTITY() as int);";
 
             using (SqlCommand cmd = new SqlCommand(sql, connection))
             {
                 cmd.Parameters.AddWithValue("@GuestID",        order.Guest.GuestID);
+                cmd.Parameters.AddWithValue("@StaffID",        order.Staff.StaffID);
                 cmd.Parameters.AddWithValue("@OrderTimeStamp", order.OrderTimeStamp);
                 cmd.Parameters.AddWithValue("@OrderStatus",    order.Status.ToString());
                 return (int)cmd.ExecuteScalar();
@@ -72,133 +73,73 @@ namespace ChapeauProject.Repositories
             }
         }
 
-        public List<RunningOrderViewModel> GetAllOrdersByStatus()
+        public List<RunningOrder> GetAllOrdersByStatus()
         {
-            var orders = new Dictionary<int, RunningOrderViewModel>();
+            string query = $@"
+                SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
+                       oi.OrderItemID, mi.ItemName, oi.Quantity, oi.PreparationStatus,
+                       mi.MenuCard, ISNULL(c.CourseName, 'Other') AS CourseName, oi.Comment
+                FROM Orders o
+                JOIN Guests g ON o.GuestID = g.GuestID
+                JOIN OrderItems oi ON o.OrderID = oi.OrderID
+                JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
+                LEFT JOIN Courses c ON mi.CourseID = c.CourseID
+                WHERE o.OrderStatus = '{StatusPending}'
+                ORDER BY o.OrderTimeStamp ASC, c.CourseID ASC";
 
-            using (SqlConnection connection = GetConnection())
-            {
-                string query = $@"
-                    SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
-                           oi.OrderItemID, mi.ItemName, oi.Quantity, oi.PreparationStatus,
-                           mi.MenuCard, ISNULL(c.CourseName, 'Other') AS CourseName,
-                           oi.Comment
-                    FROM Orders o
-                    JOIN Guests g ON o.GuestID = g.GuestID
-                    JOIN OrderItems oi ON o.OrderID = oi.OrderID
-                    JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
-                    LEFT JOIN Courses c ON mi.CourseID = c.CourseID
-                    WHERE o.OrderStatus = '{StatusPending}'
-                    ORDER BY o.OrderTimeStamp ASC, c.CourseID ASC";
-
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            int orderID = reader.GetInt32(reader.GetOrdinal("OrderID"));
-
-                            if (!orders.ContainsKey(orderID))
-                            {
-                                orders[orderID] = new RunningOrderViewModel
-                                {
-                                    OrderID     = orderID,
-                                    TableNumber = reader.GetInt32(reader.GetOrdinal("TableNumber")),
-                                    OrderTime   = DateTime.SpecifyKind(reader.GetDateTime(reader.GetOrdinal("OrderTimeStamp")), DateTimeKind.Utc),
-                                    Items       = new List<RunningOrderItemViewModel>()
-                                };
-                            }
-
-                            string? comment;
-                            if (reader.IsDBNull(reader.GetOrdinal("Comment")))
-                            {
-                                comment = null;
-                            }
-                            else
-                            {
-                                comment = reader.GetString(reader.GetOrdinal("Comment"));
-                            }
-
-                            orders[orderID].Items.Add(new RunningOrderItemViewModel
-                            {
-                                OrderItemID       = reader.GetInt32(reader.GetOrdinal("OrderItemID")),
-                                ItemName          = reader.GetString(reader.GetOrdinal("ItemName")),
-                                Quantity          = reader.GetInt32(reader.GetOrdinal("Quantity")),
-                                PreparationStatus = Enum.Parse<PreparationStatus>(reader.GetString(reader.GetOrdinal("PreparationStatus"))),
-                                MenuCard          = reader.GetString(reader.GetOrdinal("MenuCard")),
-                                CourseName        = reader.GetString(reader.GetOrdinal("CourseName")),
-                                Comment           = comment
-                            });
-                        }
-                    }
-                }
-            }
-
-            return orders.Values.ToList();
+            return ReadOrders(query);
         }
 
-        public List<RunningOrderViewModel> GetFinishedOrdersToday()
+        public List<RunningOrder> GetFinishedOrdersToday()
         {
-            var orders = new Dictionary<int, RunningOrderViewModel>();
+            string query = $@"
+                SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
+                       oi.OrderItemID, mi.ItemName, oi.Quantity, oi.PreparationStatus,
+                       mi.MenuCard, ISNULL(c.CourseName, 'Other') AS CourseName, oi.Comment
+                FROM Orders o
+                JOIN Guests g ON o.GuestID = g.GuestID
+                JOIN OrderItems oi ON o.OrderID = oi.OrderID
+                JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
+                LEFT JOIN Courses c ON mi.CourseID = c.CourseID
+                WHERE o.OrderStatus IN ('{StatusComplete}', '{StatusServed}')
+                  AND CAST(o.OrderTimeStamp AS DATE) = CAST(GETDATE() AS DATE)
+                ORDER BY o.OrderTimeStamp DESC, c.CourseID ASC";
+
+            return ReadOrders(query);
+        }
+
+        private List<RunningOrder> ReadOrders(string query)
+        {
+            var orders = new Dictionary<int, RunningOrder>();
 
             using (SqlConnection connection = GetConnection())
+            using (SqlCommand command = new SqlCommand(query, connection))
+            using (SqlDataReader reader = command.ExecuteReader())
             {
-                string query = $@"
-                    SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
-                           oi.OrderItemID, mi.ItemName, oi.Quantity, oi.PreparationStatus,
-                           mi.MenuCard, ISNULL(c.CourseName, 'Other') AS CourseName,
-                           oi.Comment
-                    FROM Orders o
-                    JOIN Guests g ON o.GuestID = g.GuestID
-                    JOIN OrderItems oi ON o.OrderID = oi.OrderID
-                    JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
-                    LEFT JOIN Courses c ON mi.CourseID = c.CourseID
-                    WHERE o.OrderStatus IN ('{StatusComplete}', '{StatusServed}')
-                      AND CAST(o.OrderTimeStamp AS DATE) = CAST(GETDATE() AS DATE)
-                    ORDER BY o.OrderTimeStamp DESC, c.CourseID ASC";
-
-                using (SqlCommand command = new SqlCommand(query, connection))
+                while (reader.Read())
                 {
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    int orderID = reader.GetInt32(reader.GetOrdinal("OrderID"));
+
+                    if (!orders.ContainsKey(orderID))
                     {
-                        while (reader.Read())
+                        orders[orderID] = new RunningOrder
                         {
-                            int orderID = reader.GetInt32(reader.GetOrdinal("OrderID"));
-
-                            if (!orders.ContainsKey(orderID))
-                            {
-                                orders[orderID] = new RunningOrderViewModel
-                                {
-                                    OrderID     = orderID,
-                                    TableNumber = reader.GetInt32(reader.GetOrdinal("TableNumber")),
-                                    OrderTime   = DateTime.SpecifyKind(reader.GetDateTime(reader.GetOrdinal("OrderTimeStamp")), DateTimeKind.Utc),
-                                    Items       = new List<RunningOrderItemViewModel>()
-                                };
-                            }
-
-                            string? comment;
-                            if (reader.IsDBNull(reader.GetOrdinal("Comment")))
-                            {
-                                comment = null;
-                            }
-                            else
-                            {
-                                comment = reader.GetString(reader.GetOrdinal("Comment"));
-                            }
-
-                            orders[orderID].Items.Add(new RunningOrderItemViewModel
-                            {
-                                OrderItemID       = reader.GetInt32(reader.GetOrdinal("OrderItemID")),
-                                ItemName          = reader.GetString(reader.GetOrdinal("ItemName")),
-                                Quantity          = reader.GetInt32(reader.GetOrdinal("Quantity")),
-                                PreparationStatus = Enum.Parse<PreparationStatus>(reader.GetString(reader.GetOrdinal("PreparationStatus"))),
-                                MenuCard          = reader.GetString(reader.GetOrdinal("MenuCard")),
-                                CourseName        = reader.GetString(reader.GetOrdinal("CourseName")),
-                                Comment           = comment
-                            });
-                        }
+                            OrderID     = orderID,
+                            TableNumber = reader.GetInt32(reader.GetOrdinal("TableNumber")),
+                            OrderTime   = DateTime.SpecifyKind(reader.GetDateTime(reader.GetOrdinal("OrderTimeStamp")), DateTimeKind.Utc)
+                        };
                     }
+
+                    orders[orderID].Items.Add(new RunningOrderItem
+                    {
+                        OrderItemID       = reader.GetInt32(reader.GetOrdinal("OrderItemID")),
+                        ItemName          = reader.GetString(reader.GetOrdinal("ItemName")),
+                        Quantity          = reader.GetInt32(reader.GetOrdinal("Quantity")),
+                        PreparationStatus = Enum.Parse<PreparationStatus>(reader.GetString(reader.GetOrdinal("PreparationStatus"))),
+                        MenuCard          = reader.GetString(reader.GetOrdinal("MenuCard")),
+                        CourseName        = reader.GetString(reader.GetOrdinal("CourseName")),
+                        Comment           = reader.IsDBNull(reader.GetOrdinal("Comment")) ? null : reader.GetString(reader.GetOrdinal("Comment"))
+                    });
                 }
             }
 

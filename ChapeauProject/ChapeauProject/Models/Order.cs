@@ -4,12 +4,12 @@ using System.Linq;
 
 namespace ChapeauProject.Models
 {
-    //NOTE Order is missing a Staff/Employee object
     public class Order
     {
         public int OrderID { get; set; }
         public Table Table { get; set; } = new Table();
         public Guest Guest { get; set; } = new Guest();
+        public Staff Staff { get; set; } = new Staff();
         public DateTime OrderTimeStamp { get; set; } = DateTime.Now;
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
         public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();

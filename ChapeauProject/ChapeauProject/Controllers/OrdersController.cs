@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChapeauProject.Controllers
 {
-    //NOTE No exception handling in this controller, need to be added
     public class OrdersController : Controller
     {
         private const string SessionKey = "ActiveWorkingOrder";
@@ -38,32 +37,42 @@ namespace ChapeauProject.Controllers
 
         public IActionResult Index(string filter = "running")
         {
-            var orders = filter == "finished"
-                ? _orderService.GetFinishedOrdersToday()
-                : _orderService.GetAllOrdersByStatus();
+            try
+            {
+                var orders = filter == "finished"
+                    ? _orderService.GetFinishedOrdersToday()
+                    : _orderService.GetAllOrdersByStatus();
 
-            var tableGroups = orders
-                .GroupBy(o => o.TableNumber)
-                .OrderBy(g => g.Key)
-                .Select(g => new TableOrderGroupViewModel
-                {
-                    TableNumber = g.Key,
-                    Orders      = g.ToList()
-                })
-                .ToList();
+                var tableGroups = orders
+                    .GroupBy(o => o.TableNumber)
+                    .OrderBy(g => g.Key)
+                    .Select(g => new TableOrderGroupViewModel
+                    {
+                        TableNumber = g.Key,
+                        Orders      = g.ToList()
+                    })
+                    .ToList();
 
-            ViewBag.Filter       = filter;
-            ViewBag.PageTitle    = filter == "finished" ? "Finished Orders Today" : "Running Orders";
-            ViewBag.EmptyMessage = filter == "finished" ? "No finished orders today yet." : "No running orders at the moment.";
-            return View(tableGroups);
+                ViewBag.Filter       = filter;
+                ViewBag.PageTitle    = filter == "finished" ? "Finished Orders Today" : "Running Orders";
+                ViewBag.EmptyMessage = filter == "finished" ? "No finished orders today yet." : "No running orders at the moment.";
+                return View(tableGroups);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Failed to load orders: " + ex.Message;
+                return View(new List<TableOrderGroupViewModel>());
+            }
         }
 
         [HttpPost]
         public IActionResult StartNewOrder(int tableNumber)
         {
+            var loggedInStaff = HttpContext.Session.GetObject<Staff>("LoggedInStaff") ?? new Staff();
             SetActiveOrder(new Order
             {
-                Table = _tableService.GetByTableNumber(tableNumber) ?? new Table { TableNumber = tableNumber },
+                Table      = _tableService.GetByTableNumber(tableNumber) ?? new Table { TableNumber = tableNumber },
+                Staff      = loggedInStaff,
                 OrderItems = new System.Collections.Generic.List<OrderItem>()
             });
 

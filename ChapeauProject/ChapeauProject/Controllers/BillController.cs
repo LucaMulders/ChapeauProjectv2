@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChapeauProject.Controllers
 {
-    //NOTE No exception handling in this controller, needs to be added
     public class BillController : Controller
     {
         private readonly ITableService _tableService;
@@ -18,50 +17,72 @@ namespace ChapeauProject.Controllers
 
         public IActionResult Index()
         {
-            var tables = _tableService.GetAllOccupiedTables()
-                .Select(t =>
-                {
-                    var categories = _tableService.GetRunningOrderCategories(t.TableNumber);
-                    return new TablesViewModel
+            try
+            {
+                var tables = _tableService.GetAllOccupiedTables()
+                    .Select(t =>
                     {
-                        Table         = t,
-                        OrderCount    = _tableService.GetOrderCount(t.TableNumber),
-                        HasFoodOrder  = categories.HasFood,
-                        HasDrinkOrder = categories.HasDrink
-                    };
-                })
-                .ToList();
+                        var categories = _tableService.GetRunningOrderCategories(t.TableNumber);
+                        return new TablesViewModel
+                        {
+                            Table         = t,
+                            OrderCount    = _tableService.GetOrderCount(t.TableNumber),
+                            HasFoodOrder  = categories.HasFood,
+                            HasDrinkOrder = categories.HasDrink
+                        };
+                    })
+                    .ToList();
 
-            return View(tables);
+                return View(tables);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Failed to load bill overview: " + ex.Message;
+                return View(new List<TablesViewModel>());
+            }
         }
 
         [HttpGet]
         public IActionResult Pay(PayRequest request)
         {
-            TableOrderViewModel orders = _tableService.GetTableOrders(request.TableNumber);
-
-            var viewModel = new BillViewModel
+            try
             {
-                TableNumber    = orders.TableNumber,
-                Guests         = orders.Guests,
-                SubTotalAmount = orders.SubTotalAmount,
-                LowVAT         = orders.LowVAT,
-                HighVAT        = orders.HighVAT,
-                TotalAmount    = orders.TotalAmount
-            };
+                TableOrderViewModel orders = _tableService.GetTableOrders(request.TableNumber);
 
-            return View(viewModel);
+                var viewModel = new BillViewModel
+                {
+                    TableNumber    = orders.TableNumber,
+                    Guests         = orders.Guests,
+                    SubTotalAmount = orders.SubTotalAmount,
+                    LowVAT         = orders.LowVAT,
+                    HighVAT        = orders.HighVAT,
+                    TotalAmount    = orders.TotalAmount
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Failed to load bill: " + ex.Message;
+                return RedirectToAction("Index");
+            }
         }
 
         [HttpPost]
         public IActionResult SetSplitMode(int tableNumber, SplitMode splitMode, int splitCount = 1)
         {
-            TableOrderViewModel orders = _tableService.GetTableOrders(tableNumber);
-
-            var viewModel = BuildBillViewModel(orders, splitMode, splitCount);
-            AddPayers(viewModel, orders, splitMode);
-
-            return View("Pay", viewModel);
+            try
+            {
+                TableOrderViewModel orders = _tableService.GetTableOrders(tableNumber);
+                var viewModel = BuildBillViewModel(orders, splitMode, splitCount);
+                AddPayers(viewModel, orders, splitMode);
+                return View("Pay", viewModel);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Failed to set split mode: " + ex.Message;
+                return RedirectToAction("Index");
+            }
         }
 
         private BillViewModel BuildBillViewModel(TableOrderViewModel orders, SplitMode splitMode, int splitCount)
@@ -124,24 +145,31 @@ namespace ChapeauProject.Controllers
         [HttpPost]
         public IActionResult Pay(BillViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            if (model.SplitMode == SplitMode.Custom)
+            try
             {
-                decimal totalPaying = model.Payers.Sum(p => p.AmountDue + p.TipAmount);
-                if (totalPaying < model.TotalAmount)
-                {
-                    ModelState.AddModelError("", $"Total payments (€{totalPaying:F2}) are less than the bill total (€{model.TotalAmount:F2}).");
-                    var orders = _tableService.GetTableOrders(model.TableNumber);
-                    model.Guests = orders.Guests;
+                if (!ModelState.IsValid)
                     return View(model);
+
+                if (model.SplitMode == SplitMode.Custom)
+                {
+                    decimal totalPaying = model.Payers.Sum(p => p.AmountDue + p.TipAmount);
+                    if (totalPaying < model.TotalAmount)
+                    {
+                        ModelState.AddModelError("", $"Total payments (€{totalPaying:F2}) are less than the bill total (€{model.TotalAmount:F2}).");
+                        var orders = _tableService.GetTableOrders(model.TableNumber);
+                        model.Guests = orders.Guests;
+                        return View(model);
+                    }
                 }
+
+                _billService.ProcessPayment(model);
+                return RedirectToAction("Confirmation", new { id = model.TableNumber });
             }
-
-            _billService.ProcessPayment(model);
-
-            return RedirectToAction("Confirmation", new { id = model.TableNumber });
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Payment failed: " + ex.Message;
+                return View(model);
+            }
         }
 
         [HttpGet]

@@ -6,7 +6,6 @@ using System.Linq;
 
 namespace ChapeauProject.Controllers
 {
-    //NOTE No exception handling in this controller, needs to be added
     public class TablesController : Controller
     {
         private const string SessionKey = "ActiveWorkingOrder";
@@ -32,74 +31,90 @@ namespace ChapeauProject.Controllers
 
         public IActionResult Index()
         {
-            var tables = _tableService.GetAllTables();
-            var viewModel = tables.Select(t =>
+            try
             {
-                var categories = _tableService.GetRunningOrderCategories(t.TableNumber);
-                var vm = new TablesViewModel
+                var tables = _tableService.GetAllTables();
+                var viewModel = tables.Select(t =>
                 {
-                    Table = t,
-                    OrderCount = _tableService.GetOrderCount(t.TableNumber),
-                    HasFoodOrder = categories.HasFood,
-                    HasDrinkOrder = categories.HasDrink
-                };
-                if (t.IsOccupied)
-                {
-                    vm.GuestCount = _tableService.GetGuestCount(t.TableNumber);
-                }
-                else
-                {
-                    vm.GuestCount = 0;
-                }
-                return vm;
-            }).OrderBy(t => t.Table.TableNumber).ToList();
+                    var categories = _tableService.GetRunningOrderCategories(t.TableNumber);
+                    var vm = new TablesViewModel
+                    {
+                        Table        = t,
+                        OrderCount   = _tableService.GetOrderCount(t.TableNumber),
+                        HasFoodOrder = categories.HasFood,
+                        HasDrinkOrder = categories.HasDrink,
+                        GuestCount   = t.IsOccupied ? _tableService.GetGuestCount(t.TableNumber) : 0
+                    };
+                    return vm;
+                }).OrderBy(t => t.Table.TableNumber).ToList();
 
-            ViewBag.FreeCount     = viewModel.Count(t => !t.Table.IsOccupied);
-            ViewBag.OccupiedCount = viewModel.Count(t =>  t.Table.IsOccupied);
-            return View(viewModel);
+                ViewBag.FreeCount     = viewModel.Count(t => !t.Table.IsOccupied);
+                ViewBag.OccupiedCount = viewModel.Count(t =>  t.Table.IsOccupied);
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Failed to load tables: " + ex.Message;
+                return View(new List<TablesViewModel>());
+            }
         }
 
         [HttpPost]
         public IActionResult ToggleOccupied(int tableNumber)
         {
-            var table = _tableService.GetByTableNumber(tableNumber);
-            if (table != null && table.IsOccupied)
+            try
             {
-                int pendingOrders = _tableService.GetOrderCount(tableNumber);
-                if (pendingOrders > 0)
+                var table = _tableService.GetByTableNumber(tableNumber);
+                if (table != null && table.IsOccupied)
                 {
-                    TempData["Error"] = $"Table {tableNumber} still has {pendingOrders} pending order(s) and cannot be marked as free.";
-                    return RedirectToAction("Index");
+                    int pendingOrders = _tableService.GetOrderCount(tableNumber);
+                    if (pendingOrders > 0)
+                    {
+                        TempData["Error"] = $"Table {tableNumber} still has {pendingOrders} pending order(s) and cannot be marked as free.";
+                        return RedirectToAction("Index");
+                    }
                 }
-            }
 
-            _tableService.ToggleOccupied(tableNumber);
+                _tableService.ToggleOccupied(tableNumber);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Failed to update table: " + ex.Message;
+            }
             return RedirectToAction("Index");
         }
 
         public IActionResult Details(int id, MenuCard cardFilter = MenuCard.Lunch, string courseFilter = "All")
         {
-            var viewModel = _tableService.GetTableOrders(id);
-            if (viewModel == null) return NotFound();
-
-            var activeOrder = GetActiveOrder();
-            if (activeOrder.Table.TableNumber != id)
+            try
             {
-                activeOrder = new Order
+                var viewModel = _tableService.GetTableOrders(id);
+                if (viewModel == null) return NotFound();
+
+                var activeOrder = GetActiveOrder();
+                if (activeOrder.Table.TableNumber != id)
                 {
-                    Table = _tableService.GetByTableNumber(id) ?? new Table { TableNumber = id },
-                    OrderItems = new System.Collections.Generic.List<OrderItem>()
-                };
-                SetActiveOrder(activeOrder);
+                    activeOrder = new Order
+                    {
+                        Table      = _tableService.GetByTableNumber(id) ?? new Table { TableNumber = id },
+                        OrderItems = new System.Collections.Generic.List<OrderItem>()
+                    };
+                    SetActiveOrder(activeOrder);
+                }
+
+                ViewBag.CardFilter    = cardFilter;
+                ViewBag.CourseFilter  = courseFilter;
+                ViewBag.CurrentBasket = activeOrder;
+                ViewBag.Guests        = _tableService.GetGuestsByTable(id);
+                ViewBag.MenuItems     = _menuService.GetCourseFiltered(cardFilter, courseFilter);
+
+                return View(viewModel);
             }
-
-            ViewBag.CardFilter = cardFilter;
-            ViewBag.CourseFilter = courseFilter;
-            ViewBag.CurrentBasket = activeOrder;
-            ViewBag.Guests = _tableService.GetGuestsByTable(id);
-            ViewBag.MenuItems = _menuService.GetCourseFiltered(cardFilter, courseFilter);
-
-            return View(viewModel);
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Failed to load table details: " + ex.Message;
+                return RedirectToAction("Index");
+            }
         }
     }
 }

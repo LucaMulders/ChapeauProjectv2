@@ -106,7 +106,15 @@ namespace ChapeauProject.Repositories
             }
         }
 
-        //NOTE GetGuestsAtTable and GetGuestsByTable both contain duplicate guest name-construction logic — extract to a shared private helper
+        private Guest ReadGuest(SqlDataReader reader)
+        {
+            return new Guest(
+                reader.GetInt32(reader.GetOrdinal("GuestID")),
+                reader.GetString(reader.GetOrdinal("FirstName")),
+                reader.GetString(reader.GetOrdinal("LastName"))
+            );
+        }
+
         private List<GuestOrder> GetGuestsAtTable(int tableNumber, SqlConnection connection)
         {
             var guests = new List<GuestOrder>();
@@ -119,22 +127,10 @@ namespace ChapeauProject.Repositories
                 {
                     while (reader.Read())
                     {
-                        string fullName = (reader.GetString(reader.GetOrdinal("FirstName")) + " " + reader.GetString(reader.GetOrdinal("LastName"))).Trim();
-                        string guestName;
-                        if (string.IsNullOrWhiteSpace(fullName))
-                        {
-                            guestName = "Unnamed Guest";
-                        }
-                        else
-                        {
-                            guestName = fullName;
-                        }
-
                         guests.Add(new GuestOrder
                         {
-                            GuestID   = reader.GetInt32(reader.GetOrdinal("GuestID")),
-                            GuestName = guestName,
-                            Items     = new List<GuestOrderItem>()
+                            Guest = ReadGuest(reader),
+                            Items = new List<GuestOrderItem>()
                         });
                     }
                 }
@@ -148,7 +144,7 @@ namespace ChapeauProject.Repositories
             var items = new List<GuestOrderItem>();
 
             string query = $@"
-                SELECT oi.OrderItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus
+                SELECT oi.OrderItemID, mi.MenuItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus
                 FROM Orders o
                 JOIN OrderItems oi ON o.OrderID = oi.OrderID
                 JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
@@ -165,11 +161,16 @@ namespace ChapeauProject.Repositories
                         items.Add(new GuestOrderItem
                         {
                             OrderItemID       = reader.GetInt32(reader.GetOrdinal("OrderItemID")),
-                            ItemName          = reader.GetString(reader.GetOrdinal("ItemName")),
                             Quantity          = reader.GetInt32(reader.GetOrdinal("Quantity")),
-                            Price             = reader.GetDecimal(reader.GetOrdinal("Price")),
-                            VatRate           = reader.GetDecimal(reader.GetOrdinal("VatRate")),
-                            PreparationStatus = Enum.Parse<PreparationStatus>(reader.GetString(reader.GetOrdinal("PreparationStatus")))
+                            PreparationStatus = Enum.Parse<PreparationStatus>(reader.GetString(reader.GetOrdinal("PreparationStatus"))),
+                            MenuItem          = new MenuItem(
+                                reader.GetInt32(reader.GetOrdinal("MenuItemID")),
+                                reader.GetString(reader.GetOrdinal("ItemName")),
+                                reader.GetDecimal(reader.GetOrdinal("Price")),
+                                reader.GetDecimal(reader.GetOrdinal("VatRate")),
+                                0,
+                                null
+                            )
                         });
                     }
                 }
@@ -208,13 +209,7 @@ namespace ChapeauProject.Repositories
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
-                        {
-                            guests.Add(new Guest(
-                                reader.GetInt32(reader.GetOrdinal("GuestID")),
-                                reader.GetString(reader.GetOrdinal("FirstName")),
-                                reader.GetString(reader.GetOrdinal("LastName"))
-                            ));
-                        }
+                            guests.Add(ReadGuest(reader));
                     }
                 }
             }

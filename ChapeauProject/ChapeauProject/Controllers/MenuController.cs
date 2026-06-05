@@ -6,7 +6,6 @@ using System.Collections.Generic;
 
 namespace ChapeauProject.Controllers
 {
-    //NOTE No exception handling in this controller, needs to be added
     public class MenuController : Controller
     {
         private readonly IMenuService _menuService;
@@ -18,18 +17,24 @@ namespace ChapeauProject.Controllers
 
         public IActionResult Index(string menuCard = "Lunch", string category = "All")
         {
-         
-            List<MenuItem> filteredItems = _menuService.GetMenuItemForWaiter(menuCard, category);
-
-            // Using the ViewModel to pass data to the View
-            MenuViewModel viewModel = new MenuViewModel
+            try
             {
-                MenuItems = filteredItems,
-                SelectedCard = menuCard,
-                SelectedCategory = category
-            };
+                List<MenuItem> filteredItems = _menuService.GetMenuItemForWaiter(menuCard, category);
 
-            return View(viewModel);
+                MenuViewModel viewModel = new MenuViewModel
+                {
+                    MenuItems        = filteredItems,
+                    SelectedCard     = menuCard,
+                    SelectedCategory = category
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Failed to load menu: " + ex.Message;
+                return RedirectToAction("Index", "Tables");
+            }
         }
     }
 }

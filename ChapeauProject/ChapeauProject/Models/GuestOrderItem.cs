@@ -3,10 +3,13 @@ namespace ChapeauProject.Models
     public class GuestOrderItem
     {
         public int OrderItemID { get; set; }
-        public string ItemName { get; set; } = string.Empty;
         public int Quantity { get; set; }
-        public decimal Price { get; set; }
-        public decimal VatRate { get; set; }
         public PreparationStatus PreparationStatus { get; set; }
+        public MenuItem MenuItem { get; set; } = new MenuItem(0, string.Empty, 0, 0, 0, null);
+
+        // Convenience passthroughs for existing code
+        public string ItemName => MenuItem.ItemName;
+        public decimal Price => MenuItem.Price;
+        public decimal VatRate => MenuItem.VatRate;
     }
 }

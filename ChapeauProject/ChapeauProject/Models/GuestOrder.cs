@@ -1,10 +1,12 @@
 namespace ChapeauProject.Models
 {
-    //NOTE GuestOrder and GuestOrderItem need to return domain models instead of raw data
     public class GuestOrder
     {
-        public int GuestID { get; set; }
-        public string GuestName { get; set; } = string.Empty;
+        public Guest Guest { get; set; } = new Guest();
         public List<GuestOrderItem> Items { get; set; } = new();
+
+        // Convenience passthrough for code that uses GuestName/GuestID directly
+        public int GuestID => Guest.GuestID;
+        public string GuestName => Guest.FullName;
     }
 }

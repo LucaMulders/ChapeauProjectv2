@@ -27,8 +27,8 @@ namespace ChapeauProject.Repositories
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@OrderID",       (object?)bill.OrderID ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@GuestID",       (object?)bill.GuestID ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@OrderID",       (object?)bill.Order?.OrderID ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@GuestID",       (object?)bill.Guest?.GuestID ?? DBNull.Value);
                     command.Parameters.AddWithValue("@TotalAmount",    bill.TotalAmount);
                     command.Parameters.AddWithValue("@VatAmount",      bill.VatAmount);
                     command.Parameters.AddWithValue("@SubTotalAmount", bill.SubTotalAmount);

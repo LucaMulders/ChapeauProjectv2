@@ -8,7 +8,6 @@ using System.Security.Claims;
 
 namespace ChapeauProject.Controllers
 {
-    //NOTE No exception handling in this controller, needs to be added
     [AllowAnonymous]
     public class AccountController : Controller
     {
@@ -45,26 +44,41 @@ namespace ChapeauProject.Controllers
         [HttpPost]
         public async Task<ActionResult> Login(LoginModel loginModel)
         {
-            Staff? staff = _staffService.GetByLoginCredentials(loginModel.StaffID, loginModel.Password);
-
-            if (staff == null)
+            try
             {
-                ViewBag.ErrorMessage = "Invalid staffID or password";
+                Staff? staff = _staffService.GetByLoginCredentials(loginModel.StaffID, loginModel.Password);
+
+                if (staff == null)
+                {
+                    ViewBag.ErrorMessage = "Invalid staffID or password";
+                    return View(loginModel);
+                }
+
+                await SignInStaff(staff);
+                HttpContext.Session.SetObject("LoggedInStaff", staff);
+                TempData["SuccessMessage"] = "Welcome back, " + staff.FirstName + "!";
+                return RedirectToAction("Index", "Tables");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = "An error occurred during login: " + ex.Message;
                 return View(loginModel);
             }
-
-            await SignInStaff(staff);
-            HttpContext.Session.SetObject("LoggedInStaff", staff);
-            TempData["SuccessMessage"] = "Welcome back, " + staff.FirstName + "!";
-            return RedirectToAction("Index", "Tables");
         }
 
         // GET: /Account/Logoff
         [HttpGet]
         public async Task<ActionResult> Logoff()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            HttpContext.Session.Remove("LoggedInStaff");
+            try
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                HttpContext.Session.Remove("LoggedInStaff");
+            }
+            catch (Exception)
+            {
+                // continue with logoff even if sign out fails, to ensure user is logged out
+            }
             return RedirectToAction("Login");
         }
     }
