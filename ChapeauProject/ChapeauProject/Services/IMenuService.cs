@@ -10,6 +10,6 @@ namespace ChapeauProject.Services
       
         List<MenuItem> GetCourseFiltered(MenuCard cardFilter, string courseFilter);
 
-        List<MenuItem> GetMenuForWaiter(string menuCard, string courseFilter);
+        List<MenuItem> GetMenuItemForWaiter(string menuCard, string courseFilter);
     }
 }
