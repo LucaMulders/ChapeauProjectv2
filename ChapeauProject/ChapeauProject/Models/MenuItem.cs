@@ -16,8 +16,12 @@
             Price = price;
             StockQuantity = stock;
 
-            Course = System.Enum.TryParse(course, true, out CourseName parsedCourse) ? parsedCourse : CourseName.Starter;
-            Card = System.Enum.TryParse(card, true, out MenuCard parsedCard) ? parsedCard : MenuCard.Lunch;
+            if (card == "Dinner")
+                Card = MenuCard.Dinner;
+            else if (card == "Drinks")
+                Card = MenuCard.Drinks;
+            else
+                Card = MenuCard.Lunch;
         }
     }
 }
