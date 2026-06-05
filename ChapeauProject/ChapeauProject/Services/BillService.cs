@@ -15,11 +15,22 @@ namespace ChapeauProject.Services
             _tableRepository = tableRepository;
         }
 
-        //NOTE Split into seperate methods
         public void ProcessPayment(BillViewModel model)
         {
-            var now = DateTime.Now;
+            var now   = DateTime.Now;
+            int billId = CreateBill(model, now);
 
+            if (model.SplitMode == SplitMode.Single)
+                CreateSinglePayment(model, billId, now);
+            else
+                CreateSplitPayments(model, billId, now);
+
+            _billRepository.CompleteOrdersForTable(model.TableNumber);
+            _tableRepository.SetFree(model.TableNumber);
+        }
+
+        private int CreateBill(BillViewModel model, DateTime now)
+        {
             var bill = new Bill
             {
                 TotalAmount    = model.TotalAmount,
@@ -27,58 +38,39 @@ namespace ChapeauProject.Services
                 SubTotalAmount = model.SubTotalAmount,
                 BillTimeStamp  = now
             };
-            int billId = _billRepository.CreateBill(bill);
+            return _billRepository.CreateBill(bill);
+        }
 
-            if (model.SplitMode == SplitMode.Single)
+        private void CreateSinglePayment(BillViewModel model, int billId, DateTime now)
+        {
+            _billRepository.CreatePayment(new Payment
             {
-                string? singleFeedback;
-                if (string.IsNullOrWhiteSpace(model.Feedback))
-                {
-                    singleFeedback = null;
-                }
-                else
-                {
-                    singleFeedback = model.Feedback;
-                }
+                Bill             = new Bill { BillID = billId },
+                PaymentAmount    = model.TotalAmount + model.TipAmount,
+                PaymentMethod    = model.PaymentMethod,
+                TipAmount        = model.TipAmount,
+                PaymentTimeStamp = now,
+                Feedback         = NullIfEmpty(model.Feedback)
+            });
+        }
 
+        private void CreateSplitPayments(BillViewModel model, int billId, DateTime now)
+        {
+            foreach (var payer in model.Payers)
+            {
                 _billRepository.CreatePayment(new Payment
                 {
                     Bill             = new Bill { BillID = billId },
-                    PaymentAmount    = model.TotalAmount + model.TipAmount,
-                    PaymentMethod    = model.PaymentMethod,
-                    TipAmount        = model.TipAmount,
+                    PaymentAmount    = payer.AmountDue + payer.TipAmount,
+                    PaymentMethod    = payer.PaymentMethod,
+                    TipAmount        = payer.TipAmount,
                     PaymentTimeStamp = now,
-                    Feedback         = singleFeedback
+                    Feedback         = NullIfEmpty(payer.Feedback)
                 });
             }
-            else
-            {
-                foreach (var payer in model.Payers)
-                {
-                    string? payerFeedback;
-                    if (string.IsNullOrWhiteSpace(payer.Feedback))
-                    {
-                        payerFeedback = null;
-                    }
-                    else
-                    {
-                        payerFeedback = payer.Feedback;
-                    }
-
-                    _billRepository.CreatePayment(new Payment
-                    {
-                        Bill             = new Bill { BillID = billId },
-                        PaymentAmount    = payer.AmountDue + payer.TipAmount,
-                        PaymentMethod    = payer.PaymentMethod,
-                        TipAmount        = payer.TipAmount,
-                        PaymentTimeStamp = now,
-                        Feedback         = payerFeedback
-                    });
-                }
-            }
-
-            _billRepository.CompleteOrdersForTable(model.TableNumber);
-            _tableRepository.SetFree(model.TableNumber);
         }
+
+        private static string? NullIfEmpty(string? value) =>
+            string.IsNullOrWhiteSpace(value) ? null : value;
     }
 }
