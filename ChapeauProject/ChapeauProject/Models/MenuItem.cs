@@ -1,5 +1,6 @@
 ﻿namespace ChapeauProject.Models
 {
+    //NOTE MenuItem has no behavior methods or computed properties — rubric requires classes contain behavior related to their data
     public class MenuItem
     {
         public int MenuItemID { get; set; }

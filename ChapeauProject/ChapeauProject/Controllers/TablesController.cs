@@ -1,4 +1,4 @@
-﻿using ChapeauProject.Models;
+using ChapeauProject.Models;
 using ChapeauProject.Services;
 using ChapeauProject.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -6,18 +6,28 @@ using System.Linq;
 
 namespace ChapeauProject.Controllers
 {
-    //NOTE: No exception handling in this controller — rubric requires exceptions are handled and should not crash the application
+    //NOTE No exception handling in this controller, needs to be added
     public class TablesController : Controller
     {
+        private const string SessionKey = "ActiveWorkingOrder";
+
         private readonly ITableService _tableService;
         private readonly IMenuService _menuService;
-        private readonly IOrderStateService _orderState;
 
-        public TablesController(ITableService tableService, IMenuService menuService, IOrderStateService orderState)
+        public TablesController(ITableService tableService, IMenuService menuService)
         {
             _tableService = tableService;
             _menuService = menuService;
-            _orderState = orderState;
+        }
+
+        private Order GetActiveOrder()
+        {
+            return HttpContext.Session.GetObject<Order>(SessionKey) ?? new Order();
+        }
+
+        private void SetActiveOrder(Order order)
+        {
+            HttpContext.Session.SetObject(SessionKey, order);
         }
 
         public IActionResult Index()
@@ -67,30 +77,28 @@ namespace ChapeauProject.Controllers
             return RedirectToAction("Index");
         }
 
-       
         public IActionResult Details(int id, MenuCard cardFilter = MenuCard.Lunch, string courseFilter = "All")
         {
-            // existing running orders view model for the top of the screen
             var viewModel = _tableService.GetTableOrders(id);
             if (viewModel == null) return NotFound();
 
-          
-            if (_orderState.ActiveWorkingOrder.Table.TableNumber != id)
+            var activeOrder = GetActiveOrder();
+            if (activeOrder.Table.TableNumber != id)
             {
-                _orderState.ActiveWorkingOrder = new Order
+                activeOrder = new Order
                 {
                     Table = _tableService.GetByTableNumber(id) ?? new Table { TableNumber = id },
                     OrderItems = new System.Collections.Generic.List<OrderItem>()
                 };
+                SetActiveOrder(activeOrder);
             }
 
             ViewBag.CardFilter = cardFilter;
             ViewBag.CourseFilter = courseFilter;
-            ViewBag.CurrentBasket = _orderState.ActiveWorkingOrder;
+            ViewBag.CurrentBasket = activeOrder;
             ViewBag.Guests = _tableService.GetGuestsByTable(id);
             ViewBag.MenuItems = _menuService.GetCourseFiltered(cardFilter, courseFilter);
 
-         
             return View(viewModel);
         }
     }

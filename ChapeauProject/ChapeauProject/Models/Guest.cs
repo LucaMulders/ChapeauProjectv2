@@ -1,5 +1,6 @@
 namespace ChapeauProject.Models
 {
+    //NOTE Guest has no behavior methods or computed properties — rubric requires classes contain behavior related to their data
     public class Guest
     {
         public int GuestID { get; set; }

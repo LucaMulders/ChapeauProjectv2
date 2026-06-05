@@ -102,6 +102,7 @@ namespace ChapeauProject.Repositories
             }
         }
 
+        //NOTE GetGuestsAtTable and GetGuestsByTable both contain duplicate guest name-construction logic — extract to a shared private helper
         private List<GuestOrder> GetGuestsAtTable(int tableNumber, SqlConnection connection)
         {
             var guests = new List<GuestOrder>();
@@ -148,7 +149,7 @@ namespace ChapeauProject.Repositories
                 JOIN OrderItems oi ON o.OrderID = oi.OrderID
                 JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
                 WHERE o.GuestID = @GuestID
-                  AND o.OrderStatus = 'Pending'";
+                  AND o.OrderStatus = 'Pending'"; //NOTE 'Pending' is a hardcoded string — needs to be a constant
 
             using (SqlCommand cmd = new SqlCommand(query, connection))
             {

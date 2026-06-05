@@ -64,6 +64,8 @@ namespace ChapeauProject.Repositories
         }
 
         //NOTE strings 'Pending', 'Served', 'Complete', 'Preparing', 'Ready' are hardcoded, need to be constant instead
+        //NOTE GetAllOrdersByStatus and GetFinishedOrdersToday are nearly identical (~65 lines each)
+        //NOTE Both methods return List<RunningOrderViewModel> — repositories should return domain objects, not ViewModels
         public List<RunningOrderViewModel> GetAllOrdersByStatus()
         {
             var orders = new Dictionary<int, RunningOrderViewModel>();

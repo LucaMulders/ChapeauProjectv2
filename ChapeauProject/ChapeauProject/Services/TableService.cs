@@ -54,7 +54,7 @@ namespace ChapeauProject.Services
 
             var allItems = guests.SelectMany(g => g.Items).ToList();
             decimal subtotal = allItems.Sum(i => i.Price * i.Quantity);
-            //NOTE: 0.09m and 0.21m are hardcoded magic values — rubric requires constants instead of hardcoded values
+            //NOTE 0.09m and 0.21m are hardcoded magic values — rubric requires constants instead of hardcoded values
             decimal lowVat   = allItems.Where(i => i.VatRate == 0.09m).Sum(i => i.Price * i.Quantity * i.VatRate);
             decimal highVat  = allItems.Where(i => i.VatRate == 0.21m).Sum(i => i.Price * i.Quantity * i.VatRate);
             return new TableOrderViewModel

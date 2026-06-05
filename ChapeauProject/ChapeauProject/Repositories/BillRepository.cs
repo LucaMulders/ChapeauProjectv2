@@ -55,6 +55,7 @@ namespace ChapeauProject.Repositories
             }
         }
 
+        //NOTE 'Complete', 'Pending', 'Served' are hardcoded strings — need to be constants instead
         public void CompleteOrdersForTable(int tableNumber)
         {
             using (SqlConnection connection = GetConnection())

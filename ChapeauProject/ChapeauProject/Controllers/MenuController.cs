@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 namespace ChapeauProject.Controllers
 {
+    //NOTE No exception handling in this controller, needs to be added
     public class MenuController : Controller
     {
         private readonly IMenuService _menuService;

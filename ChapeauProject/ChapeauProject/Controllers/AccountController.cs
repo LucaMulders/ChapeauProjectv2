@@ -8,6 +8,7 @@ using System.Security.Claims;
 
 namespace ChapeauProject.Controllers
 {
+    //NOTE No exception handling in this controller, needs to be added
     [AllowAnonymous]
     public class AccountController : Controller
     {
