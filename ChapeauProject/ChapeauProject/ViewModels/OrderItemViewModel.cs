@@ -16,7 +16,8 @@ namespace ChapeauProject.ViewModels
             PreparationStatus.Pending   => "status-pill status-ordered",
             PreparationStatus.Preparing => "status-pill status-preparing",
             PreparationStatus.Ready     => "status-pill status-ready",
-            _                           => "status-pill"
+            PreparationStatus.Served    => "status-pill status-served",
+            _ => "status-pill"
         };
 
         public string StatusLabel => PreparationStatus switch
@@ -24,6 +25,7 @@ namespace ChapeauProject.ViewModels
             PreparationStatus.Pending   => "Ordered",
             PreparationStatus.Preparing => "Being Prepared",
             PreparationStatus.Ready     => "Ready to Serve",
+            PreparationStatus.Served    => "Served",
             _                           => PreparationStatus.ToString()
         };
     }

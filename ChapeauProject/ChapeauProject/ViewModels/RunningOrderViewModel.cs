@@ -9,6 +9,7 @@ namespace ChapeauProject.ViewModels
 
         public bool AllReady     => Items.All(i => i.PreparationStatus == PreparationStatus.Ready);
         public bool AllPreparing => !AllReady && Items.All(i => i.PreparationStatus != PreparationStatus.Pending);
+        public bool AllServed    => Items.All(i => i.PreparationStatus == PreparationStatus.Served);
 
         public string CourseAdvanceLabel => AllReady      ? "↺ Reset"
                                          : AllPreparing  ? "▶ All Ready"
@@ -67,6 +68,7 @@ namespace ChapeauProject.ViewModels
             PreparationStatus.Pending   => "status-pill status-ordered",
             PreparationStatus.Preparing => "status-pill status-preparing",
             PreparationStatus.Ready     => "status-pill status-ready",
+            PreparationStatus.Served    => "status-pill status-served",
             _                           => "status-pill"
         };
 
@@ -75,6 +77,7 @@ namespace ChapeauProject.ViewModels
             PreparationStatus.Pending   => "Ordered",
             PreparationStatus.Preparing => "Being Prepared",
             PreparationStatus.Ready     => "Ready to Serve",
+            PreparationStatus.Served => "Served",
             _                           => PreparationStatus.ToString()
         };
 

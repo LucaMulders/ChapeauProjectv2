@@ -91,7 +91,7 @@ namespace ChapeauProject.Repositories
 
         public MenuItem GetById(int menuItemID)
         {
-            //  Search Single row can fail if connection drops
+            // Search Single row can fail if connection drops
             try
             {
                 using (SqlConnection connection = GetConnection())
