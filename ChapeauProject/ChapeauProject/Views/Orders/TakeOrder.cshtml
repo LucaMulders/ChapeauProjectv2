@@ -51,9 +51,9 @@
                         {
                             <tr>
                                 <td class="fw-bold py-3 ps-3 menu-item-name">@item.ItemName</td>
-                                <td class="text-secondary">€@item.Price.ToString("0.00")</td>
+                                <td class="text-secondary">@item.PriceDisplay</td>
                                 <td>
-                                    @if (item.StockQuantity == 0)
+                                    @if (!item.IsAvailable)
                                     {
                                         <span class="badge bg-danger">Out of Stock</span>
                                     }
@@ -69,7 +69,7 @@
                                 <td class="text-center pe-3">
                                     <form asp-action="AddItemToOrder" method="post" class="m-0">
                                         <input type="hidden" name="menuItemID" value="@item.MenuItemID" />
-                                        <button type="submit" class="add-item-btn" @(item.StockQuantity == 0 ? "disabled" : "")>+</button>
+                                        <button type="submit" class="add-item-btn" @(!item.IsAvailable ? "disabled" : "")>+</button>
                                     </form>
                                 </td>
                             </tr>

@@ -43,7 +43,7 @@ namespace ChapeauProject.Services
 
                 _billRepository.CreatePayment(new Payment
                 {
-                    BillID           = billId,
+                    Bill             = new Bill { BillID = billId },
                     PaymentAmount    = model.TotalAmount + model.TipAmount,
                     PaymentMethod    = model.PaymentMethod,
                     TipAmount        = model.TipAmount,
@@ -67,7 +67,7 @@ namespace ChapeauProject.Services
 
                     _billRepository.CreatePayment(new Payment
                     {
-                        BillID           = billId,
+                        Bill             = new Bill { BillID = billId },
                         PaymentAmount    = payer.AmountDue + payer.TipAmount,
                         PaymentMethod    = payer.PaymentMethod,
                         TipAmount        = payer.TipAmount,

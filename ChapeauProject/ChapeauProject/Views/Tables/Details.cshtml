@@ -39,7 +39,7 @@ else
 {
     @foreach (var guest in Model.Guests)
     {
-        <h4>@guest.GuestName</h4>
+        <h4>@guest.FullName</h4>
         <table class="table table-sm align-middle mb-4">
             <thead>
                 <tr>
@@ -129,11 +129,11 @@ else
                     {
                         <tr>
                             <td class="fw-bold py-3 ps-3 menu-item-name">@item.ItemName</td>
-                            <td class="text-secondary">€@item.Price.ToString("0.00")</td>
+                            <td class="text-secondary">@item.PriceDisplay</td>
                             <td class="text-center pe-3">
                                 <form asp-controller="Orders" asp-action="AddItemToOrder" method="post" class="m-0">
                                     <input type="hidden" name="menuItemID" value="@item.MenuItemID" />
-                                    <button type="submit" class="add-item-btn" @(item.StockQuantity == 0 ? "disabled" : "")>+</button>
+                                    <button type="submit" class="add-item-btn" @(!item.IsAvailable ? "disabled" : "")>+</button>
                                 </form>
                             </td>
                         </tr>
@@ -210,13 +210,17 @@ else
                     <div class="mt-4 pt-3 border-top">
                         <div class="d-grid gap-2">
                             <form asp-controller="Orders" asp-action="SaveAndSendOrder" method="post" class="m-0 w-100">
-                                <input type="hidden" name="guest.GuestName" id="guestNameInput" value="" />
+                                <input type="hidden" name="guest.FirstName" id="guestFirstNameInput" value="" />
+                                <input type="hidden" name="guest.LastName" id="guestLastNameInput" value="" />
                                 <select name="guest.GuestID" class="form-select mb-2 guest-select" required
-                                        onchange="document.getElementById('guestNameInput').value = this.options[this.selectedIndex].text">
+                                        onchange="
+                                            var opt = this.options[this.selectedIndex];
+                                            document.getElementById('guestFirstNameInput').value = opt.dataset.firstname;
+                                            document.getElementById('guestLastNameInput').value = opt.dataset.lastname;">
                                     <option value="0" disabled selected>— Select guest —</option>
                                     @foreach (var guest in (List<ChapeauProject.Models.Guest>)ViewBag.Guests)
                                     {
-                                        <option value="@guest.GuestID">@guest.GuestName</option>
+                                        <option value="@guest.GuestID" data-firstname="@guest.FirstName" data-lastname="@guest.LastName">@guest.FullName</option>
                                     }
                                 </select>
                                 <button type="submit" class="send-order-btn">🚀 Send to Kitchen / Bar</button>

@@ -21,6 +21,10 @@
                 </ul>
                 @if (User.Identity.IsAuthenticated)
                 {
+                    <span class="text-white me-3 small">
+                        @User.Identity.Name
+                        <span class="badge bg-secondary ms-1">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</span>
+                    </span>
                     <a class="btn btn-dark text-decoration-none" href="/Account/Logoff">Logoff</a>
                 }
                 else

@@ -6,6 +6,9 @@ namespace ChapeauProject.Services
 {
     public class TableService : ITableService
     {
+        private const decimal LowVatRate  = 0.09m;
+        private const decimal HighVatRate = 0.21m;
+
         private readonly ITableRepository _tableRepository;
 
         public TableService(ITableRepository tableRepository)
@@ -40,7 +43,7 @@ namespace ChapeauProject.Services
             var guests = guestOrders.Select(g => new GuestOrderViewModel
             {
                 GuestID   = g.GuestID,
-                GuestName = g.GuestName,
+                FullName  = g.GuestName,
                 Items     = g.Items.Select(i => new OrderItemViewModel
                 {
                     OrderItemID       = i.OrderItemID,
@@ -54,9 +57,8 @@ namespace ChapeauProject.Services
 
             var allItems = guests.SelectMany(g => g.Items).ToList();
             decimal subtotal = allItems.Sum(i => i.Price * i.Quantity);
-            //NOTE 0.09m and 0.21m are hardcoded magic values — rubric requires constants instead of hardcoded values
-            decimal lowVat   = allItems.Where(i => i.VatRate == 0.09m).Sum(i => i.Price * i.Quantity * i.VatRate);
-            decimal highVat  = allItems.Where(i => i.VatRate == 0.21m).Sum(i => i.Price * i.Quantity * i.VatRate);
+            decimal lowVat   = allItems.Where(i => i.VatRate == LowVatRate).Sum(i => i.Price * i.Quantity * i.VatRate);
+            decimal highVat  = allItems.Where(i => i.VatRate == HighVatRate).Sum(i => i.Price * i.Quantity * i.VatRate);
             return new TableOrderViewModel
             {
                 TableNumber = tableNumber,

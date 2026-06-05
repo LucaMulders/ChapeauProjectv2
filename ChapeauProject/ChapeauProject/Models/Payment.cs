@@ -1,13 +1,11 @@
 namespace ChapeauProject.Models
 {
-    //NOTE Payment uses raw int BillID, needs to change to a Bill object
     public class Payment
     {
         public int PaymentID { get; set; }
-        public int BillID { get; set; }
-        public decimal PaymentAmount { get; set; }  // TotalAmount + Tip
-        //NOTE should be enum
-        public string PaymentMethod { get; set; } = string.Empty;
+        public Bill Bill { get; set; } = new Bill();
+        public decimal PaymentAmount { get; set; }
+        public PaymentMethod PaymentMethod { get; set; }
         public decimal TipAmount { get; set; }
         public DateTime PaymentTimeStamp { get; set; }
         public string? Feedback { get; set; }

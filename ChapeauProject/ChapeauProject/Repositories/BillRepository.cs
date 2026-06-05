@@ -6,6 +6,12 @@ namespace ChapeauProject.Repositories
 {
     public class BillRepository : RepositoryBase, IBillRepository
     {
+        // Rubric Item: Use of Constants for Repeated Strings
+
+        private const string StatusPending  = nameof(OrderStatus.Pending);
+        private const string StatusComplete = nameof(OrderStatus.Complete);
+        private const string StatusServed   = nameof(OrderStatus.Served);
+
         public BillRepository(IConfiguration configuration) : base(configuration)
         {
         }
@@ -43,9 +49,9 @@ namespace ChapeauProject.Repositories
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@BillID",           payment.BillID);
+                    command.Parameters.AddWithValue("@BillID",           payment.Bill.BillID);
                     command.Parameters.AddWithValue("@PaymentAmount",     payment.PaymentAmount);
-                    command.Parameters.AddWithValue("@PaymentMethod",     payment.PaymentMethod);
+                    command.Parameters.AddWithValue("@PaymentMethod",     payment.PaymentMethod.ToString());
                     command.Parameters.AddWithValue("@TipAmount",         payment.TipAmount);
                     command.Parameters.AddWithValue("@PaymentTimeStamp",  payment.PaymentTimeStamp);
                     command.Parameters.AddWithValue("@Feedback",          (object?)payment.Feedback ?? DBNull.Value);
@@ -55,16 +61,15 @@ namespace ChapeauProject.Repositories
             }
         }
 
-        //NOTE 'Complete', 'Pending', 'Served' are hardcoded strings — need to be constants instead
         public void CompleteOrdersForTable(int tableNumber)
         {
             using (SqlConnection connection = GetConnection())
             {
-                string query = @"
+                string query = $@"
                     UPDATE Orders
-                    SET    OrderStatus = 'Complete'
+                    SET    OrderStatus = '{StatusComplete}'
                     WHERE  GuestID IN (SELECT GuestID FROM Guests WHERE TableNumber = @TableNumber)
-                      AND  OrderStatus IN ('Pending', 'Served')";
+                      AND  OrderStatus IN ('{StatusPending}', '{StatusServed}')";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {

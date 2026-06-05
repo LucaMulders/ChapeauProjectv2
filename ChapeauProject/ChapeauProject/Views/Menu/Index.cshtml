@@ -38,9 +38,9 @@
                 {
                     <tr>
                         <td class="fw-bold">@item.ItemName</td>
-                        <td>€@item.Price.ToString("0.00")</td>
+                        <td>@item.PriceDisplay</td>
                         <td>
-                            @if (item.StockQuantity == 0)
+                            @if (!item.IsAvailable)
                             {
                                 <span class="badge bg-danger">Out of Stock</span>
                             }

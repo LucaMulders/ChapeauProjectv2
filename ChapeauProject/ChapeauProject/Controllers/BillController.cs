@@ -114,7 +114,7 @@ namespace ChapeauProject.Controllers
 
                 viewModel.Payers.Add(new SplitPayerViewModel
                 {
-                    Name      = guest.GuestName,
+                    Name      = guest.FullName,
                     GuestID   = guest.GuestID,
                     AmountDue = Math.Round(vatShare, 2)
                 });

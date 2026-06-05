@@ -2,7 +2,6 @@ using ChapeauProject.Models;
 using ChapeauProject.Services;
 using ChapeauProject.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 
 namespace ChapeauProject.Controllers
 {
@@ -71,7 +70,6 @@ namespace ChapeauProject.Controllers
             return RedirectToAction("Details", "Tables", new { id = tableNumber });
         }
 
-        //NOTE logic for adding/removing items should move to Order model (AddItem/RemoveItem methods)
         [HttpPost]
         public IActionResult AddItemToOrder(int menuItemID)
         {
@@ -81,34 +79,20 @@ namespace ChapeauProject.Controllers
             if (item == null)
                 return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
 
-            if (item.StockQuantity <= 0)
+            if (!item.IsAvailable)
             {
                 TempData["ErrorMessage"] = $"{item.ItemName} is out of stock!";
                 return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
             }
 
-            var existingItem = order.OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
-
-            if (existingItem != null)
+            var existing = order.OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
+            if (existing != null && !item.IsInStock(existing.Quantity))
             {
-                if (existingItem.Quantity >= item.StockQuantity)
-                {
-                    TempData["ErrorMessage"] = $"Stock ceiling reached for {item.ItemName}.";
-                    return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
-                }
-                existingItem.Quantity++;
-            }
-            else
-            {
-                order.OrderItems.Add(new OrderItem
-                {
-                    MenuItem = item,
-                    Quantity = 1,
-                    PreparationStatus = PreparationStatus.Pending,
-                    Comment = string.Empty
-                });
+                TempData["ErrorMessage"] = $"Stock ceiling reached for {item.ItemName}.";
+                return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
             }
 
+            order.AddItem(item);
             SetActiveOrder(order);
             return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
         }
@@ -117,19 +101,16 @@ namespace ChapeauProject.Controllers
         public IActionResult IncreaseQuantity(int menuItemID)
         {
             var order = GetActiveOrder();
-            var basketItem = order.OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
             var dbItem = _menuService.GetById(menuItemID);
+            var basketItem = order.OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
 
-            if (basketItem != null && dbItem != null)
+            if (basketItem != null && dbItem != null && !dbItem.IsInStock(basketItem.Quantity))
             {
-                if (basketItem.Quantity >= dbItem.StockQuantity)
-                {
-                    TempData["ErrorMessage"] = "Cannot exceed warehouse stock capacities.";
-                }
-                else
-                {
-                    basketItem.Quantity++;
-                }
+                TempData["ErrorMessage"] = "Cannot exceed warehouse stock capacities.";
+            }
+            else
+            {
+                order.IncreaseQuantity(menuItemID);
             }
 
             SetActiveOrder(order);
@@ -140,17 +121,7 @@ namespace ChapeauProject.Controllers
         public IActionResult DecreaseQuantity(int menuItemID)
         {
             var order = GetActiveOrder();
-            var basketItem = order.OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
-
-            if (basketItem != null)
-            {
-                basketItem.Quantity--;
-                if (basketItem.Quantity <= 0)
-                {
-                    order.OrderItems.Remove(basketItem);
-                }
-            }
-
+            order.DecreaseQuantity(menuItemID);
             SetActiveOrder(order);
             return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
         }
@@ -159,13 +130,7 @@ namespace ChapeauProject.Controllers
         public IActionResult RemoveRow(int menuItemID)
         {
             var order = GetActiveOrder();
-            var basketItem = order.OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
-
-            if (basketItem != null)
-            {
-                order.OrderItems.Remove(basketItem);
-            }
-
+            order.RemoveItem(menuItemID);
             SetActiveOrder(order);
             return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
         }
@@ -174,13 +139,7 @@ namespace ChapeauProject.Controllers
         public IActionResult UpdateItemComment(int menuItemID, string comment)
         {
             var order = GetActiveOrder();
-            var basketItem = order.OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
-
-            if (basketItem != null)
-            {
-                basketItem.Comment = comment ?? string.Empty;
-            }
-
+            order.UpdateItemComment(menuItemID, comment);
             SetActiveOrder(order);
             return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
         }

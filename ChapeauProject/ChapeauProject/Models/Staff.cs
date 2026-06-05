@@ -5,11 +5,10 @@
         public int StaffID { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        //NOTE Role should be an enum
-        public string Role { get; set; }
+        public StaffRole Role { get; set; }
         public string Password { get; set; }
 
-        public Staff(int id, string firstName, string lastName, string role, string password)
+        public Staff(int id, string firstName, string lastName, StaffRole role, string password)
         {
             StaffID = id;
             FirstName = firstName;
@@ -23,7 +22,7 @@
             StaffID = 0;
             FirstName = "";
             LastName = "";
-            Role = "";
+            Role = StaffRole.Waiter;
             Password = "";
         }
     }

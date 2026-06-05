@@ -1,17 +1,22 @@
 namespace ChapeauProject.Models
 {
-    //NOTE Guest has no behavior methods or computed properties — rubric requires classes contain behavior related to their data
     public class Guest
     {
         public int GuestID { get; set; }
-        public string GuestName { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+
+        public string FullName => string.IsNullOrWhiteSpace($"{FirstName} {LastName}".Trim())
+            ? "Unnamed Guest"
+            : $"{FirstName} {LastName}".Trim();
 
         public Guest() { }
 
-        public Guest(int guestID, string guestName)
+        public Guest(int guestID, string firstName, string lastName)
         {
             GuestID = guestID;
-            GuestName = guestName;
+            FirstName = firstName;
+            LastName = lastName;
         }
     }
 }

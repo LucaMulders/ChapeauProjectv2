@@ -25,7 +25,7 @@ namespace ChapeauProject.Controllers
             {
                 new Claim(ClaimTypes.NameIdentifier, staff.StaffID.ToString()),
                 new Claim(ClaimTypes.Name, staff.FirstName + " " + staff.LastName),
-                new Claim(ClaimTypes.Role, staff.Role)
+                new Claim(ClaimTypes.Role, staff.Role.ToString())
             };
 
             ClaimsIdentity identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

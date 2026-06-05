@@ -8,6 +8,15 @@ namespace ChapeauProject.Repositories
 {
     public class OrderRepository : RepositoryBase, IOrderRepository
     {
+        // Rubric Item: Use of Constants for Repeated Strings
+
+        private const string StatusPending    = nameof(OrderStatus.Pending);
+        private const string StatusComplete   = nameof(OrderStatus.Complete);
+        private const string StatusServed     = nameof(OrderStatus.Served);
+        private const string PrepPending      = nameof(PreparationStatus.Pending);
+        private const string PrepPreparing    = nameof(PreparationStatus.Preparing);
+        private const string PrepReady        = nameof(PreparationStatus.Ready);
+
         private readonly IMenuRepository _menuRepository;
 
         public OrderRepository(IConfiguration configuration, IMenuRepository menuRepository) : base(configuration)
@@ -63,16 +72,13 @@ namespace ChapeauProject.Repositories
             }
         }
 
-        //NOTE strings 'Pending', 'Served', 'Complete', 'Preparing', 'Ready' are hardcoded, need to be constant instead
-        //NOTE GetAllOrdersByStatus and GetFinishedOrdersToday are nearly identical (~65 lines each)
-        //NOTE Both methods return List<RunningOrderViewModel> — repositories should return domain objects, not ViewModels
         public List<RunningOrderViewModel> GetAllOrdersByStatus()
         {
             var orders = new Dictionary<int, RunningOrderViewModel>();
 
             using (SqlConnection connection = GetConnection())
             {
-                string query = @"
+                string query = $@"
                     SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
                            oi.OrderItemID, mi.ItemName, oi.Quantity, oi.PreparationStatus,
                            mi.MenuCard, ISNULL(c.CourseName, 'Other') AS CourseName,
@@ -82,7 +88,7 @@ namespace ChapeauProject.Repositories
                     JOIN OrderItems oi ON o.OrderID = oi.OrderID
                     JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
                     LEFT JOIN Courses c ON mi.CourseID = c.CourseID
-                    WHERE o.OrderStatus = 'Pending'
+                    WHERE o.OrderStatus = '{StatusPending}'
                     ORDER BY o.OrderTimeStamp ASC, c.CourseID ASC";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
@@ -138,7 +144,7 @@ namespace ChapeauProject.Repositories
 
             using (SqlConnection connection = GetConnection())
             {
-                string query = @"
+                string query = $@"
                     SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
                            oi.OrderItemID, mi.ItemName, oi.Quantity, oi.PreparationStatus,
                            mi.MenuCard, ISNULL(c.CourseName, 'Other') AS CourseName,
@@ -148,7 +154,7 @@ namespace ChapeauProject.Repositories
                     JOIN OrderItems oi ON o.OrderID = oi.OrderID
                     JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
                     LEFT JOIN Courses c ON mi.CourseID = c.CourseID
-                    WHERE o.OrderStatus IN ('Complete', 'Served')
+                    WHERE o.OrderStatus IN ('{StatusComplete}', '{StatusServed}')
                       AND CAST(o.OrderTimeStamp AS DATE) = CAST(GETDATE() AS DATE)
                     ORDER BY o.OrderTimeStamp DESC, c.CourseID ASC";
 
@@ -203,7 +209,7 @@ namespace ChapeauProject.Repositories
         {
             using (SqlConnection connection = GetConnection())
             {
-                string query = @"
+                string query = $@"
                     UPDATE oi
                     SET oi.PreparationStatus =
                         CASE
@@ -212,16 +218,16 @@ namespace ChapeauProject.Repositories
                                   LEFT JOIN Courses c2 ON mi2.CourseID = c2.CourseID
                                   WHERE oi2.OrderID = @OrderID
                                     AND ISNULL(c2.CourseName, 'Other') = @CourseName
-                                    AND oi2.PreparationStatus = 'Pending') > 0
-                                THEN 'Preparing'
+                                    AND oi2.PreparationStatus = '{PrepPending}') > 0
+                                THEN '{PrepPreparing}'
                             WHEN (SELECT COUNT(*) FROM OrderItems oi2
                                   JOIN MenuItems mi2 ON oi2.MenuItemID = mi2.MenuItemID
                                   LEFT JOIN Courses c2 ON mi2.CourseID = c2.CourseID
                                   WHERE oi2.OrderID = @OrderID
                                     AND ISNULL(c2.CourseName, 'Other') = @CourseName
-                                    AND oi2.PreparationStatus = 'Preparing') > 0
-                                THEN 'Ready'
-                            ELSE 'Pending'
+                                    AND oi2.PreparationStatus = '{PrepPreparing}') > 0
+                                THEN '{PrepReady}'
+                            ELSE '{PrepPending}'
                         END
                     FROM OrderItems oi
                     JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
@@ -242,11 +248,11 @@ namespace ChapeauProject.Repositories
         {
             using (SqlConnection connection = GetConnection())
             {
-                string query = @"UPDATE OrderItems SET PreparationStatus =
+                string query = $@"UPDATE OrderItems SET PreparationStatus =
                     CASE PreparationStatus
-                        WHEN 'Pending'   THEN 'Preparing'
-                        WHEN 'Preparing' THEN 'Ready'
-                        WHEN 'Ready'     THEN 'Pending'
+                        WHEN '{PrepPending}'   THEN '{PrepPreparing}'
+                        WHEN '{PrepPreparing}' THEN '{PrepReady}'
+                        WHEN '{PrepReady}'     THEN '{PrepPending}'
                     END
                     WHERE OrderItemID = @OrderItemID";
 
@@ -262,7 +268,7 @@ namespace ChapeauProject.Repositories
         {
             using (SqlConnection connection = GetConnection())
             {
-                string query = "UPDATE Orders SET OrderStatus = 'Complete' WHERE OrderID = @OrderID";
+                string query = $"UPDATE Orders SET OrderStatus = '{StatusComplete}' WHERE OrderID = @OrderID";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@OrderID", orderId);
@@ -277,7 +283,7 @@ namespace ChapeauProject.Repositories
             {
                 string query = @"
                     SELECT COUNT(*) FROM OrderItems
-                    WHERE OrderID = @OrderID AND PreparationStatus != 'Ready'";
+                    WHERE OrderID = @OrderID AND PreparationStatus != '{PrepReady}'";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {

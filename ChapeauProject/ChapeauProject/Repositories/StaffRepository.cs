@@ -57,7 +57,7 @@ namespace ChapeauProject.Repositories
             int id = reader.GetInt32(reader.GetOrdinal("StaffID"));
             string firstName = reader.GetString(reader.GetOrdinal("FirstName"));
             string lastName = reader.GetString(reader.GetOrdinal("LastName"));
-            string role = reader.GetString(reader.GetOrdinal("Role"));
+            StaffRole role = Enum.Parse<StaffRole>(reader.GetString(reader.GetOrdinal("Role")));
             string password;
             if (reader.IsDBNull(reader.GetOrdinal("Password")))
             {

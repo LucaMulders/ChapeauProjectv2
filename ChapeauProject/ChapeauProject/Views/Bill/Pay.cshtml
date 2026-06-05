@@ -1,9 +1,10 @@
 @model ChapeauProject.ViewModels.BillViewModel
 @using ChapeauProject.ViewModels
+@using ChapeauProject.Models
 
 @{
     ViewData["Title"] = "Bill – Table " + Model.TableNumber;
-    var methods = new[] { "Cash", "Credit Card", "Debit Card" };
+    var methods = Enum.GetValues<PaymentMethod>();
 }
 
 <h2 class="page-title">Bill – Table @Model.TableNumber</h2>
@@ -187,7 +188,7 @@
                             @foreach (var method in methods)
                             {
                                 <label class="radio-label-sm">
-                                    <input type="radio" name="Payers[@i].PaymentMethod" value="@method" @(method == "Cash" ? "checked" : "") />
+                                    <input type="radio" name="Payers[@i].PaymentMethod" value="@method" @(method == PaymentMethod.Cash ? "checked" : "") />
                                     @method
                                 </label>
                             }
@@ -222,7 +223,7 @@
 {
     <script>
         let payerCount = @Model.Payers.Count;
-        const methods = ['Cash', 'Credit Card', 'Debit Card'];
+        const methods = [@string.Join(", ", Enum.GetValues<PaymentMethod>().Select(m => $"'{m}'"))];
 
         function addPayer() {
             const i = payerCount++;

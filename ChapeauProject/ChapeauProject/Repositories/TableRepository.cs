@@ -5,6 +5,10 @@ namespace ChapeauProject.Repositories
 {
     public class TableRepository : RepositoryBase, ITableRepository
     {
+        // Rubric Item: Use of Constants for Repeated Strings
+
+        private const string StatusPending = nameof(OrderStatus.Pending);
+
         public TableRepository(IConfiguration configuration) : base(configuration)
         {
         }
@@ -143,13 +147,13 @@ namespace ChapeauProject.Repositories
         {
             var items = new List<GuestOrderItem>();
 
-            string query = @"
+            string query = $@"
                 SELECT oi.OrderItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus
                 FROM Orders o
                 JOIN OrderItems oi ON o.OrderID = oi.OrderID
                 JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
                 WHERE o.GuestID = @GuestID
-                  AND o.OrderStatus = 'Pending'"; //NOTE 'Pending' is a hardcoded string — needs to be a constant
+                  AND o.OrderStatus = '{StatusPending}'";
 
             using (SqlCommand cmd = new SqlCommand(query, connection))
             {
@@ -205,10 +209,11 @@ namespace ChapeauProject.Repositories
                     {
                         while (reader.Read())
                         {
-                            int id = reader.GetInt32(reader.GetOrdinal("GuestID"));
-                            string name = (reader.GetString(reader.GetOrdinal("FirstName")) + " " + reader.GetString(reader.GetOrdinal("LastName"))).Trim();
-                            if (string.IsNullOrWhiteSpace(name)) name = "Unnamed Guest";
-                            guests.Add(new Guest(id, name));
+                            guests.Add(new Guest(
+                                reader.GetInt32(reader.GetOrdinal("GuestID")),
+                                reader.GetString(reader.GetOrdinal("FirstName")),
+                                reader.GetString(reader.GetOrdinal("LastName"))
+                            ));
                         }
                     }
                 }
@@ -235,14 +240,14 @@ namespace ChapeauProject.Repositories
 
             using (SqlConnection connection = GetConnection())
             {
-                string query = @"
+                string query = $@"
                     SELECT DISTINCT mi.MenuCard
                     FROM Orders o
                     JOIN Guests g ON o.GuestID = g.GuestID
                     JOIN OrderItems oi ON o.OrderID = oi.OrderID
                     JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
                     WHERE g.TableNumber = @TableNumber
-                      AND o.OrderStatus = 'Pending'";
+                      AND o.OrderStatus = '{StatusPending}'";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
