@@ -5,6 +5,7 @@
         public int StaffID { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        //NOTE Role should be an enum
         public string Role { get; set; }
         public string Password { get; set; }
 

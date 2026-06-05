@@ -7,3 +7,5 @@ namespace ChapeauProject.Services
         public Order ActiveWorkingOrder { get; set; } = new Order();
     }
 }
+
+//NOTE remove orderstateservice

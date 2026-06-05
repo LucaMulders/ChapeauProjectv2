@@ -7,6 +7,7 @@ using System.Linq;
 namespace ChapeauProject.Controllers
 {
     //NOTE No exception handling in this controller, needs to be added
+    //NOTE orderstate to service
     public class OrdersController : Controller
     {
         private readonly IOrderService _orderService;
@@ -47,6 +48,7 @@ namespace ChapeauProject.Controllers
         [HttpPost]
         public IActionResult StartNewOrder(int tableNumber)
         {
+            //NOTE store in session
             _orderState.ActiveWorkingOrder = new Order
             {
                 Table = _tableService.GetByTableNumber(tableNumber) ?? new Table { TableNumber = tableNumber },
@@ -56,6 +58,7 @@ namespace ChapeauProject.Controllers
             return RedirectToAction("Details", "Tables", new { id = tableNumber });
         }
 
+        //NOTE logic in service or preferably in model
         [HttpPost]
         public IActionResult AddItemToOrder(int menuItemID)
         {
@@ -96,6 +99,7 @@ namespace ChapeauProject.Controllers
             return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.Table.TableNumber });
         }
 
+        //NOTE increase quanitity done in models
         [HttpPost]
         public IActionResult IncreaseQuantity(int menuItemID)
         {
@@ -117,6 +121,7 @@ namespace ChapeauProject.Controllers
             return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.Table.TableNumber });
         }
 
+        //NOTE remove orderitems instead of row
         [HttpPost]
         public IActionResult DecreaseQuantity(int menuItemID)
         {
@@ -157,6 +162,7 @@ namespace ChapeauProject.Controllers
             return RedirectToAction("Details", "Tables", new { id = _orderState.ActiveWorkingOrder.Table.TableNumber });
         }
 
+        //NOTE get tableID from view as parameter
         [HttpPost]
         public IActionResult SaveAndSendOrder(Guest guest)
         {
