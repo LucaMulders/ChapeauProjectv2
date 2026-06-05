@@ -52,14 +52,14 @@ namespace ChapeauProject.Repositories
                 using (SqlCommand cmd = new SqlCommand(sql, connection))
                 {
                     cmd.Parameters.AddWithValue("@OrderID",    orderId);
-                    cmd.Parameters.AddWithValue("@MenuItemID", item.MenuItemID);
+                    cmd.Parameters.AddWithValue("@MenuItemID", item.MenuItem?.MenuItemID ?? 0);
                     cmd.Parameters.AddWithValue("@Quantity",   item.Quantity);
                     cmd.Parameters.AddWithValue("@PrepStatus", item.PreparationStatus.ToString());
                     cmd.Parameters.AddWithValue("@Comment",    (object?)item.Comment ?? DBNull.Value);
                     cmd.ExecuteNonQuery();
                 }
 
-                _menuRepository.DeductStockQuantity(item.MenuItemID, item.Quantity);
+                _menuRepository.DeductStockQuantity(item.MenuItem?.MenuItemID ?? 0, item.Quantity);
             }
         }
 

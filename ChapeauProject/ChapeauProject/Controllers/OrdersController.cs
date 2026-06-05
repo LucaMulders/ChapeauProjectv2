@@ -73,7 +73,7 @@ namespace ChapeauProject.Controllers
             }
 
             var existingItem = _orderState.ActiveWorkingOrder.OrderItems
-                .FirstOrDefault(oi => oi.MenuItemID == menuItemID);
+                .FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
 
             if (existingItem != null)
             {
@@ -88,7 +88,6 @@ namespace ChapeauProject.Controllers
             {
                 _orderState.ActiveWorkingOrder.OrderItems.Add(new OrderItem
                 {
-                    MenuItemID = menuItemID,
                     MenuItem = item,
                     Quantity = 1,
                     PreparationStatus = PreparationStatus.Pending,
@@ -103,7 +102,7 @@ namespace ChapeauProject.Controllers
         [HttpPost]
         public IActionResult IncreaseQuantity(int menuItemID)
         {
-            var basketItem = _orderState.ActiveWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItemID == menuItemID);
+            var basketItem = _orderState.ActiveWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
             var dbItem = _menuService.GetById(menuItemID);
 
             if (basketItem != null && dbItem != null)
@@ -125,7 +124,7 @@ namespace ChapeauProject.Controllers
         [HttpPost]
         public IActionResult DecreaseQuantity(int menuItemID)
         {
-            var basketItem = _orderState.ActiveWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItemID == menuItemID);
+            var basketItem = _orderState.ActiveWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
             if (basketItem != null)
             {
                 basketItem.Quantity--;
@@ -141,7 +140,7 @@ namespace ChapeauProject.Controllers
         [HttpPost]
         public IActionResult RemoveRow(int menuItemID)
         {
-            var basketItem = _orderState.ActiveWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItemID == menuItemID);
+            var basketItem = _orderState.ActiveWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
             if (basketItem != null)
             {
                 _orderState.ActiveWorkingOrder.OrderItems.Remove(basketItem);
@@ -153,7 +152,7 @@ namespace ChapeauProject.Controllers
         [HttpPost]
         public IActionResult UpdateItemComment(int menuItemID, string comment)
         {
-            var basketItem = _orderState.ActiveWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItemID == menuItemID);
+            var basketItem = _orderState.ActiveWorkingOrder.OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
             if (basketItem != null)
             {
                 basketItem.Comment = comment ?? string.Empty;
