@@ -10,13 +10,13 @@ namespace ChapeauProject.Controllers
         private const string SessionKey = "ActiveWorkingOrder";
 
         private readonly IOrderService _orderService;
-        private readonly IMenuService _menuService;
+        private readonly IMenuService  _menuService;
         private readonly ITableService _tableService;
 
         public OrdersController(IOrderService orderService, IMenuService menuService, ITableService tableService)
         {
             _orderService = orderService;
-            _menuService = menuService;
+            _menuService  = menuService;
             _tableService = tableService;
         }
 
@@ -39,20 +39,7 @@ namespace ChapeauProject.Controllers
         {
             try
             {
-                var orders = filter == "finished"
-                    ? _orderService.GetFinishedOrdersToday()
-                    : _orderService.GetAllOrdersByStatus();
-
-                var tableGroups = orders
-                    .GroupBy(o => o.TableNumber)
-                    .OrderBy(g => g.Key)
-                    .Select(g => new TableOrderGroupViewModel
-                    {
-                        TableNumber = g.Key,
-                        Orders      = g.ToList()
-                    })
-                    .ToList();
-
+                var tableGroups = _orderService.GetOrdersGroupedByTable(filter);
                 ViewBag.Filter       = filter;
                 ViewBag.PageTitle    = filter == "finished" ? "Finished Orders Today" : "Running Orders";
                 ViewBag.EmptyMessage = filter == "finished" ? "No finished orders today yet." : "No running orders at the moment.";
@@ -75,7 +62,6 @@ namespace ChapeauProject.Controllers
                 Staff      = loggedInStaff,
                 OrderItems = new System.Collections.Generic.List<OrderItem>()
             });
-
             return RedirectToAction("Details", "Tables", new { id = tableNumber });
         }
 
@@ -83,25 +69,16 @@ namespace ChapeauProject.Controllers
         public IActionResult AddItemToOrder(int menuItemID)
         {
             var order = GetActiveOrder();
+            string? error = _orderService.ValidateAddItem(order, menuItemID);
+
+            if (error != null)
+            {
+                TempData["ErrorMessage"] = error;
+                return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
+            }
+
             var item = _menuService.GetById(menuItemID);
-
-            if (item == null)
-                return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
-
-            if (!item.IsAvailable)
-            {
-                TempData["ErrorMessage"] = $"{item.ItemName} is out of stock!";
-                return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
-            }
-
-            var existing = order.OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
-            if (existing != null && !item.IsInStock(existing.Quantity))
-            {
-                TempData["ErrorMessage"] = $"Stock ceiling reached for {item.ItemName}.";
-                return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
-            }
-
-            order.AddItem(item);
+            order.AddItem(item!);
             SetActiveOrder(order);
             return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
         }
@@ -109,18 +86,13 @@ namespace ChapeauProject.Controllers
         [HttpPost]
         public IActionResult IncreaseQuantity(int menuItemID)
         {
-            var order = GetActiveOrder();
-            var dbItem = _menuService.GetById(menuItemID);
-            var basketItem = order.OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
+            var order  = GetActiveOrder();
+            string? error = _orderService.ValidateIncreaseQuantity(order, menuItemID);
 
-            if (basketItem != null && dbItem != null && !dbItem.IsInStock(basketItem.Quantity))
-            {
-                TempData["ErrorMessage"] = "Cannot exceed warehouse stock capacities.";
-            }
+            if (error != null)
+                TempData["ErrorMessage"] = error;
             else
-            {
                 order.IncreaseQuantity(menuItemID);
-            }
 
             SetActiveOrder(order);
             return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
@@ -173,10 +145,8 @@ namespace ChapeauProject.Controllers
 
             order.Guest = guest;
             _orderService.SaveNewOrder(order);
-
             TempData["SuccessMessage"] = "Order dispatched and stock adjusted successfully!";
             ClearActiveOrder();
-
             return RedirectToAction("Index", "Tables");
         }
 

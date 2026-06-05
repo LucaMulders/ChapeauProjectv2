@@ -14,8 +14,10 @@ namespace ChapeauProject.Models
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
         public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
-        public decimal CalculateTotalPrice() =>
-            OrderItems.Sum(oi => (oi.MenuItem?.Price ?? 0) * oi.Quantity);
+        public decimal CalculateTotalPrice()
+        {
+            return OrderItems.Sum(oi => (oi.MenuItem?.Price ?? 0) * oi.Quantity);
+        }
 
         public void AddItem(MenuItem item)
         {

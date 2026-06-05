@@ -9,9 +9,20 @@
         public int StockQuantity { get; set; }
         public Menu? AssociatedMenu { get; set; }
 
-        public bool IsAvailable => StockQuantity > 0;
-        public bool IsInStock(int quantity) => quantity < StockQuantity;
-        public string PriceDisplay => $"€{Price:F2}";
+        public bool IsAvailable
+        {
+            get { return StockQuantity > 0; }
+        }
+
+        public bool IsInStock(int quantity)
+        {
+            return quantity < StockQuantity;
+        }
+
+        public string PriceDisplay
+        {
+            get { return $"€{Price:F2}"; }
+        }
 
         public MenuItem(int id, string name, decimal price, decimal vatRate, int stock, Menu? menu)
         {

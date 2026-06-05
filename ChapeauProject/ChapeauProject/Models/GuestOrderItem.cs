@@ -8,8 +8,19 @@ namespace ChapeauProject.Models
         public MenuItem MenuItem { get; set; } = new MenuItem(0, string.Empty, 0, 0, 0, null);
 
         // Convenience passthroughs for existing code
-        public string ItemName => MenuItem.ItemName;
-        public decimal Price => MenuItem.Price;
-        public decimal VatRate => MenuItem.VatRate;
+        public string ItemName
+        {
+            get { return MenuItem.ItemName; }
+        }
+
+        public decimal Price
+        {
+            get { return MenuItem.Price; }
+        }
+
+        public decimal VatRate
+        {
+            get { return MenuItem.VatRate; }
+        }
     }
 }

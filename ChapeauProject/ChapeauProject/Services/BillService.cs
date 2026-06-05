@@ -8,16 +8,40 @@ namespace ChapeauProject.Services
     {
         private readonly IBillRepository  _billRepository;
         private readonly ITableRepository _tableRepository;
+        private readonly ITableService    _tableService;
 
-        public BillService(IBillRepository billRepository, ITableRepository tableRepository)
+        public BillService(IBillRepository billRepository, ITableRepository tableRepository, ITableService tableService)
         {
             _billRepository  = billRepository;
             _tableRepository = tableRepository;
+            _tableService    = tableService;
+        }
+
+        public BillViewModel GetPayViewModel(int tableNumber)
+        {
+            var orders = _tableService.GetTableOrders(tableNumber);
+            return new BillViewModel
+            {
+                TableNumber    = orders.TableNumber,
+                Guests         = orders.Guests,
+                SubTotalAmount = orders.SubTotalAmount,
+                LowVAT         = orders.LowVAT,
+                HighVAT        = orders.HighVAT,
+                TotalAmount    = orders.TotalAmount
+            };
+        }
+
+        public BillViewModel GetSplitViewModel(int tableNumber, SplitMode splitMode, int splitCount)
+        {
+            var orders    = _tableService.GetTableOrders(tableNumber);
+            var viewModel = BuildBillViewModel(orders, splitMode, splitCount);
+            AddPayers(viewModel, orders, splitMode);
+            return viewModel;
         }
 
         public void ProcessPayment(BillViewModel model)
         {
-            var now   = DateTime.Now;
+            var now    = DateTime.Now;
             int billId = CreateBill(model, now);
 
             if (model.SplitMode == SplitMode.Single)
@@ -27,6 +51,61 @@ namespace ChapeauProject.Services
 
             _billRepository.CompleteOrdersForTable(model.TableNumber);
             _tableRepository.SetFree(model.TableNumber);
+        }
+
+        private BillViewModel BuildBillViewModel(TableOrderViewModel orders, SplitMode splitMode, int splitCount)
+        {
+            return new BillViewModel
+            {
+                TableNumber    = orders.TableNumber,
+                Guests         = orders.Guests,
+                SubTotalAmount = orders.SubTotalAmount,
+                LowVAT         = orders.LowVAT,
+                HighVAT        = orders.HighVAT,
+                TotalAmount    = orders.TotalAmount,
+                SplitMode      = splitMode,
+                SplitCount     = splitMode == SplitMode.Equal ? Math.Max(1, splitCount) : 1
+            };
+        }
+
+        private void AddPayers(BillViewModel viewModel, TableOrderViewModel orders, SplitMode splitMode)
+        {
+            if (splitMode == SplitMode.Equal)
+                AddEqualPayers(viewModel);
+            else if (splitMode == SplitMode.Custom)
+                AddCustomPayers(viewModel);
+            else if (splitMode == SplitMode.ByGuest)
+                AddByGuestPayers(viewModel, orders);
+        }
+
+        private void AddEqualPayers(BillViewModel viewModel)
+        {
+            decimal share = Math.Round(viewModel.TotalAmount / viewModel.SplitCount, 2);
+            for (int i = 1; i <= viewModel.SplitCount; i++)
+                viewModel.Payers.Add(new SplitPayerViewModel { Name = $"Person {i}", AmountDue = share });
+        }
+
+        private void AddCustomPayers(BillViewModel viewModel)
+        {
+            viewModel.Payers.Add(new SplitPayerViewModel { Name = "Person 1", AmountDue = 0 });
+        }
+
+        private void AddByGuestPayers(BillViewModel viewModel, TableOrderViewModel orders)
+        {
+            foreach (var guest in orders.Guests)
+            {
+                decimal guestTotal = guest.Items.Sum(i => i.Price * i.Quantity);
+                decimal vatShare   = orders.TotalAmount > 0
+                    ? guestTotal * (orders.TotalAmount / orders.SubTotalAmount)
+                    : guestTotal;
+
+                viewModel.Payers.Add(new SplitPayerViewModel
+                {
+                    Name      = guest.FullName,
+                    GuestID   = guest.GuestID,
+                    AmountDue = Math.Round(vatShare, 2)
+                });
+            }
         }
 
         private int CreateBill(BillViewModel model, DateTime now)
@@ -70,7 +149,13 @@ namespace ChapeauProject.Services
             }
         }
 
-        private static string? NullIfEmpty(string? value) =>
-            string.IsNullOrWhiteSpace(value) ? null : value;
+        private static string? NullIfEmpty(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+            return value;
+        }
     }
 }
