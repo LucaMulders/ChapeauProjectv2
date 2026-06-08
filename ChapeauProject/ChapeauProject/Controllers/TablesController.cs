@@ -25,13 +25,19 @@ namespace ChapeauProject.Controllers
                 var viewModel = tables.Select(t =>
                 {
                     var categories = _tableService.GetRunningOrderCategories(t.TableNumber);
+                    int guestCount;
+                    if (t.IsOccupied)
+                        guestCount = _tableService.GetGuestCount(t.TableNumber);
+                    else
+                        guestCount = 0;
+
                     var vm = new TablesViewModel
                     {
-                        Table        = t,
-                        OrderCount   = _tableService.GetOrderCount(t.TableNumber),
-                        HasFoodOrder = categories.HasFood,
+                        Table         = t,
+                        OrderCount    = _tableService.GetOrderCount(t.TableNumber),
+                        HasFoodOrder  = categories.HasFood,
                         HasDrinkOrder = categories.HasDrink,
-                        GuestCount   = t.IsOccupied ? _tableService.GetGuestCount(t.TableNumber) : 0
+                        GuestCount    = guestCount
                     };
                     return vm;
                 }).OrderBy(t => t.Table.TableNumber).ToList();

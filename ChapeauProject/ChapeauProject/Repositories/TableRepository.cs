@@ -231,7 +231,7 @@ namespace ChapeauProject.Repositories
             return guests;
         }
 
-        public void SetFree(int tableNumber)
+        public void MarkTableAsFree(int tableNumber)
         {
             using (SqlConnection connection = GetConnection())
             {

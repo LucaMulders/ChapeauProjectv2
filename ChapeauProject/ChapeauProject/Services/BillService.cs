@@ -50,12 +50,18 @@ namespace ChapeauProject.Services
                 CreateSplitPayments(model, billId, now);
 
             _billRepository.CompleteOrdersForTable(model.TableNumber);
-            _tableRepository.SetFree(model.TableNumber);
+            _tableRepository.MarkTableAsFree(model.TableNumber);
             _tableService.RemoveGuests(model.TableNumber);
         }
 
         private BillViewModel BuildBillViewModel(TableOrderViewModel orders, SplitMode splitMode, int splitCount)
         {
+            int resolvedSplitCount;
+            if (splitMode == SplitMode.Equal)
+                resolvedSplitCount = Math.Max(1, splitCount);
+            else
+                resolvedSplitCount = 1;
+
             return new BillViewModel
             {
                 TableNumber    = orders.TableNumber,
@@ -65,7 +71,7 @@ namespace ChapeauProject.Services
                 HighVAT        = orders.HighVAT,
                 TotalAmount    = orders.TotalAmount,
                 SplitMode      = splitMode,
-                SplitCount     = splitMode == SplitMode.Equal ? Math.Max(1, splitCount) : 1
+                SplitCount     = resolvedSplitCount
             };
         }
 
@@ -87,7 +93,12 @@ namespace ChapeauProject.Services
 
             for (int i = 1; i <= viewModel.SplitCount; i++)
             {
-                decimal amount = i == viewModel.SplitCount ? lastShare : share;
+                decimal amount;
+                if (i == viewModel.SplitCount)
+                    amount = lastShare;
+                else
+                    amount = share;
+
                 viewModel.Payers.Add(new SplitPayerViewModel { Name = $"Person {i}", AmountDue = amount });
             }
         }

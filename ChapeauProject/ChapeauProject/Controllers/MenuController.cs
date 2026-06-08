@@ -19,8 +19,7 @@ namespace ChapeauProject.Controllers
         {
             try
             {
-                MenuCard card = Enum.TryParse(menuCard, true, out MenuCard parsed) ? parsed : MenuCard.Lunch;
-                List<MenuItem> filteredItems = _menuService.GetCourseFiltered(card, category);
+                List<MenuItem> filteredItems = _menuService.GetCourseFilteredByName(menuCard, category);
 
                 MenuViewModel viewModel = new MenuViewModel
                 {

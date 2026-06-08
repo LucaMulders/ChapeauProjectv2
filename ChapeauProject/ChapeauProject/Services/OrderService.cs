@@ -45,7 +45,7 @@ namespace ChapeauProject.Services
 
         public string? ValidateAddItem(Order order, int menuItemID)
         {
-            var item = _menuService.GetById(menuItemID);
+            var item = _menuService.GetMenuItemById(menuItemID);
             if (item == null) return "Item not found.";
             if (!item.IsAvailable) return $"{item.ItemName} is out of stock!";
 
@@ -58,7 +58,7 @@ namespace ChapeauProject.Services
 
         public string? ValidateIncreaseQuantity(Order order, int menuItemID)
         {
-            var dbItem     = _menuService.GetById(menuItemID);
+            var dbItem     = _menuService.GetMenuItemById(menuItemID);
             var basketItem = order.OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
 
             if (basketItem != null && dbItem != null && !dbItem.IsInStock(basketItem.Quantity))
@@ -92,6 +92,14 @@ namespace ChapeauProject.Services
             _orderRepository.SaveNewOrder(order);
         }
 
+        private static CourseName ParseCourseName(string raw)
+        {
+            if (Enum.TryParse(raw, out CourseName course))
+                return course;
+            else
+                return CourseName.Other;
+        }
+
         private List<RunningOrderViewModel> MapToViewModels(List<RunningOrder> orders)
         {
             return orders.Select(o => new RunningOrderViewModel
@@ -102,11 +110,11 @@ namespace ChapeauProject.Services
                 Items       = o.Items.Select(i => new RunningOrderItemViewModel
                 {
                     OrderItemID       = i.OrderItemID,
-                    ItemName          = i.ItemName,
+                    ItemName          = i.MenuItem.ItemName,
                     Quantity          = i.Quantity,
                     PreparationStatus = i.PreparationStatus,
-                    MenuCard          = i.MenuCard,
-                    CourseName        = i.CourseName,
+                    MenuCard          = i.MenuItem.AssociatedMenu?.CardType.ToString() ?? string.Empty,
+                    CourseName        = ParseCourseName(i.CourseName),
                     Comment           = i.Comment
                 }).ToList()
             }).ToList();

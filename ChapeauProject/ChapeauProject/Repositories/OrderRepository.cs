@@ -78,7 +78,7 @@ namespace ChapeauProject.Repositories
         {
             string query = $@"
                 SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
-                       oi.OrderItemID, mi.ItemName, oi.Quantity, oi.PreparationStatus,
+                       oi.OrderItemID, mi.MenuItemID, mi.ItemName, oi.Quantity, oi.PreparationStatus,
                        mi.MenuCard, ISNULL(c.CourseName, 'Other') AS CourseName, oi.Comment
                 FROM Orders o
                 JOIN Guests g ON o.GuestID = g.GuestID
@@ -95,7 +95,7 @@ namespace ChapeauProject.Repositories
         {
             string query = $@"
                 SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
-                       oi.OrderItemID, mi.ItemName, oi.Quantity, oi.PreparationStatus,
+                       oi.OrderItemID, mi.MenuItemID, mi.ItemName, oi.Quantity, oi.PreparationStatus,
                        mi.MenuCard, ISNULL(c.CourseName, 'Other') AS CourseName, oi.Comment
                 FROM Orders o
                 JOIN Guests g ON o.GuestID = g.GuestID
@@ -134,10 +134,14 @@ namespace ChapeauProject.Repositories
                     orders[orderID].Items.Add(new RunningOrderItem
                     {
                         OrderItemID       = reader.GetInt32(reader.GetOrdinal("OrderItemID")),
-                        ItemName          = reader.GetString(reader.GetOrdinal("ItemName")),
+                        MenuItem          = new MenuItem(
+                            reader.GetInt32(reader.GetOrdinal("MenuItemID")),
+                            reader.GetString(reader.GetOrdinal("ItemName")),
+                            0, 0, 0,
+                            new Menu(Enum.Parse<MenuCard>(reader.GetString(reader.GetOrdinal("MenuCard"))))
+                        ),
                         Quantity          = reader.GetInt32(reader.GetOrdinal("Quantity")),
                         PreparationStatus = Enum.Parse<PreparationStatus>(reader.GetString(reader.GetOrdinal("PreparationStatus"))),
-                        MenuCard          = reader.GetString(reader.GetOrdinal("MenuCard")),
                         CourseName        = reader.GetString(reader.GetOrdinal("CourseName")),
                         Comment           = reader.IsDBNull(reader.GetOrdinal("Comment")) ? null : reader.GetString(reader.GetOrdinal("Comment"))
                     });

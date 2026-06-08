@@ -14,9 +14,9 @@ namespace ChapeauProject.Services
             _menuRepository = menuRepository;
         }
 
-        public MenuItem? GetById(int menuItemID)
+        public MenuItem? GetMenuItemById(int menuItemID)
         {
-            return _menuRepository.GetById(menuItemID);
+            return _menuRepository.GetMenuItemById(menuItemID);
         }
 
         public List<MenuItem> GetCourseFiltered(MenuCard cardFilter, string courseFilter)
@@ -24,20 +24,14 @@ namespace ChapeauProject.Services
             return _menuRepository.GetCourseFiltered(cardFilter, courseFilter);
         }
 
-        public List<MenuItem> GetMenuItemForWaiter(string menuCard, string courseFilter)
-        {
-            MenuCard parsedCard;
 
-          
-            if (Enum.TryParse(menuCard, true, out parsedCard))
-            {
-                return _menuRepository.GetCourseFiltered(parsedCard, courseFilter);
-            }
+        public List<MenuItem> GetCourseFilteredByName(string menuCard, string courseFilter)
+        {
+            if (Enum.TryParse(menuCard, true, out MenuCard parsed))
+                return GetCourseFiltered(parsed, courseFilter);
             else
-            {
-                // default
-                return _menuRepository.GetCourseFiltered(MenuCard.Lunch, courseFilter);
-            }
+                return GetCourseFiltered(MenuCard.Lunch, courseFilter);
         }
+
     }
 }

@@ -71,7 +71,7 @@ namespace ChapeauProject.Repositories
             return new Staff(id, firstName, lastName, role, password);
         }
 
-        public Staff? GetById(int staffId)
+        public Staff? GetStaffById(int staffId)
         {
             using (var connection = GetConnection())
             {

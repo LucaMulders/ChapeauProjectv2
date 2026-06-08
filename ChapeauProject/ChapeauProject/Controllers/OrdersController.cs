@@ -23,9 +23,18 @@ namespace ChapeauProject.Controllers
             try
             {
                 var tableGroups = _orderService.GetOrdersGroupedByTable(filter);
-                ViewBag.Filter       = filter;
-                ViewBag.PageTitle    = filter == "finished" ? "Finished Orders Today" : "Running Orders";
-                ViewBag.EmptyMessage = filter == "finished" ? "No finished orders today yet." : "No running orders at the moment.";
+                ViewBag.Filter = filter;
+
+                if (filter == "finished")
+                {
+                    ViewBag.PageTitle    = "Finished Orders Today";
+                    ViewBag.EmptyMessage = "No finished orders today yet.";
+                }
+                else
+                {
+                    ViewBag.PageTitle    = "Running Orders";
+                    ViewBag.EmptyMessage = "No running orders at the moment.";
+                }
                 return View(tableGroups);
             }
             catch (Exception ex)
@@ -62,7 +71,7 @@ namespace ChapeauProject.Controllers
                 return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber, fragment = "basket" });
             }
 
-            var item = _menuService.GetById(menuItemID);
+            var item = _menuService.GetMenuItemById(menuItemID);
             order.AddItem(item!);
             SetActiveOrder(order);
             return Redirect(Url.Action("Details", "Tables", new { id = order.Table.TableNumber }) + "#basket");

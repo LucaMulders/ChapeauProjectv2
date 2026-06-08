@@ -11,10 +11,9 @@ namespace ChapeauProject.Models
     public class RunningOrderItem
     {
         public int OrderItemID { get; set; }
-        public string ItemName { get; set; } = string.Empty;
+        public MenuItem MenuItem { get; set; } = new MenuItem();
         public int Quantity { get; set; }
         public PreparationStatus PreparationStatus { get; set; }
-        public string MenuCard { get; set; } = string.Empty;
         public string CourseName { get; set; } = string.Empty;
         public string? Comment { get; set; }
     }

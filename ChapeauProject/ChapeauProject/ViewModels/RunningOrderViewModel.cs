@@ -4,7 +4,7 @@ namespace ChapeauProject.ViewModels
 {
     public class CourseGroupViewModel
     {
-        public string CourseName { get; set; } = string.Empty;
+        public CourseName CourseName { get; set; }
         public List<RunningOrderItemViewModel> Items { get; set; } = new();
 
         public bool AllReady     => Items.All(i => i.PreparationStatus == PreparationStatus.Ready);
@@ -18,7 +18,7 @@ namespace ChapeauProject.ViewModels
 
     public class RunningOrderViewModel
     {
-        private static readonly string[] CourseOrder = { "Starters", "Main", "Desserts", "Other" };
+        private static readonly CourseName[] CourseOrder = { CourseName.Starters, CourseName.Main, CourseName.Desserts, CourseName.Other };
 
         public int OrderID { get; set; }
         public int TableNumber { get; set; }
@@ -60,7 +60,7 @@ namespace ChapeauProject.ViewModels
         public int Quantity { get; set; }
         public PreparationStatus PreparationStatus { get; set; }
         public string MenuCard { get; set; } = string.Empty;
-        public string CourseName { get; set; } = string.Empty;
+        public CourseName CourseName { get; set; }
         public string? Comment { get; set; }
 
         public string StatusPillClass => PreparationStatus switch

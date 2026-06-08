@@ -2,9 +2,9 @@
 {
     public enum CourseName
     {
-        Starter,
-        MainCourse,
-        Dessert,
-        Drink
+        Starters,
+        Main,
+        Desserts,
+        Other
     }
 }

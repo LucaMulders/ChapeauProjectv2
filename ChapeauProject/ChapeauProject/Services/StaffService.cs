@@ -19,9 +19,9 @@ namespace ChapeauProject.Services
             return _staffRepository.GetAllStaff();
         }
 
-        public Staff? GetById(int id)
+        public Staff? GetStaffById(int id)
         {
-            return _staffRepository.GetById(id);
+            return _staffRepository.GetStaffById(id);
         }
 
         public Staff? GetByLoginCredentials(int staffID, string password)

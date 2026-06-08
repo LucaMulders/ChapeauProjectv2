@@ -5,11 +5,8 @@ namespace ChapeauProject.Services
 {
     public interface IMenuService
     {
-        MenuItem? GetById(int menuItemID);
-
-      
+        MenuItem? GetMenuItemById(int menuItemID);
         List<MenuItem> GetCourseFiltered(MenuCard cardFilter, string courseFilter);
-
-        List<MenuItem> GetMenuItemForWaiter(string menuCard, string courseFilter);
+        List<MenuItem> GetCourseFilteredByName(string menuCard, string courseFilter);
     }
 }

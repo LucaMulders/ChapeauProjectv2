@@ -90,7 +90,7 @@ namespace ChapeauProject.Repositories
             );
         }
 
-        public MenuItem? GetById(int menuItemID)
+        public MenuItem? GetMenuItemById(int menuItemID)
         {
             // Search Single row can fail if connection drops
             try

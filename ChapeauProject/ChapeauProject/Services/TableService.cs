@@ -89,9 +89,9 @@ namespace ChapeauProject.Services
             return _tableRepository.GetRunningOrderCategories(tableNumber);
         }
 
-        public void SetFree(int tableNumber)
+        public void MarkTableAsFree(int tableNumber)
         {
-            _tableRepository.SetFree(tableNumber);
+            _tableRepository.MarkTableAsFree(tableNumber);
         }
 
         public void RemoveGuests(int tableNumber)
