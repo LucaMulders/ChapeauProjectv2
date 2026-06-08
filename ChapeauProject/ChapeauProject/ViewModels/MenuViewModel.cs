@@ -1,5 +1,4 @@
-﻿using ChapeauProject.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace ChapeauProject.ViewModels
 {

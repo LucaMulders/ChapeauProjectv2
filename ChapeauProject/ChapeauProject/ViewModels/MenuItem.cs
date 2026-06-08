@@ -1,4 +1,6 @@
-﻿namespace ChapeauProject.Models
+﻿using ChapeauProject.Models;
+
+namespace ChapeauProject.ViewModels
 {
     public class MenuItem
     {

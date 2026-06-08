@@ -1,5 +1,6 @@
 ﻿using ChapeauProject.Models;
 using ChapeauProject.Repositories;
+using ChapeauProject.ViewModels;
 using System;
 using System.Collections.Generic;
 
