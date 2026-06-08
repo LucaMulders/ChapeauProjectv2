@@ -21,6 +21,31 @@ namespace ChapeauProject.Services
             return _tableRepository.GetAllTables();
         }
 
+        public List<TablesViewModel> GetTableSummaries(bool occupiedOnly = false)
+        {
+            var tables = occupiedOnly ? GetAllOccupiedTables() : GetAllTables();
+
+            return tables.Select(t =>
+            {
+                var categories = _tableRepository.GetRunningOrderCategories(t.TableNumber);
+
+                int guestCount;
+                if (t.IsOccupied)
+                    guestCount = _tableRepository.GetGuestCount(t.TableNumber);
+                else
+                    guestCount = 0;
+
+                return new TablesViewModel
+                {
+                    Table         = t,
+                    OrderCount    = _tableRepository.GetOrderCount(t.TableNumber),
+                    HasFoodOrder  = categories.HasFood,
+                    HasDrinkOrder = categories.HasDrink,
+                    GuestCount    = guestCount
+                };
+            }).OrderBy(t => t.Table.TableNumber).ToList();
+        }
+
         public List<Table> GetAllOccupiedTables()
         {
             return _tableRepository.GetAllOccupiedTables();

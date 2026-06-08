@@ -29,7 +29,7 @@ namespace ChapeauProject.Services
         public List<TableOrderGroupViewModel> GetOrdersGroupedByTable(string filter)
         {
             List<RunningOrderViewModel> orders;
-            if (filter == "finished")
+            if (filter == OrderFilter.Finished)
                 orders = GetFinishedOrdersToday();
             else
                 orders = GetAllOrdersByStatus();

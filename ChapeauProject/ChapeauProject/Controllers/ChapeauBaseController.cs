@@ -23,6 +23,11 @@ namespace ChapeauProject.Controllers
             HttpContext.Session.Remove(SessionKey);
         }
 
+        protected IActionResult RedirectToBasket(int tableNumber)
+        {
+            return Redirect(Url.Action("Details", "Tables", new { id = tableNumber }) + "#basket");
+        }
+
         protected Staff GetLoggedInStaff()
         {
             var staff = HttpContext.Session.GetObject<Staff>("LoggedInStaff");

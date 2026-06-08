@@ -15,7 +15,7 @@ namespace ChapeauProject.Controllers
             _menuService = menuService;
         }
 
-        public IActionResult Index(string menuCard = "Lunch", string category = CourseFilter.All)
+        public IActionResult Index(string menuCard = nameof(MenuCard.Lunch), string category = CourseFilter.All)
         {
             try
             {

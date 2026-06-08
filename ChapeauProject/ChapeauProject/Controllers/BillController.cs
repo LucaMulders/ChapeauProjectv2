@@ -20,21 +20,7 @@ namespace ChapeauProject.Controllers
         {
             try
             {
-                var tables = _tableService.GetAllOccupiedTables()
-                    .Select(t =>
-                    {
-                        var categories = _tableService.GetRunningOrderCategories(t.TableNumber);
-                        return new TablesViewModel
-                        {
-                            Table         = t,
-                            OrderCount    = _tableService.GetOrderCount(t.TableNumber),
-                            GuestCount    = _tableService.GetGuestCount(t.TableNumber),
-                            HasFoodOrder  = categories.HasFood,
-                            HasDrinkOrder = categories.HasDrink
-                        };
-                    })
-                    .ToList();
-
+                var tables = _tableService.GetTableSummaries(occupiedOnly: true);
                 return View(tables);
             }
             catch (Exception ex)
@@ -89,7 +75,7 @@ namespace ChapeauProject.Controllers
                 }
 
                 _billService.ProcessPayment(model);
-                return RedirectToAction("Confirmation", new { id = model.TableNumber });
+                return RedirectToAction("Confirmation", new { tableNumber = model.TableNumber });
             }
             catch (Exception ex)
             {
@@ -99,9 +85,9 @@ namespace ChapeauProject.Controllers
         }
 
         [HttpGet]
-        public IActionResult Confirmation(int id)
+        public IActionResult Confirmation(int tableNumber)
         {
-            ViewBag.TableNumber = id;
+            ViewBag.TableNumber = tableNumber;
             return View();
         }
     }

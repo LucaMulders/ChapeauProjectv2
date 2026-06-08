@@ -18,14 +18,14 @@ namespace ChapeauProject.Controllers
             _tableService = tableService;
         }
 
-        public IActionResult Index(string filter = "running")
+        public IActionResult Index(string filter = OrderFilter.Running)
         {
             try
             {
                 var tableGroups = _orderService.GetOrdersGroupedByTable(filter);
                 ViewBag.Filter = filter;
 
-                if (filter == "finished")
+                if (filter == OrderFilter.Finished)
                 {
                     ViewBag.PageTitle    = "Finished Orders Today";
                     ViewBag.EmptyMessage = "No finished orders today yet.";
@@ -50,9 +50,8 @@ namespace ChapeauProject.Controllers
             var loggedInStaff = GetLoggedInStaff();
             SetActiveOrder(new Order
             {
-                Table      = _tableService.GetByTableNumber(tableNumber) ?? new Table { TableNumber = tableNumber },
-                Staff      = loggedInStaff,
-                OrderItems = new System.Collections.Generic.List<OrderItem>()
+                Table = _tableService.GetByTableNumber(tableNumber) ?? new Table { TableNumber = tableNumber },
+                Staff = loggedInStaff
             });
             return RedirectToAction("Details", "Tables", new { id = tableNumber });
         }
@@ -74,7 +73,7 @@ namespace ChapeauProject.Controllers
             var item = _menuService.GetMenuItemById(menuItemID);
             order.AddItem(item!);
             SetActiveOrder(order);
-            return Redirect(Url.Action("Details", "Tables", new { id = order.Table.TableNumber }) + "#basket");
+            return RedirectToBasket(order.Table.TableNumber);
         }
 
         [HttpPost]
@@ -89,7 +88,7 @@ namespace ChapeauProject.Controllers
                 order.IncreaseQuantity(menuItemID);
 
             SetActiveOrder(order);
-            return Redirect(Url.Action("Details", "Tables", new { id = order.Table.TableNumber }) + "#basket");
+            return RedirectToBasket(order.Table.TableNumber);
         }
 
         [HttpPost]
@@ -98,7 +97,7 @@ namespace ChapeauProject.Controllers
             var order = GetActiveOrder();
             order.DecreaseQuantity(menuItemID);
             SetActiveOrder(order);
-            return Redirect(Url.Action("Details", "Tables", new { id = order.Table.TableNumber }) + "#basket");
+            return RedirectToBasket(order.Table.TableNumber);
         }
 
         [HttpPost]
@@ -107,7 +106,7 @@ namespace ChapeauProject.Controllers
             var order = GetActiveOrder();
             order.RemoveItem(menuItemID);
             SetActiveOrder(order);
-            return Redirect(Url.Action("Details", "Tables", new { id = order.Table.TableNumber }) + "#basket");
+            return RedirectToBasket(order.Table.TableNumber);
         }
 
         [HttpPost]
@@ -116,7 +115,7 @@ namespace ChapeauProject.Controllers
             var order = GetActiveOrder();
             order.UpdateItemComment(menuItemID, comment);
             SetActiveOrder(order);
-            return Redirect(Url.Action("Details", "Tables", new { id = order.Table.TableNumber }) + "#basket");
+            return RedirectToBasket(order.Table.TableNumber);
         }
 
         [HttpPost]

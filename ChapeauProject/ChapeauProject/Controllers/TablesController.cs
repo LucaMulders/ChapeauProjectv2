@@ -21,26 +21,7 @@ namespace ChapeauProject.Controllers
         {
             try
             {
-                var tables = _tableService.GetAllTables();
-                var viewModel = tables.Select(t =>
-                {
-                    var categories = _tableService.GetRunningOrderCategories(t.TableNumber);
-                    int guestCount;
-                    if (t.IsOccupied)
-                        guestCount = _tableService.GetGuestCount(t.TableNumber);
-                    else
-                        guestCount = 0;
-
-                    var vm = new TablesViewModel
-                    {
-                        Table         = t,
-                        OrderCount    = _tableService.GetOrderCount(t.TableNumber),
-                        HasFoodOrder  = categories.HasFood,
-                        HasDrinkOrder = categories.HasDrink,
-                        GuestCount    = guestCount
-                    };
-                    return vm;
-                }).OrderBy(t => t.Table.TableNumber).ToList();
+                var viewModel = _tableService.GetTableSummaries();
 
                 ViewBag.FreeCount     = viewModel.Count(t => !t.Table.IsOccupied);
                 ViewBag.OccupiedCount = viewModel.Count(t =>  t.Table.IsOccupied);
@@ -62,7 +43,7 @@ namespace ChapeauProject.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                TempData["Error"] = ex.Message;
+                TempData["ErrorMessage"] = ex.Message;
             }
             catch (Exception ex)
             {
@@ -71,6 +52,7 @@ namespace ChapeauProject.Controllers
             return RedirectToAction("Index");
         }
 
+        // NOTE 'id' matches the default ASP.NET route segment. Renaming to tableNumber means updating 10+ view links and 8 redirects. Should we?
         public IActionResult Details(int id, MenuCard cardFilter = MenuCard.Lunch, string courseFilter = CourseFilter.All)
         {
             try
@@ -84,9 +66,8 @@ namespace ChapeauProject.Controllers
                     var loggedInStaff = GetLoggedInStaff();
                     activeOrder = new Order
                     {
-                        Table      = _tableService.GetByTableNumber(id) ?? new Table { TableNumber = id },
-                        Staff      = loggedInStaff,
-                        OrderItems = new System.Collections.Generic.List<OrderItem>()
+                        Table = _tableService.GetByTableNumber(id) ?? new Table { TableNumber = id },
+                        Staff = loggedInStaff
                     };
                     SetActiveOrder(activeOrder);
                 }

@@ -6,6 +6,7 @@ namespace ChapeauProject.Services
     public interface ITableService
     {
         List<Table> GetAllTables();
+        List<TablesViewModel> GetTableSummaries(bool occupiedOnly = false);
         List<Table> GetAllOccupiedTables();
         Table? GetByTableNumber(int tableNumber);
         void ToggleOccupied(int tableNumber);
