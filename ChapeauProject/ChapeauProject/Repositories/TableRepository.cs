@@ -93,33 +93,19 @@ namespace ChapeauProject.Repositories
 
         public List<GuestOrder> GetTableOrders(int tableNumber)
         {
+            string query = $@"
+                SELECT g.GuestID, g.FirstName, g.LastName,
+                       oi.OrderItemID, mi.MenuItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus
+                FROM Guests g
+                JOIN Orders o ON g.GuestID = o.GuestID
+                JOIN OrderItems oi ON o.OrderID = oi.OrderID
+                JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
+                WHERE g.TableNumber = @TableNumber
+                  AND o.OrderStatus = '{StatusPending}'";
+
+            var guestOrders = new Dictionary<int, GuestOrder>();
+
             using (SqlConnection connection = GetConnection())
-            {
-                var guests = GetGuestsAtTable(tableNumber, connection);
-
-                foreach (var guest in guests)
-                {
-                    guest.Items = GetItemsForGuest(guest.GuestID, connection);
-                }
-
-                return guests;
-            }
-        }
-
-        private Guest ReadGuest(SqlDataReader reader)
-        {
-            return new Guest(
-                reader.GetInt32(reader.GetOrdinal("GuestID")),
-                reader.GetString(reader.GetOrdinal("FirstName")),
-                reader.GetString(reader.GetOrdinal("LastName"))
-            );
-        }
-
-        private List<GuestOrder> GetGuestsAtTable(int tableNumber, SqlConnection connection)
-        {
-            var guests = new List<GuestOrder>();
-
-            string query = "SELECT GuestID, FirstName, LastName FROM Guests WHERE TableNumber = @TableNumber";
             using (SqlCommand cmd = new SqlCommand(query, connection))
             {
                 cmd.Parameters.AddWithValue("@TableNumber", tableNumber);
@@ -127,38 +113,22 @@ namespace ChapeauProject.Repositories
                 {
                     while (reader.Read())
                     {
-                        guests.Add(new GuestOrder
+                        int guestId = reader.GetInt32(reader.GetOrdinal("GuestID"));
+
+                        if (!guestOrders.ContainsKey(guestId))
                         {
-                            Guest = ReadGuest(reader),
-                            Items = new List<GuestOrderItem>()
-                        });
-                    }
-                }
-            }
+                            guestOrders[guestId] = new GuestOrder
+                            {
+                                Guest = new Guest(
+                                    guestId,
+                                    reader.GetString(reader.GetOrdinal("FirstName")),
+                                    reader.GetString(reader.GetOrdinal("LastName"))
+                                ),
+                                Items = new List<GuestOrderItem>()
+                            };
+                        }
 
-            return guests;
-        }
-
-        private List<GuestOrderItem> GetItemsForGuest(int guestId, SqlConnection connection)
-        {
-            var items = new List<GuestOrderItem>();
-
-            string query = $@"
-                SELECT oi.OrderItemID, mi.MenuItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus
-                FROM Orders o
-                JOIN OrderItems oi ON o.OrderID = oi.OrderID
-                JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
-                WHERE o.GuestID = @GuestID
-                  AND o.OrderStatus = '{StatusPending}'";
-
-            using (SqlCommand cmd = new SqlCommand(query, connection))
-            {
-                cmd.Parameters.AddWithValue("@GuestID", guestId);
-                using (SqlDataReader reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        items.Add(new GuestOrderItem
+                        guestOrders[guestId].Items.Add(new GuestOrderItem
                         {
                             OrderItemID       = reader.GetInt32(reader.GetOrdinal("OrderItemID")),
                             Quantity          = reader.GetInt32(reader.GetOrdinal("Quantity")),
@@ -176,7 +146,7 @@ namespace ChapeauProject.Repositories
                 }
             }
 
-            return items;
+            return guestOrders.Values.ToList();
         }
 
         public int GetOrderCount(int tableNumber)

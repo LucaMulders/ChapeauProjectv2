@@ -1,5 +1,4 @@
 using ChapeauProject.Models;
-using ChapeauProject.ViewModels;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
@@ -74,7 +73,7 @@ namespace ChapeauProject.Repositories
         {
             string query = $@"
                 SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
-                       oi.OrderItemID, mi.MenuItemID, mi.ItemName, oi.Quantity, oi.PreparationStatus,
+                       oi.OrderItemID, mi.MenuItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus,
                        mi.MenuCard, ISNULL(c.CourseName, 'Other') AS CourseName, oi.Comment
                 FROM Orders o
                 JOIN Guests g ON o.GuestID = g.GuestID
@@ -91,7 +90,7 @@ namespace ChapeauProject.Repositories
         {
             string query = $@"
                 SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
-                       oi.OrderItemID, mi.MenuItemID, mi.ItemName, oi.Quantity, oi.PreparationStatus,
+                       oi.OrderItemID, mi.MenuItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus,
                        mi.MenuCard, ISNULL(c.CourseName, 'Other') AS CourseName, oi.Comment
                 FROM Orders o
                 JOIN Guests g ON o.GuestID = g.GuestID
@@ -133,7 +132,9 @@ namespace ChapeauProject.Repositories
                         MenuItem          = new MenuItem(
                             reader.GetInt32(reader.GetOrdinal("MenuItemID")),
                             reader.GetString(reader.GetOrdinal("ItemName")),
-                            0, 0, 0,
+                            reader.GetDecimal(reader.GetOrdinal("Price")),
+                            reader.GetDecimal(reader.GetOrdinal("VatRate")),
+                            0,
                             new Menu(Enum.Parse<MenuCard>(reader.GetString(reader.GetOrdinal("MenuCard"))))
                         ),
                         Quantity          = reader.GetInt32(reader.GetOrdinal("Quantity")),
