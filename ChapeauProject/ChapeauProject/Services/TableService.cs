@@ -33,6 +33,14 @@ namespace ChapeauProject.Services
 
         public void ToggleOccupied(int tableNumber)
         {
+            var table = _tableRepository.GetByTableNumber(tableNumber);
+            if (table != null && table.IsOccupied)
+            {
+                int pendingOrders = _tableRepository.GetOrderCount(tableNumber);
+                if (pendingOrders > 0)
+                    throw new InvalidOperationException($"Table {tableNumber} still has {pendingOrders} pending order(s) and cannot be marked as free.");
+            }
+
             _tableRepository.ToggleOccupied(tableNumber);
         }
 

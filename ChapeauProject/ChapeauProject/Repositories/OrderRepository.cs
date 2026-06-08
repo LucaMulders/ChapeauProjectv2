@@ -18,11 +18,8 @@ namespace ChapeauProject.Repositories
         private const string PrepReady        = nameof(PreparationStatus.Ready);
         private const string PrepServed       = nameof(PreparationStatus.Served);
 
-        private readonly IMenuRepository _menuRepository;
-
-        public OrderRepository(IConfiguration configuration, IMenuRepository menuRepository) : base(configuration)
+        public OrderRepository(IConfiguration configuration) : base(configuration)
         {
-            _menuRepository = menuRepository;
         }
 
         public void SaveNewOrder(Order order)
@@ -70,7 +67,6 @@ namespace ChapeauProject.Repositories
                     cmd.ExecuteNonQuery();
                 }
 
-                _menuRepository.DeductStockQuantity(item.MenuItem?.MenuItemID ?? 0, item.Quantity);
             }
         }
 

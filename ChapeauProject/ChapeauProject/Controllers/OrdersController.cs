@@ -125,15 +125,10 @@ namespace ChapeauProject.Controllers
             var order = GetActiveOrder();
             int currentTableId = order.Table.TableNumber;
 
-            if (guest.GuestID <= 0)
+            string? validationError = _orderService.ValidateSaveOrder(order, guest);
+            if (validationError != null)
             {
-                TempData["ErrorMessage"] = "Please select a guest before sending the order.";
-                return RedirectToAction("Details", "Tables", new { id = currentTableId });
-            }
-
-            if (!order.OrderItems.Any())
-            {
-                TempData["ErrorMessage"] = "The active order sheet cannot be blank.";
+                TempData["ErrorMessage"] = validationError;
                 return RedirectToAction("Details", "Tables", new { id = currentTableId });
             }
 
@@ -171,13 +166,14 @@ namespace ChapeauProject.Controllers
         [HttpPost]
         public IActionResult CompleteOrder(int orderId)
         {
-            if (!_orderService.AllItemsReady(orderId))
+            try
             {
-                TempData["ErrorMessage"] = "All items must be Served before marking the order as complete.";
-                return RedirectToAction("Index");
+                _orderService.CompleteOrder(orderId);
             }
-
-            _orderService.CompleteOrder(orderId);
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
             return RedirectToAction("Index");
         }
     }

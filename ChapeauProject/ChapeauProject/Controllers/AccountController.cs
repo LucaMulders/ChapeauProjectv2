@@ -1,4 +1,5 @@
 ﻿using ChapeauProject.Models;
+using ChapeauProject.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -45,7 +46,7 @@ namespace ChapeauProject.Controllers
 
         // POST: /Account/Login
         [HttpPost]
-        public async Task<ActionResult> Login(LoginModel loginModel)
+        public async Task<ActionResult> Login(LoginViewModel loginModel)
         {
             try
             {

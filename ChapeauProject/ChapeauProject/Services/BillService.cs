@@ -6,15 +6,13 @@ namespace ChapeauProject.Services
 {
     public class BillService : IBillService
     {
-        private readonly IBillRepository  _billRepository;
-        private readonly ITableRepository _tableRepository;
-        private readonly ITableService    _tableService;
+        private readonly IBillRepository _billRepository;
+        private readonly ITableService   _tableService;
 
-        public BillService(IBillRepository billRepository, ITableRepository tableRepository, ITableService tableService)
+        public BillService(IBillRepository billRepository, ITableService tableService)
         {
-            _billRepository  = billRepository;
-            _tableRepository = tableRepository;
-            _tableService    = tableService;
+            _billRepository = billRepository;
+            _tableService   = tableService;
         }
 
         public BillViewModel GetPayViewModel(int tableNumber)
@@ -39,6 +37,18 @@ namespace ChapeauProject.Services
             return viewModel;
         }
 
+        public string? ValidatePayment(BillViewModel model)
+        {
+            if (model.SplitMode == SplitMode.Custom)
+            {
+                decimal totalPaying = model.Payers.Sum(p => p.AmountDue + p.TipAmount);
+                if (totalPaying < model.TotalAmount)
+                    return $"Total payments (€{totalPaying:F2}) are less than the bill total (€{model.TotalAmount:F2}).";
+            }
+
+            return null;
+        }
+
         public void ProcessPayment(BillViewModel model)
         {
             var now    = DateTime.Now;
@@ -50,7 +60,7 @@ namespace ChapeauProject.Services
                 CreateSplitPayments(model, billId, now);
 
             _billRepository.CompleteOrdersForTable(model.TableNumber);
-            _tableRepository.MarkTableAsFree(model.TableNumber);
+            _tableService.MarkTableAsFree(model.TableNumber);
             _tableService.RemoveGuests(model.TableNumber);
         }
 

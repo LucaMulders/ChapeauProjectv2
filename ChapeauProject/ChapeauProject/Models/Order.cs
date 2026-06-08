@@ -12,7 +12,8 @@ namespace ChapeauProject.Models
         public Staff Staff { get; set; } = new Staff();
         public DateTime OrderTimeStamp { get; set; } = DateTime.Now;
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
-        public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        private readonly List<OrderItem> _orderItems = new List<OrderItem>();
+        public IReadOnlyList<OrderItem> OrderItems => _orderItems;
 
         public decimal CalculateTotalPrice()
         {
@@ -28,7 +29,7 @@ namespace ChapeauProject.Models
             }
             else
             {
-                OrderItems.Add(new OrderItem
+                _orderItems.Add(new OrderItem
                 {
                     MenuItem          = item,
                     Quantity          = 1,
@@ -42,7 +43,7 @@ namespace ChapeauProject.Models
         {
             var item = OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
             if (item != null)
-                OrderItems.Remove(item);
+                _orderItems.Remove(item);
         }
 
         public void IncreaseQuantity(int menuItemID)
@@ -59,7 +60,7 @@ namespace ChapeauProject.Models
 
             item.Quantity--;
             if (item.Quantity <= 0)
-                OrderItems.Remove(item);
+                _orderItems.Remove(item);
         }
 
         public void UpdateItemComment(int menuItemID, string comment)

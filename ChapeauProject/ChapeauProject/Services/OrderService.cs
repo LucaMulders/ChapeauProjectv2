@@ -45,6 +45,17 @@ namespace ChapeauProject.Services
                 .ToList();
         }
 
+        public string? ValidateSaveOrder(Order order, Guest guest)
+        {
+            if (guest.GuestID <= 0)
+                return "Please select a guest before sending the order.";
+
+            if (!order.OrderItems.Any())
+                return "The active order sheet cannot be blank.";
+
+            return null;
+        }
+
         public string? ValidateAddItem(Order order, int menuItemID)
         {
             var item = _menuService.GetMenuItemById(menuItemID);
@@ -81,17 +92,21 @@ namespace ChapeauProject.Services
 
         public void CompleteOrder(int orderId)
         {
-            _orderRepository.CompleteOrder(orderId);
-        }
+            if (!_orderRepository.AllItemsReady(orderId))
+                throw new InvalidOperationException("All items must be Served before marking the order as complete.");
 
-        public bool AllItemsReady(int orderId)
-        {
-            return _orderRepository.AllItemsReady(orderId);
+            _orderRepository.CompleteOrder(orderId);
         }
 
         public void SaveNewOrder(Order order)
         {
             _orderRepository.SaveNewOrder(order);
+
+            foreach (var item in order.OrderItems)
+            {
+                if (item.MenuItem != null)
+                    _menuService.DeductStockQuantity(item.MenuItem.MenuItemID, item.Quantity);
+            }
         }
 
         private List<RunningOrderViewModel> MapToViewModels(List<RunningOrder> orders)

@@ -80,15 +80,12 @@ namespace ChapeauProject.Controllers
                 if (!ModelState.IsValid)
                     return View(model);
 
-                if (model.SplitMode == SplitMode.Custom)
+                string? validationError = _billService.ValidatePayment(model);
+                if (validationError != null)
                 {
-                    decimal totalPaying = model.Payers.Sum(p => p.AmountDue + p.TipAmount);
-                    if (totalPaying < model.TotalAmount)
-                    {
-                        ModelState.AddModelError("", $"Total payments (€{totalPaying:F2}) are less than the bill total (€{model.TotalAmount:F2}).");
-                        model.Guests = _tableService.GetTableOrders(model.TableNumber).Guests;
-                        return View(model);
-                    }
+                    ModelState.AddModelError("", validationError);
+                    model.Guests = _tableService.GetTableOrders(model.TableNumber).Guests;
+                    return View(model);
                 }
 
                 _billService.ProcessPayment(model);

@@ -58,18 +58,11 @@ namespace ChapeauProject.Controllers
         {
             try
             {
-                var table = _tableService.GetByTableNumber(tableNumber);
-                if (table != null && table.IsOccupied)
-                {
-                    int pendingOrders = _tableService.GetOrderCount(tableNumber);
-                    if (pendingOrders > 0)
-                    {
-                        TempData["Error"] = $"Table {tableNumber} still has {pendingOrders} pending order(s) and cannot be marked as free.";
-                        return RedirectToAction("Index");
-                    }
-                }
-
                 _tableService.ToggleOccupied(tableNumber);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["Error"] = ex.Message;
             }
             catch (Exception ex)
             {

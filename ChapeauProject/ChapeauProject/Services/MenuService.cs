@@ -25,6 +25,11 @@ namespace ChapeauProject.Services
         }
 
 
+        public void DeductStockQuantity(int menuItemID, int amountToDeduct)
+        {
+            _menuRepository.DeductStockQuantity(menuItemID, amountToDeduct);
+        }
+
         public List<MenuItem> GetCourseFilteredByName(string menuCard, string courseFilter)
         {
             if (Enum.TryParse(menuCard, true, out MenuCard parsed))
