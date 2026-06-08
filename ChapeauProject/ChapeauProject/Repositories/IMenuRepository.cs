@@ -7,7 +7,7 @@ namespace ChapeauProject.Repositories
     {
         
         List<MenuItem> GetCourseFiltered(MenuCard cardFilter, string courseFilter);
-        MenuItem GetById(int menuItemID);
+        MenuItem? GetById(int menuItemID);
         void DeductStockQuantity(int menuItemID, int amountToDeduct);
     }
 }

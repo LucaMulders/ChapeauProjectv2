@@ -1,3 +1,4 @@
+using ChapeauProject.Models;
 using ChapeauProject.Services;
 using ChapeauProject.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,7 @@ namespace ChapeauProject.Controllers
                         {
                             Table         = t,
                             OrderCount    = _tableService.GetOrderCount(t.TableNumber),
+                            GuestCount    = _tableService.GetGuestCount(t.TableNumber),
                             HasFoodOrder  = categories.HasFood,
                             HasDrinkOrder = categories.HasDrink
                         };
@@ -43,11 +45,11 @@ namespace ChapeauProject.Controllers
         }
 
         [HttpGet]
-        public IActionResult Pay(PayRequest request)
+        public IActionResult Pay(Table table)
         {
             try
             {
-                return View(_billService.GetPayViewModel(request.TableNumber));
+                return View(_billService.GetPayViewModel(table.TableNumber));
             }
             catch (Exception ex)
             {

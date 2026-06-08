@@ -5,10 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChapeauProject.Controllers
 {
-    public class OrdersController : Controller
+    public class OrdersController : ChapeauBaseController
     {
-        private const string SessionKey = "ActiveWorkingOrder";
-
         private readonly IOrderService _orderService;
         private readonly IMenuService  _menuService;
         private readonly ITableService _tableService;
@@ -18,32 +16,6 @@ namespace ChapeauProject.Controllers
             _orderService = orderService;
             _menuService  = menuService;
             _tableService = tableService;
-        }
-
-        private Order GetActiveOrder()
-        {
-            return HttpContext.Session.GetObject<Order>(SessionKey) ?? new Order();
-        }
-
-        private void SetActiveOrder(Order order)
-        {
-            HttpContext.Session.SetObject(SessionKey, order);
-        }
-
-        private void ClearActiveOrder()
-        {
-            HttpContext.Session.Remove(SessionKey);
-        }
-
-        private Staff GetLoggedInStaff()
-        {
-            var staff = HttpContext.Session.GetObject<Staff>("LoggedInStaff");
-            if (staff != null) return staff;
-
-            if (int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int staffId))
-                return new Staff { StaffID = staffId };
-
-            return new Staff();
         }
 
         public IActionResult Index(string filter = "running")
@@ -192,7 +164,7 @@ namespace ChapeauProject.Controllers
         {
             if (!_orderService.AllItemsReady(orderId))
             {
-                TempData["ErrorMessage"] = "All items must be Ready before marking the order as served.";
+                TempData["ErrorMessage"] = "All items must be Served before marking the order as complete.";
                 return RedirectToAction("Index");
             }
 

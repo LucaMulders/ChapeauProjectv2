@@ -60,7 +60,7 @@
     <form asp-action="CompleteOrder" asp-controller="Orders" method="post" class="complete-order-form">
         <input type="hidden" name="orderId" value="@Model.OrderID" />
         <button type="submit" class="complete-btn @(Model.AllItemsReady ? "" : "btn-disabled")"
-                @(Model.AllItemsReady ? "" : "disabled title=\"All items must be Ready first\"")>
+                @(Model.AllItemsReady ? "" : "disabled title=\"All items must be Served first\"")>
             Mark as Served
         </button>
     </form>

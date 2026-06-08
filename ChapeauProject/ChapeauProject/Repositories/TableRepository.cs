@@ -181,7 +181,22 @@ namespace ChapeauProject.Repositories
 
         public int GetOrderCount(int tableNumber)
         {
-            return GetTableOrders(tableNumber).Sum(g => g.Items.Count);
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = $@"
+                    SELECT COUNT(*)
+                    FROM Orders o
+                    JOIN Guests g  ON o.GuestID  = g.GuestID
+                    JOIN OrderItems oi ON o.OrderID = oi.OrderID
+                    WHERE g.TableNumber  = @TableNumber
+                      AND o.OrderStatus = '{StatusPending}'";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@TableNumber", tableNumber);
+                    return (int)command.ExecuteScalar();
+                }
+            }
         }
 
         public int GetGuestCount(int tableNumber)

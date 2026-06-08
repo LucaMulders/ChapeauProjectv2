@@ -29,7 +29,7 @@
 
             <div class="d-flex mb-4">
                 <div class="btn-group btn-group-sm">
-                    <a asp-action="TakeOrder" asp-route-cardFilter="@ViewBag.CardFilter" asp-route-courseFilter="All" class="btn btn-light @(ViewBag.CourseFilter == "All" ? "active" : "")">All</a>
+                    <a asp-action="TakeOrder" asp-route-cardFilter="@ViewBag.CardFilter" asp-route-courseFilter="@CourseFilter.All" class="btn btn-light @(ViewBag.CourseFilter == CourseFilter.All ? "active" : "")">All</a>
                     <a asp-action="TakeOrder" asp-route-cardFilter="@ViewBag.CardFilter" asp-route-courseFilter="Starter" class="btn btn-light @(ViewBag.CourseFilter == "Starter" ? "active" : "")">Starters</a>
                     <a asp-action="TakeOrder" asp-route-cardFilter="@ViewBag.CardFilter" asp-route-courseFilter="Main" class="btn btn-light @(ViewBag.CourseFilter == "Main" ? "active" : "")">Mains</a>
                     <a asp-action="TakeOrder" asp-route-cardFilter="@ViewBag.CardFilter" asp-route-courseFilter="Dessert" class="btn btn-light @(ViewBag.CourseFilter == "Dessert" ? "active" : "")">Desserts</a>

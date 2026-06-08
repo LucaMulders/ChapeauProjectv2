@@ -6,10 +6,8 @@ using System.Linq;
 
 namespace ChapeauProject.Controllers
 {
-    public class TablesController : Controller
+    public class TablesController : ChapeauBaseController
     {
-        private const string SessionKey = "ActiveWorkingOrder";
-
         private readonly ITableService _tableService;
         private readonly IMenuService _menuService;
 
@@ -17,27 +15,6 @@ namespace ChapeauProject.Controllers
         {
             _tableService = tableService;
             _menuService = menuService;
-        }
-
-        private Order GetActiveOrder()
-        {
-            return HttpContext.Session.GetObject<Order>(SessionKey) ?? new Order();
-        }
-
-        private void SetActiveOrder(Order order)
-        {
-            HttpContext.Session.SetObject(SessionKey, order);
-        }
-
-        private Staff GetLoggedInStaff()
-        {
-            var staff = HttpContext.Session.GetObject<Staff>("LoggedInStaff");
-            if (staff != null) return staff;
-
-            if (int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int staffId))
-                return new Staff { StaffID = staffId };
-
-            return new Staff();
         }
 
         public IActionResult Index()
@@ -95,7 +72,7 @@ namespace ChapeauProject.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult Details(int id, MenuCard cardFilter = MenuCard.Lunch, string courseFilter = "All")
+        public IActionResult Details(int id, MenuCard cardFilter = MenuCard.Lunch, string courseFilter = CourseFilter.All)
         {
             try
             {

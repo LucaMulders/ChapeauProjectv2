@@ -233,7 +233,7 @@ namespace ChapeauProject.Repositories
             {
                 string query = $@"
                     SELECT COUNT(*) FROM OrderItems
-                    WHERE OrderID = @OrderID AND PreparationStatus NOT IN ('{PrepReady}', '{PrepServed}')";
+                    WHERE OrderID = @OrderID AND PreparationStatus != '{PrepServed}'";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {

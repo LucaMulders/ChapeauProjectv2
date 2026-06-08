@@ -15,11 +15,12 @@ namespace ChapeauProject.Controllers
             _menuService = menuService;
         }
 
-        public IActionResult Index(string menuCard = "Lunch", string category = "All")
+        public IActionResult Index(string menuCard = "Lunch", string category = CourseFilter.All)
         {
             try
             {
-                List<MenuItem> filteredItems = _menuService.GetMenuItemForWaiter(menuCard, category);
+                MenuCard card = Enum.TryParse(menuCard, true, out MenuCard parsed) ? parsed : MenuCard.Lunch;
+                List<MenuItem> filteredItems = _menuService.GetCourseFiltered(card, category);
 
                 MenuViewModel viewModel = new MenuViewModel
                 {

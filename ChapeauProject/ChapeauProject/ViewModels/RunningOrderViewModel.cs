@@ -28,7 +28,7 @@ namespace ChapeauProject.ViewModels
         public List<RunningOrderItemViewModel> Items { get; set; } = new();
 
         public TimeSpan WaitingTime => DateTime.Now - OrderTime;
-        public bool AllItemsReady   => Items.All(i => i.PreparationStatus == PreparationStatus.Ready);
+        public bool AllItemsReady   => Items.All(i => i.PreparationStatus == PreparationStatus.Served);
 
         public List<RunningOrderItemViewModel> FoodItems  =>
             Items.Where(i => i.MenuCard == "Lunch" || i.MenuCard == "Dinner").ToList();
@@ -82,6 +82,8 @@ namespace ChapeauProject.ViewModels
         };
 
         public string NameCssClass =>
-            PreparationStatus == PreparationStatus.Ready ? "order-item-name done" : "order-item-name";
+            PreparationStatus == PreparationStatus.Ready || PreparationStatus == PreparationStatus.Served
+                ? "order-item-name done"
+                : "order-item-name";
     }
 }

@@ -14,7 +14,7 @@ namespace ChapeauProject.Services
             _menuRepository = menuRepository;
         }
 
-        public MenuItem GetById(int menuItemID)
+        public MenuItem? GetById(int menuItemID)
         {
             return _menuRepository.GetById(menuItemID);
         }

@@ -24,7 +24,7 @@ namespace ChapeauProject.Repositories
                     {
                         command.Parameters.AddWithValue("@MenuCard", cardFilter.ToString());
 
-                        if (courseFilter != "All")
+                        if (courseFilter != CourseFilter.All)
                         {
                             command.Parameters.AddWithValue("@CourseName", courseFilter);
                         }
@@ -58,7 +58,7 @@ namespace ChapeauProject.Repositories
                 LEFT JOIN Courses C ON MI.CourseID = C.CourseID
                 WHERE UPPER(MI.MenuCard) = UPPER(@MenuCard)";
 
-            if (courseFilter != "All")
+            if (courseFilter != CourseFilter.All)
             {
                 query += " AND UPPER(C.CourseName) = UPPER(@CourseName)";
             }
@@ -90,7 +90,7 @@ namespace ChapeauProject.Repositories
             );
         }
 
-        public MenuItem GetById(int menuItemID)
+        public MenuItem? GetById(int menuItemID)
         {
             // Search Single row can fail if connection drops
             try

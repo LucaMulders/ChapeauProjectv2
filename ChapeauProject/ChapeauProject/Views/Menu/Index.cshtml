@@ -19,7 +19,7 @@
     {
         <div class="d-flex justify-content-center mb-4">
             <div class="btn-group btn-group-sm">
-                <a asp-action="Index" asp-route-menuCard="@Model.SelectedCard" asp-route-category="All" class="btn btn-light @(Model.SelectedCategory == "All" ? "active" : "")">All</a>
+                <a asp-action="Index" asp-route-menuCard="@Model.SelectedCard" asp-route-category="@CourseFilter.All" class="btn btn-light @(Model.SelectedCategory == CourseFilter.All ? "active" : "")">All</a>
                 <a asp-action="Index" asp-route-menuCard="@Model.SelectedCard" asp-route-category="Starters" class="btn btn-light @(Model.SelectedCategory == "Starters" ? "active" : "")">Starters</a>
                 <a asp-action="Index" asp-route-menuCard="@Model.SelectedCard" asp-route-category="Main" class="btn btn-light @(Model.SelectedCategory == "Main" ? "active" : "")">Mains</a>
                 <a asp-action="Index" asp-route-menuCard="@Model.SelectedCard" asp-route-category="Desserts" class="btn btn-light @(Model.SelectedCategory == "Desserts" ? "active" : "")">Desserts</a>
