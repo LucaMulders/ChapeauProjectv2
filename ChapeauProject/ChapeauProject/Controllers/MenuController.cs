@@ -15,6 +15,7 @@ namespace ChapeauProject.Controllers
             _menuService = menuService;
         }
 
+        //NOTE Can we prevent the webpage from refreshing when you add a new item? It is kinda annoying
         public IActionResult Index(string menuCard = "Lunch", string category = "All")
         {
             try
