@@ -229,6 +229,20 @@ namespace ChapeauProject.Repositories
             }
         }
 
+        // Added this so that when the bill has been processed the table actually becomes free. 
+        public void RemoveGuests(int tableNumber)
+        {
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = "UPDATE Guests SET TableNumber = NULL WHERE TableNumber = @TableNumber";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@TableNumber", tableNumber);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
         public (bool HasFood, bool HasDrink) GetRunningOrderCategories(int tableNumber)
         {
             var cards = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

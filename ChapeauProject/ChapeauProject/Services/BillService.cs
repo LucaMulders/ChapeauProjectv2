@@ -51,6 +51,7 @@ namespace ChapeauProject.Services
 
             _billRepository.CompleteOrdersForTable(model.TableNumber);
             _tableRepository.SetFree(model.TableNumber);
+            _tableService.RemoveGuests(model.TableNumber);
         }
 
         private BillViewModel BuildBillViewModel(TableOrderViewModel orders, SplitMode splitMode, int splitCount)
@@ -80,9 +81,15 @@ namespace ChapeauProject.Services
 
         private void AddEqualPayers(BillViewModel viewModel)
         {
-            decimal share = Math.Round(viewModel.TotalAmount / viewModel.SplitCount, 2);
+            decimal share     = Math.Round(viewModel.TotalAmount / viewModel.SplitCount, 2);
+            decimal allocated = share * (viewModel.SplitCount - 1);
+            decimal lastShare = viewModel.TotalAmount - allocated;
+
             for (int i = 1; i <= viewModel.SplitCount; i++)
-                viewModel.Payers.Add(new SplitPayerViewModel { Name = $"Person {i}", AmountDue = share });
+            {
+                decimal amount = i == viewModel.SplitCount ? lastShare : share;
+                viewModel.Payers.Add(new SplitPayerViewModel { Name = $"Person {i}", AmountDue = amount });
+            }
         }
 
         private void AddCustomPayers(BillViewModel viewModel)

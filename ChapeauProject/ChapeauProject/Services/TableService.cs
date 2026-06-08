@@ -93,5 +93,10 @@ namespace ChapeauProject.Services
         {
             _tableRepository.SetFree(tableNumber);
         }
+
+        public void RemoveGuests(int tableNumber)
+        {
+            _tableRepository.RemoveGuests(tableNumber);
+        }
     }
 }

@@ -16,6 +16,7 @@ namespace ChapeauProject.Repositories
         private const string PrepPending      = nameof(PreparationStatus.Pending);
         private const string PrepPreparing    = nameof(PreparationStatus.Preparing);
         private const string PrepReady        = nameof(PreparationStatus.Ready);
+        private const string PrepServed       = nameof(PreparationStatus.Served);
 
         private readonly IMenuRepository _menuRepository;
 
@@ -168,6 +169,13 @@ namespace ChapeauProject.Repositories
                                     AND ISNULL(c2.CourseName, 'Other') = @CourseName
                                     AND oi2.PreparationStatus = '{PrepPreparing}') > 0
                                 THEN '{PrepReady}'
+                            WHEN (SELECT COUNT(*) FROM OrderItems oi2
+                                  JOIN MenuItems mi2 ON oi2.MenuItemID = mi2.MenuItemID
+                                  LEFT JOIN Courses c2 ON mi2.CourseID = c2.CourseID
+                                  WHERE oi2.OrderID = @OrderID
+                                    AND ISNULL(c2.CourseName, 'Other') = @CourseName
+                                    AND oi2.PreparationStatus = '{PrepReady}') > 0
+                                THEN '{PrepServed}'
                             ELSE '{PrepPending}'
                         END
                     FROM OrderItems oi
@@ -193,7 +201,8 @@ namespace ChapeauProject.Repositories
                     CASE PreparationStatus
                         WHEN '{PrepPending}'   THEN '{PrepPreparing}'
                         WHEN '{PrepPreparing}' THEN '{PrepReady}'
-                        WHEN '{PrepReady}'     THEN '{PrepPending}'
+                        WHEN '{PrepReady}'     THEN '{PrepServed}'
+                        WHEN '{PrepServed}'    THEN '{PrepPending}'
                     END
                     WHERE OrderItemID = @OrderItemID";
 
@@ -224,7 +233,7 @@ namespace ChapeauProject.Repositories
             {
                 string query = $@"
                     SELECT COUNT(*) FROM OrderItems
-                    WHERE OrderID = @OrderID AND PreparationStatus != '{PrepReady}'";
+                    WHERE OrderID = @OrderID AND PreparationStatus NOT IN ('{PrepReady}', '{PrepServed}')";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {

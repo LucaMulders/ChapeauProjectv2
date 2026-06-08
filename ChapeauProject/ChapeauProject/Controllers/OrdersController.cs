@@ -76,6 +76,8 @@ namespace ChapeauProject.Controllers
             return RedirectToAction("Details", "Tables", new { id = tableNumber });
         }
 
+        // I added fragment baskets which will makes it so we don't have to scroll down after every basket addition.
+
         [HttpPost]
         public IActionResult AddItemToOrder(int menuItemID)
         {
@@ -85,13 +87,13 @@ namespace ChapeauProject.Controllers
             if (error != null)
             {
                 TempData["ErrorMessage"] = error;
-                return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
+                return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber, fragment = "basket" });
             }
 
             var item = _menuService.GetById(menuItemID);
             order.AddItem(item!);
             SetActiveOrder(order);
-            return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
+            return Redirect(Url.Action("Details", "Tables", new { id = order.Table.TableNumber }) + "#basket");
         }
 
         [HttpPost]
@@ -106,7 +108,7 @@ namespace ChapeauProject.Controllers
                 order.IncreaseQuantity(menuItemID);
 
             SetActiveOrder(order);
-            return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
+            return Redirect(Url.Action("Details", "Tables", new { id = order.Table.TableNumber }) + "#basket");
         }
 
         [HttpPost]
@@ -115,7 +117,7 @@ namespace ChapeauProject.Controllers
             var order = GetActiveOrder();
             order.DecreaseQuantity(menuItemID);
             SetActiveOrder(order);
-            return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
+            return Redirect(Url.Action("Details", "Tables", new { id = order.Table.TableNumber }) + "#basket");
         }
 
         [HttpPost]
@@ -124,7 +126,7 @@ namespace ChapeauProject.Controllers
             var order = GetActiveOrder();
             order.RemoveItem(menuItemID);
             SetActiveOrder(order);
-            return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
+            return Redirect(Url.Action("Details", "Tables", new { id = order.Table.TableNumber }) + "#basket");
         }
 
         [HttpPost]
@@ -133,7 +135,7 @@ namespace ChapeauProject.Controllers
             var order = GetActiveOrder();
             order.UpdateItemComment(menuItemID, comment);
             SetActiveOrder(order);
-            return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber });
+            return Redirect(Url.Action("Details", "Tables", new { id = order.Table.TableNumber }) + "#basket");
         }
 
         [HttpPost]

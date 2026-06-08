@@ -320,6 +320,7 @@ footer {
 .status-ordered   { background: #FFF3CD; color: #856404; }
 .status-preparing { background: #CCE5FF; color: #004085; }
 .status-ready     { background: #D4EDDA; color: #155724; }
+.status-served    { background: #D1ECF1; color: #0C5460; }
 
 /* ── Orders filter tabs ── */
 .filter-tab {
@@ -520,8 +521,8 @@ footer {
     gap: 6px;
     align-items: center;
 }
-.btn-pay-full { background: #2b1810; padding: 8px 18px; }
-.btn-split    { padding: 8px 18px; }
+.btn-pay-full { background: #4a3728; padding: 8px 18px; }
+.btn-split    { background: #6b5344; padding: 8px 18px; }
 
 .form-field { margin-bottom: 1rem; }
 .form-field-label {
@@ -613,6 +614,12 @@ footer {
     align-items: center;
     justify-content: center;
     margin: 0 auto;
+}
+.add-item-btn:disabled {
+    background-color: #d9d9d9;
+    color: #999;
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 .basket-card {
     top: 20px;

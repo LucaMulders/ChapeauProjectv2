@@ -45,7 +45,7 @@ else
                 <tr>
                     <th>Item</th>
                     <th>Qty</th>
-                    <th>Price</th>
+                    <th>Unit Price</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -106,14 +106,17 @@ else
             </div>
         </div>
 
-        <div class="d-flex mb-4">
-            <div class="btn-group btn-group-sm">
-                <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="All" class="btn btn-light @(ViewBag.CourseFilter == "All" ? "active" : "")">All</a>
-                <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Starter" class="btn btn-light @(ViewBag.CourseFilter == "Starter" ? "active" : "")">Starters</a>
-                <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Main" class="btn btn-light @(ViewBag.CourseFilter == "Main" ? "active" : "")">Mains</a>
-                <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Dessert" class="btn btn-light @(ViewBag.CourseFilter == "Dessert" ? "active" : "")">Desserts</a>
+        @if (currentCard != MenuCard.Drinks)
+        {
+            <div class="d-flex mb-4">
+                <div class="btn-group btn-group-sm">
+                    <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="All" class="btn btn-light @(ViewBag.CourseFilter == "All" ? "active" : "")">All</a>
+                    <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Starter" class="btn btn-light @(ViewBag.CourseFilter == "Starter" ? "active" : "")">Starters</a>
+                    <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Main" class="btn btn-light @(ViewBag.CourseFilter == "Main" ? "active" : "")">Mains</a>
+                    <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Dessert" class="btn btn-light @(ViewBag.CourseFilter == "Dessert" ? "active" : "")">Desserts</a>
+                </div>
             </div>
-        </div>
+        }
 
         <div class="table-responsive bg-white rounded shadow-sm border">
             <table class="table table-hover align-middle mb-0">
@@ -144,7 +147,7 @@ else
     </div>
 
     <div class="col-md-5">
-        <div class="card shadow-sm border-0 position-sticky basket-card details-basket mb-4">
+        <div id="basket" class="card shadow-sm border-0 position-sticky basket-card details-basket mb-4">
             <div class="card-body p-4">
 
                 <div class="text-center pb-2 mb-4 border-bottom">

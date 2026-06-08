@@ -14,5 +14,6 @@ namespace ChapeauProject.Repositories
         List<Guest> GetGuestsByTable(int tableNumber);
         (bool HasFood, bool HasDrink) GetRunningOrderCategories(int tableNumber);
         void SetFree(int tableNumber);
+        void RemoveGuests(int tableNumber);
     }
 }

@@ -5,7 +5,7 @@
         <i class="ti ti-armchair"></i>
     </div>
     <div class="table-num">Table @Model.Table.TableNumber</div>
-    <div class="table-seats">@Model.Table.Seats seats</div>
+    <div class="table-seats">@Model.GuestCount guests</div>
     <div class="order-icons-bill">
         @if (Model.HasFoodOrder) { <span title="Food order">🍽️</span> }
         @if (Model.HasDrinkOrder) { <span title="Drink order">🍷</span> }
