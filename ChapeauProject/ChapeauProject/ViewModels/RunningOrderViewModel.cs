@@ -11,8 +11,9 @@ namespace ChapeauProject.ViewModels
         public bool AllPreparing => !AllReady && Items.All(i => i.PreparationStatus != PreparationStatus.Pending);
         public bool AllServed    => Items.All(i => i.PreparationStatus == PreparationStatus.Served);
 
-        public string CourseAdvanceLabel => AllReady      ? "↺ Reset"
-                                         : AllPreparing  ? "▶ All Ready"
+        public string CourseAdvanceLabel => AllServed    ? "↺ Reset"
+                                          : AllReady     ? "▶ Mark Served"
+                                          : AllPreparing ? "▶ All Ready"
                                                          : "▶ All Preparing";
     }
 

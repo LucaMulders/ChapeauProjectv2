@@ -78,9 +78,10 @@ namespace ChapeauProject.Controllers
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 HttpContext.Session.Remove("LoggedInStaff");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // continue with logoff even if sign out fails, to ensure user is logged out
+                Console.Error.WriteLine($"[Logoff] Sign-out error: {ex.Message}");
             }
             return RedirectToAction("Login");
         }

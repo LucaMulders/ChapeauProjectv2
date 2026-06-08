@@ -142,7 +142,7 @@ namespace ChapeauProject.Repositories
                         ),
                         Quantity          = reader.GetInt32(reader.GetOrdinal("Quantity")),
                         PreparationStatus = Enum.Parse<PreparationStatus>(reader.GetString(reader.GetOrdinal("PreparationStatus"))),
-                        CourseName        = reader.GetString(reader.GetOrdinal("CourseName")),
+                        CourseName        = ParseCourseName(reader.GetString(reader.GetOrdinal("CourseName"))),
                         Comment           = reader.IsDBNull(reader.GetOrdinal("Comment")) ? null : reader.GetString(reader.GetOrdinal("Comment"))
                     });
                 }
@@ -151,7 +151,15 @@ namespace ChapeauProject.Repositories
             return orders.Values.ToList();
         }
 
-        public void ToggleCoursePreparation(int orderId, string courseName)
+        private static CourseName ParseCourseName(string raw)
+        {
+            if (Enum.TryParse(raw, out CourseName course))
+                return course;
+            else
+                return CourseName.Other;
+        }
+
+        public void ToggleCoursePreparation(int orderId, CourseName courseName)
         {
             using (SqlConnection connection = GetConnection())
             {
@@ -191,7 +199,7 @@ namespace ChapeauProject.Repositories
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@OrderID",    orderId);
-                    command.Parameters.AddWithValue("@CourseName", courseName);
+                    command.Parameters.AddWithValue("@CourseName", courseName.ToString());
                     command.ExecuteNonQuery();
                 }
             }

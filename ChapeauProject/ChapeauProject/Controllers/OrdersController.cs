@@ -153,7 +153,7 @@ namespace ChapeauProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult ToggleCourse(int orderId, string courseName)
+        public IActionResult ToggleCourse(int orderId, CourseName courseName)
         {
             _orderService.ToggleCoursePreparation(orderId, courseName);
             return RedirectToAction("Index");

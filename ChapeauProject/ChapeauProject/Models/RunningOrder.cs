@@ -14,7 +14,7 @@ namespace ChapeauProject.Models
         public MenuItem MenuItem { get; set; } = new MenuItem();
         public int Quantity { get; set; }
         public PreparationStatus PreparationStatus { get; set; }
-        public string CourseName { get; set; } = string.Empty;
+        public CourseName CourseName { get; set; } = CourseName.Other;
         public string? Comment { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace ChapeauProject.Repositories
         List<RunningOrder> GetAllOrdersByStatus();
         List<RunningOrder> GetFinishedOrdersToday();
         void ToggleItemPreparation(int orderItemId);
-        void ToggleCoursePreparation(int orderId, string courseName);
+        void ToggleCoursePreparation(int orderId, CourseName courseName);
         void CompleteOrder(int orderId);
         bool AllItemsReady(int orderId);
         void SaveNewOrder(Order order);

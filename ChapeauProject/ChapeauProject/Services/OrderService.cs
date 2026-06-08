@@ -72,7 +72,7 @@ namespace ChapeauProject.Services
             _orderRepository.ToggleItemPreparation(orderItemId);
         }
 
-        public void ToggleCoursePreparation(int orderId, string courseName)
+        public void ToggleCoursePreparation(int orderId, CourseName courseName)
         {
             _orderRepository.ToggleCoursePreparation(orderId, courseName);
         }
@@ -92,14 +92,6 @@ namespace ChapeauProject.Services
             _orderRepository.SaveNewOrder(order);
         }
 
-        private static CourseName ParseCourseName(string raw)
-        {
-            if (Enum.TryParse(raw, out CourseName course))
-                return course;
-            else
-                return CourseName.Other;
-        }
-
         private List<RunningOrderViewModel> MapToViewModels(List<RunningOrder> orders)
         {
             return orders.Select(o => new RunningOrderViewModel
@@ -114,7 +106,7 @@ namespace ChapeauProject.Services
                     Quantity          = i.Quantity,
                     PreparationStatus = i.PreparationStatus,
                     MenuCard          = i.MenuItem.AssociatedMenu?.CardType.ToString() ?? string.Empty,
-                    CourseName        = ParseCourseName(i.CourseName),
+                    CourseName        = i.CourseName,
                     Comment           = i.Comment
                 }).ToList()
             }).ToList();

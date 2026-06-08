@@ -12,7 +12,7 @@ namespace ChapeauProject.Services
         string? ValidateAddItem(Order order, int menuItemID);
         string? ValidateIncreaseQuantity(Order order, int menuItemID);
         void ToggleItemPreparation(int orderItemId);
-        void ToggleCoursePreparation(int orderId, string courseName);
+        void ToggleCoursePreparation(int orderId, CourseName courseName);
         void CompleteOrder(int orderId);
         bool AllItemsReady(int orderId);
         void SaveNewOrder(Order order);
