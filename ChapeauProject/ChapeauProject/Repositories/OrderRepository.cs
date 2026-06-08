@@ -222,7 +222,7 @@ namespace ChapeauProject.Repositories
         {
             using (SqlConnection connection = GetConnection())
             {
-                string query = @"
+                string query = $@"
                     SELECT COUNT(*) FROM OrderItems
                     WHERE OrderID = @OrderID AND PreparationStatus != '{PrepReady}'";
 

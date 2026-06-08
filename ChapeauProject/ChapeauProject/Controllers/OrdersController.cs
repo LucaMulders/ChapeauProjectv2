@@ -35,6 +35,17 @@ namespace ChapeauProject.Controllers
             HttpContext.Session.Remove(SessionKey);
         }
 
+        private Staff GetLoggedInStaff()
+        {
+            var staff = HttpContext.Session.GetObject<Staff>("LoggedInStaff");
+            if (staff != null) return staff;
+
+            if (int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int staffId))
+                return new Staff { StaffID = staffId };
+
+            return new Staff();
+        }
+
         public IActionResult Index(string filter = "running")
         {
             try
@@ -55,7 +66,7 @@ namespace ChapeauProject.Controllers
         [HttpPost]
         public IActionResult StartNewOrder(int tableNumber)
         {
-            var loggedInStaff = HttpContext.Session.GetObject<Staff>("LoggedInStaff") ?? new Staff();
+            var loggedInStaff = GetLoggedInStaff();
             SetActiveOrder(new Order
             {
                 Table      = _tableService.GetByTableNumber(tableNumber) ?? new Table { TableNumber = tableNumber },

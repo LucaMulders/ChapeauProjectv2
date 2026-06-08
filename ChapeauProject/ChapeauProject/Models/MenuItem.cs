@@ -24,6 +24,8 @@
             get { return $"€{Price:F2}"; }
         }
 
+        public MenuItem() { ItemName = string.Empty; }
+
         public MenuItem(int id, string name, decimal price, decimal vatRate, int stock, Menu? menu)
         {
             MenuItemID     = id;

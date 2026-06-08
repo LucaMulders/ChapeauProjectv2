@@ -29,6 +29,17 @@ namespace ChapeauProject.Controllers
             HttpContext.Session.SetObject(SessionKey, order);
         }
 
+        private Staff GetLoggedInStaff()
+        {
+            var staff = HttpContext.Session.GetObject<Staff>("LoggedInStaff");
+            if (staff != null) return staff;
+
+            if (int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int staffId))
+                return new Staff { StaffID = staffId };
+
+            return new Staff();
+        }
+
         public IActionResult Index()
         {
             try
@@ -94,9 +105,11 @@ namespace ChapeauProject.Controllers
                 var activeOrder = GetActiveOrder();
                 if (activeOrder.Table.TableNumber != id)
                 {
+                    var loggedInStaff = GetLoggedInStaff();
                     activeOrder = new Order
                     {
                         Table      = _tableService.GetByTableNumber(id) ?? new Table { TableNumber = id },
+                        Staff      = loggedInStaff,
                         OrderItems = new System.Collections.Generic.List<OrderItem>()
                     };
                     SetActiveOrder(activeOrder);
