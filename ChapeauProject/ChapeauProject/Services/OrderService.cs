@@ -28,9 +28,11 @@ namespace ChapeauProject.Services
 
         public List<TableOrderGroupViewModel> GetOrdersGroupedByTable(string filter)
         {
-            var orders = filter == "finished"
-                ? GetFinishedOrdersToday()
-                : GetAllOrdersByStatus();
+            List<RunningOrderViewModel> orders;
+            if (filter == "finished")
+                orders = GetFinishedOrdersToday();
+            else
+                orders = GetAllOrdersByStatus();
 
             return orders
                 .GroupBy(o => o.TableNumber)
