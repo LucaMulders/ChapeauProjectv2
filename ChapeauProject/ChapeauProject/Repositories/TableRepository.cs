@@ -5,8 +5,7 @@ namespace ChapeauProject.Repositories
 {
     public class TableRepository : RepositoryBase, ITableRepository
     {
-        //CHANGE // Rubric Item: Use of Constants for Repeated Strings
-
+        // Use of Constants for Repeated Strings
         private const string StatusPending = nameof(OrderStatus.Pending);
 
         public TableRepository(IConfiguration configuration) : base(configuration)
