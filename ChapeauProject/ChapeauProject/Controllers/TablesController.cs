@@ -52,7 +52,7 @@ namespace ChapeauProject.Controllers
             return RedirectToAction("Index");
         }
 
-        //NOTE 'id' matches the default ASP.NET route segment. Renaming to tableNumber means updating 10+ view links and 8 redirects. Should we?
+        //NOTE 'id' matches the default ASP. Renaming to tableNumber means updating a lot of view links and redirects. Should we? (ask teacher)
         public IActionResult Details(int id, MenuCard cardFilter = MenuCard.Lunch, string courseFilter = CourseFilter.All)
         {
             try

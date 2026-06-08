@@ -1,4 +1,4 @@
-//NOTE Rubric says one domain model, no subsystem-specific models. RunningOrder duplicates Order/OrderItem just for the kitchen view. Fix is a big refactor. Should we change this?
+//NOTE Rubric says one domain model, no subsystem-specific models. RunningOrder duplicates Order/OrderItem just for the kitchen view. Fix is a big refactor. Should we change this? (aska teacher)
 namespace ChapeauProject.Models
 {
     public class RunningOrder

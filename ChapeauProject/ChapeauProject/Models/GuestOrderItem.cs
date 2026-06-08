@@ -7,7 +7,7 @@ namespace ChapeauProject.Models
         public PreparationStatus PreparationStatus { get; set; }
         public MenuItem MenuItem { get; set; } = new MenuItem(0, string.Empty, 0, 0, 0, null);
 
-        // Convenience passthroughs for existing code
+        // Convenience passthroughs for existing code (same as guestorder)
         public string ItemName
         {
             get { return MenuItem.ItemName; }

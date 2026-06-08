@@ -6,8 +6,7 @@ namespace ChapeauProject.Repositories
 {
     public class BillRepository : RepositoryBase, IBillRepository
     {
-        // Rubric Item: Use of Constants for Repeated Strings
-
+        // Use of Constants for Repeated Strings
         private const string StatusPending  = nameof(OrderStatus.Pending);
         private const string StatusComplete = nameof(OrderStatus.Complete);
         private const string StatusServed   = nameof(OrderStatus.Served);

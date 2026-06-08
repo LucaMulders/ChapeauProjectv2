@@ -5,7 +5,7 @@ namespace ChapeauProject.Models
         public Guest Guest { get; set; } = new Guest();
         public List<GuestOrderItem> Items { get; set; } = new();
 
-        // Convenience passthrough for code that uses GuestName/GuestID directly
+        // Convenience for code that uses GuestName/GuestID directly
         public int GuestID
         {
             get { return Guest.GuestID; }

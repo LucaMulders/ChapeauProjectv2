@@ -8,6 +8,6 @@ namespace ChapeauProject.ViewModels
         public int StaffID { get; set; }
 
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
     }
 }

@@ -1,6 +1,6 @@
 namespace ChapeauProject.Models
 {
-    // Same idea as CourseFilter. "finished" and "running" are used in both the controller and service, so one constant beats copy-pasting the string.
+    // Constant instead of copy pasting string 100 times
     public static class OrderFilter
     {
         public const string Running  = "running";
