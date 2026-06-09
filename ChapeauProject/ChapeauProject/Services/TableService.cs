@@ -121,7 +121,7 @@ namespace ChapeauProject.Services
             return _tableRepository.GetGuestsByTable(tableNumber);
         }
 
-        public (bool HasFood, bool HasDrink) GetRunningOrderCategories(int tableNumber)
+        public OrderCategories GetRunningOrderCategories(int tableNumber)
         {
             return _tableRepository.GetRunningOrderCategories(tableNumber);
         }

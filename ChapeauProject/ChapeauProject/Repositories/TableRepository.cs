@@ -225,7 +225,7 @@ namespace ChapeauProject.Repositories
             }
         }
 
-        public (bool HasFood, bool HasDrink) GetRunningOrderCategories(int tableNumber)
+        public OrderCategories GetRunningOrderCategories(int tableNumber)
         {
             var cards = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -253,9 +253,11 @@ namespace ChapeauProject.Repositories
                 }
             }
 
-            bool hasFood  = cards.Contains(nameof(MenuCard.Lunch)) || cards.Contains(nameof(MenuCard.Dinner));
-            bool hasDrink = cards.Contains(nameof(MenuCard.Drinks));
-            return (hasFood, hasDrink);
+            return new OrderCategories
+            {
+                HasFood  = cards.Contains(nameof(MenuCard.Lunch)) || cards.Contains(nameof(MenuCard.Dinner)),
+                HasDrink = cards.Contains(nameof(MenuCard.Drinks))
+            };
         }
     }
 }
