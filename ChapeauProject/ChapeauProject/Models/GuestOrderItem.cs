@@ -1,5 +1,3 @@
-using ChapeauProject.ViewModels;
-
 namespace ChapeauProject.Models
 {
     public class GuestOrderItem

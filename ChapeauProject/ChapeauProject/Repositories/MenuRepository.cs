@@ -1,5 +1,4 @@
 ﻿using ChapeauProject.Models;
-using ChapeauProject.ViewModels;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System;
