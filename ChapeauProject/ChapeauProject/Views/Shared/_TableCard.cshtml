@@ -27,6 +27,26 @@
                 }
             </div>
         }
+
+        <!-- Maybe make a viewmodel? -->
+        @if (Model.RunningOrderStatus != null)
+        {
+            string statusLabel = Model.RunningOrderStatus switch
+            {
+                "Pending"   => "Ordered",
+                "Preparing" => "Preparing",
+                "Ready"     => "Ready",
+                _           => Model.RunningOrderStatus
+            };
+            string statusCss = Model.RunningOrderStatus switch
+            {
+                "Pending"   => "order-status-badge order-status-ordered",
+                "Preparing" => "order-status-badge order-status-preparing",
+                "Ready"     => "order-status-badge order-status-ready",
+                _           => "order-status-badge"
+            };
+            <span class="@statusCss">@statusLabel</span>
+        }
     </form>
 
     <div class="table-card-actions">

@@ -106,8 +106,14 @@
             <input type="hidden" asp-for="SplitMode" />
 
             <div class="form-field">
+                <label class="form-field-label">Amount Tendered (€) <span class="label-optional">(optional)</span></label>
+                <input id="amountTendered" type="number" min="0" step="0.01" class="form-input"
+                       placeholder="Enter what the customer hands over" />
+                <div id="changeDisplay" class="change-display" style="display:none;"></div>
+            </div>
+            <div class="form-field">
                 <label class="form-field-label">Tip (€)</label>
-                <input asp-for="TipAmount" type="number" min="0" step="0.50" class="form-input" />
+                <input id="tipInput" asp-for="TipAmount" type="number" min="0" step="0.50" class="form-input" />
             </div>
             <div class="form-field">
                 <label class="form-field-label">Payment Method</label>
@@ -218,6 +224,39 @@
         </form>
     }
 </div>
+
+<script>
+    (function () {
+        const tendered = document.getElementById('amountTendered');
+        const tip      = document.getElementById('tipInput');
+        const display  = document.getElementById('changeDisplay');
+        if (!tendered || !tip || !display) return;
+
+        const total = @Model.TotalAmount.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+        function update() {
+            const t = parseFloat(tendered.value);
+            if (isNaN(t) || tendered.value === '') { display.style.display = 'none'; return; }
+
+            if (t >= total) {
+                const derivedTip = Math.max(0, t - total);
+                tip.value = derivedTip.toFixed(2);
+                const change = t - total - derivedTip;
+                display.style.display = 'block';
+                display.textContent   = change > 0.005
+                    ? `Change: €${change.toFixed(2)}`
+                    : `Tip auto-set to €${derivedTip.toFixed(2)}`;
+            } else {
+                display.style.display = 'block';
+                display.textContent   = `⚠ Amount is €${(total - t).toFixed(2)} short`;
+                display.style.color   = '#dc3545';
+            }
+        }
+
+        tendered.addEventListener('input', update);
+        tip.addEventListener('input', () => { tendered.value = ''; display.style.display = 'none'; });
+    })();
+</script>
 
 @if (Model.SplitMode == SplitMode.Custom)
 {

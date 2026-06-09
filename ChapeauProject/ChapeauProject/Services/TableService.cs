@@ -41,11 +41,12 @@ namespace ChapeauProject.Services
 
                 return new TablesViewModel
                 {
-                    Table         = t,
-                    OrderCount    = _tableRepository.GetOrderCount(t.TableNumber),
-                    HasFoodOrder  = categories.HasFood,
-                    HasDrinkOrder = categories.HasDrink,
-                    GuestCount    = guestCount
+                    Table              = t,
+                    OrderCount         = _tableRepository.GetOrderCount(t.TableNumber),
+                    HasFoodOrder       = categories.HasFood,
+                    HasDrinkOrder      = categories.HasDrink,
+                    GuestCount         = guestCount,
+                    RunningOrderStatus = categories.OverallStatus
                 };
             }).OrderBy(t => t.Table.TableNumber).ToList();
         }

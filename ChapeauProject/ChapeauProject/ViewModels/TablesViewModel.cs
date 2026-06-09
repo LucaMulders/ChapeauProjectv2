@@ -9,5 +9,7 @@ namespace ChapeauProject.ViewModels
         public int GuestCount { get; set; }
         public bool HasFoodOrder { get; set; }
         public bool HasDrinkOrder { get; set; }
+        // null when no active items
+        public string? RunningOrderStatus { get; set; }
     }
 }

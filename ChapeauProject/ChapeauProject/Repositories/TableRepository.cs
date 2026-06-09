@@ -227,18 +227,21 @@ namespace ChapeauProject.Repositories
 
         public OrderCategories GetRunningOrderCategories(int tableNumber)
         {
-            var cards = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var cards    = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var statuses = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             using (SqlConnection connection = GetConnection())
             {
+                // Exclude Served items
                 string query = $@"
-                    SELECT DISTINCT mi.MenuCard
+                    SELECT DISTINCT mi.MenuCard, oi.PreparationStatus
                     FROM Orders o
                     JOIN Guests g ON o.GuestID = g.GuestID
                     JOIN OrderItems oi ON o.OrderID = oi.OrderID
                     JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
                     WHERE g.TableNumber = @TableNumber
-                      AND o.OrderStatus = '{StatusPending}'";
+                      AND o.OrderStatus = '{StatusPending}'
+                      AND oi.PreparationStatus != '{nameof(PreparationStatus.Served)}'";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -248,15 +251,29 @@ namespace ChapeauProject.Repositories
                         while (reader.Read())
                         {
                             cards.Add(reader.GetString(0));
+                            statuses.Add(reader.GetString(1));
                         }
                     }
                 }
             }
 
+            // Status: Pending (ordered) > Preparing > Ready
+            string? overallStatus = null;
+            if (statuses.Count > 0)
+            {
+                if (statuses.Contains(nameof(PreparationStatus.Pending)))
+                    overallStatus = nameof(PreparationStatus.Pending);
+                else if (statuses.Contains(nameof(PreparationStatus.Preparing)))
+                    overallStatus = nameof(PreparationStatus.Preparing);
+                else
+                    overallStatus = nameof(PreparationStatus.Ready);
+            }
+
             return new OrderCategories
             {
-                HasFood  = cards.Contains(nameof(MenuCard.Lunch)) || cards.Contains(nameof(MenuCard.Dinner)),
-                HasDrink = cards.Contains(nameof(MenuCard.Drinks))
+                HasFood       = cards.Contains(nameof(MenuCard.Lunch)) || cards.Contains(nameof(MenuCard.Dinner)),
+                HasDrink      = cards.Contains(nameof(MenuCard.Drinks)),
+                OverallStatus = overallStatus
             };
         }
     }
