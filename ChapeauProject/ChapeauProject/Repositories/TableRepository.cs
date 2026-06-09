@@ -12,32 +12,17 @@ namespace ChapeauProject.Repositories
         {
         }
 
-        public List<Table> GetAllTables()
+        public List<Table> GetAllTables()         => GetTablesWhere();
+        public List<Table> GetAllOccupiedTables() => GetTablesWhere("IsOccupied = 1");
+
+        private List<Table> GetTablesWhere(string? condition = null)
         {
             var tables = new List<Table>();
             using (SqlConnection connection = GetConnection())
             {
                 string query = "SELECT TableNumber, Seats, IsOccupied FROM Tables";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            tables.Add(ReadTable(reader));
-                        }
-                    }
-                }
-            }
-            return tables;
-        }
-
-        public List<Table> GetAllOccupiedTables()
-        {
-            var tables = new List<Table>();
-            using (SqlConnection connection = GetConnection())
-            {
-                string query = "SELECT TableNumber, Seats, IsOccupied FROM Tables WHERE IsOccupied = 1";
+                if (condition != null)
+                    query += " WHERE " + condition;
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     using (SqlDataReader reader = command.ExecuteReader())
@@ -77,6 +62,17 @@ namespace ChapeauProject.Repositories
             bool isOccupied = reader.GetBoolean(reader.GetOrdinal("IsOccupied"));
             return new Table(tableNumber, seats, isOccupied);
         }
+
+        private Guest ReadGuest(SqlDataReader reader)
+        {
+            return new Guest
+            {
+                GuestID   = reader.GetInt32(reader.GetOrdinal("GuestID")),
+                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                LastName  = reader.GetString(reader.GetOrdinal("LastName"))
+            };
+        }
+
         public void ToggleOccupied(int tableNumber)
         {
             using (SqlConnection connection = GetConnection())
@@ -94,11 +90,13 @@ namespace ChapeauProject.Repositories
         {
             string query = $@"
                 SELECT g.GuestID, g.FirstName, g.LastName,
-                       oi.OrderItemID, mi.MenuItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus
+                       oi.OrderItemID, mi.MenuItemID, mi.ItemName, mi.Price, mi.VatRate, mi.MenuCard,
+                       ISNULL(s.Quantity, 0) AS Stock, oi.Quantity, oi.PreparationStatus
                 FROM Guests g
                 JOIN Orders o ON g.GuestID = o.GuestID
                 JOIN OrderItems oi ON o.OrderID = oi.OrderID
                 JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
+                LEFT JOIN Stock s ON mi.MenuItemID = s.MenuItemID
                 WHERE g.TableNumber = @TableNumber
                   AND o.OrderStatus = '{StatusPending}'";
 
@@ -137,8 +135,8 @@ namespace ChapeauProject.Repositories
                                 reader.GetString(reader.GetOrdinal("ItemName")),
                                 reader.GetDecimal(reader.GetOrdinal("Price")),
                                 reader.GetDecimal(reader.GetOrdinal("VatRate")),
-                                0,
-                                null
+                                reader.GetInt32(reader.GetOrdinal("Stock")),
+                                new Menu(Enum.Parse<MenuCard>(reader.GetString(reader.GetOrdinal("MenuCard"))))
                             )
                         });
                     }
@@ -213,7 +211,7 @@ namespace ChapeauProject.Repositories
             }
         }
 
-        // Added this so that when the bill has been processed the table actually becomes free. 
+        // Added this so that when the bill has been processed the table actually becomes free.
         public void RemoveGuests(int tableNumber)
         {
             using (SqlConnection connection = GetConnection())
@@ -227,7 +225,7 @@ namespace ChapeauProject.Repositories
             }
         }
 
-        public (bool HasFood, bool HasDrink) GetRunningOrderCategories(int tableNumber)
+        public OrderCategories GetRunningOrderCategories(int tableNumber)
         {
             var cards = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -255,10 +253,11 @@ namespace ChapeauProject.Repositories
                 }
             }
 
-            // MenuCard values are "Lunch", "Dinner" (food), and "Drinks"
-            bool hasFood  = cards.Contains("Lunch") || cards.Contains("Dinner");
-            bool hasDrink = cards.Contains("Drinks");
-            return (hasFood, hasDrink);
+            return new OrderCategories
+            {
+                HasFood  = cards.Contains(nameof(MenuCard.Lunch)) || cards.Contains(nameof(MenuCard.Dinner)),
+                HasDrink = cards.Contains(nameof(MenuCard.Drinks))
+            };
         }
     }
 }

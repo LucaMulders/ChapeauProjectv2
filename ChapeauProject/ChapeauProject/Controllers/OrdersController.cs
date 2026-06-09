@@ -53,7 +53,7 @@ namespace ChapeauProject.Controllers
                 Table = _tableService.GetByTableNumber(tableNumber) ?? new Table { TableNumber = tableNumber },
                 Staff = loggedInStaff
             });
-            return RedirectToAction("Details", "Tables", new { id = tableNumber });
+            return RedirectToAction("Details", "Tables", new { tableNumber });
         }
 
         // I added fragment baskets which will makes it so we don't have to scroll down after every basket addition.
@@ -67,7 +67,7 @@ namespace ChapeauProject.Controllers
             if (error != null)
             {
                 TempData["ErrorMessage"] = error;
-                return RedirectToAction("Details", "Tables", new { id = order.Table.TableNumber, fragment = "basket" });
+                return RedirectToAction("Details", "Tables", new { tableNumber = order.Table.TableNumber, fragment = "basket" });
             }
 
             var item = _menuService.GetMenuItemById(menuItemID);
@@ -128,7 +128,7 @@ namespace ChapeauProject.Controllers
             if (validationError != null)
             {
                 TempData["ErrorMessage"] = validationError;
-                return RedirectToAction("Details", "Tables", new { id = currentTableId });
+                return RedirectToAction("Details", "Tables", new { tableNumber = currentTableId });
             }
 
             order.Guest = guest;

@@ -15,6 +15,7 @@ namespace ChapeauProject.Repositories
         private const string PrepPreparing    = nameof(PreparationStatus.Preparing);
         private const string PrepReady        = nameof(PreparationStatus.Ready);
         private const string PrepServed       = nameof(PreparationStatus.Served);
+        private const string CourseOther      = nameof(CourseName.Other);
 
         public OrderRepository(IConfiguration configuration) : base(configuration)
         {
@@ -47,7 +48,7 @@ namespace ChapeauProject.Repositories
             }
         }
 
-        private void InsertOrderItems(List<OrderItem> items, int orderId, SqlConnection connection)
+        private void InsertOrderItems(IReadOnlyList<OrderItem> items, int orderId, SqlConnection connection)
         {
             string sql = @"
                 INSERT INTO OrderItems (OrderID, MenuItemID, Quantity, PreparationStatus, Comment)
@@ -68,40 +69,32 @@ namespace ChapeauProject.Repositories
             }
         }
 
+        // Added BuildOrderQuery for repeated code
+
         public List<RunningOrder> GetAllOrdersByStatus()
         {
-            string query = $@"
-                SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
-                       oi.OrderItemID, mi.MenuItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus,
-                       mi.MenuCard, ISNULL(c.CourseName, 'Other') AS CourseName, oi.Comment
-                FROM Orders o
-                JOIN Guests g ON o.GuestID = g.GuestID
-                JOIN OrderItems oi ON o.OrderID = oi.OrderID
-                JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
-                LEFT JOIN Courses c ON mi.CourseID = c.CourseID
-                WHERE o.OrderStatus = '{StatusPending}'
-                ORDER BY o.OrderTimeStamp ASC, c.CourseID ASC";
-
-            return ReadOrders(query);
+            return ReadOrders(BuildOrderQuery(
+                $"WHERE o.OrderStatus = '{StatusPending}' ORDER BY o.OrderTimeStamp ASC, c.CourseID ASC"));
         }
 
         public List<RunningOrder> GetFinishedOrdersToday()
         {
-            string query = $@"
+            return ReadOrders(BuildOrderQuery(
+                $"WHERE o.OrderStatus IN ('{StatusComplete}', '{StatusServed}') AND CAST(o.OrderTimeStamp AS DATE) = CAST(GETDATE() AS DATE) ORDER BY o.OrderTimeStamp DESC, c.CourseID ASC"));
+        }
+
+        private string BuildOrderQuery(string whereClause) => $@"
                 SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
                        oi.OrderItemID, mi.MenuItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus,
-                       mi.MenuCard, ISNULL(c.CourseName, 'Other') AS CourseName, oi.Comment
+                       mi.MenuCard, ISNULL(c.CourseName, '{CourseOther}') AS CourseName, oi.Comment,
+                       ISNULL(s.Quantity, 0) AS Stock
                 FROM Orders o
                 JOIN Guests g ON o.GuestID = g.GuestID
                 JOIN OrderItems oi ON o.OrderID = oi.OrderID
                 JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
                 LEFT JOIN Courses c ON mi.CourseID = c.CourseID
-                WHERE o.OrderStatus IN ('{StatusComplete}', '{StatusServed}')
-                  AND CAST(o.OrderTimeStamp AS DATE) = CAST(GETDATE() AS DATE)
-                ORDER BY o.OrderTimeStamp DESC, c.CourseID ASC";
-
-            return ReadOrders(query);
-        }
+                LEFT JOIN Stock s ON mi.MenuItemID = s.MenuItemID
+                {whereClause}";
 
         private List<RunningOrder> ReadOrders(string query)
         {
@@ -133,7 +126,7 @@ namespace ChapeauProject.Repositories
                             reader.GetString(reader.GetOrdinal("ItemName")),
                             reader.GetDecimal(reader.GetOrdinal("Price")),
                             reader.GetDecimal(reader.GetOrdinal("VatRate")),
-                            0,
+                            reader.GetInt32(reader.GetOrdinal("Stock")),
                             new Menu(Enum.Parse<MenuCard>(reader.GetString(reader.GetOrdinal("MenuCard"))))
                         ),
                         Quantity          = reader.GetInt32(reader.GetOrdinal("Quantity")),
@@ -155,42 +148,34 @@ namespace ChapeauProject.Repositories
                 return CourseName.Other;
         }
 
+
+        // Found repeated code so looked up how to shorten it. (might be too advanced for our SQL level) 
         public void ToggleCoursePreparation(int orderId, CourseName courseName)
         {
             using (SqlConnection connection = GetConnection())
             {
                 string query = $@"
+                    WITH NextStatus AS (
+                        SELECT CASE
+                                   WHEN COUNT(CASE WHEN oi2.PreparationStatus = '{PrepPending}'   THEN 1 END) > 0 THEN '{PrepPreparing}'
+                                   WHEN COUNT(CASE WHEN oi2.PreparationStatus = '{PrepPreparing}' THEN 1 END) > 0 THEN '{PrepReady}'
+                                   WHEN COUNT(CASE WHEN oi2.PreparationStatus = '{PrepReady}'     THEN 1 END) > 0 THEN '{PrepServed}'
+                                   ELSE '{PrepPending}'
+                               END AS NewStatus
+                        FROM OrderItems oi2
+                        JOIN MenuItems mi2 ON oi2.MenuItemID = mi2.MenuItemID
+                        LEFT JOIN Courses c2 ON mi2.CourseID = c2.CourseID
+                        WHERE oi2.OrderID = @OrderID
+                          AND ISNULL(c2.CourseName, '{CourseOther}') = @CourseName
+                    )
                     UPDATE oi
-                    SET oi.PreparationStatus =
-                        CASE
-                            WHEN (SELECT COUNT(*) FROM OrderItems oi2
-                                  JOIN MenuItems mi2 ON oi2.MenuItemID = mi2.MenuItemID
-                                  LEFT JOIN Courses c2 ON mi2.CourseID = c2.CourseID
-                                  WHERE oi2.OrderID = @OrderID
-                                    AND ISNULL(c2.CourseName, 'Other') = @CourseName
-                                    AND oi2.PreparationStatus = '{PrepPending}') > 0
-                                THEN '{PrepPreparing}'
-                            WHEN (SELECT COUNT(*) FROM OrderItems oi2
-                                  JOIN MenuItems mi2 ON oi2.MenuItemID = mi2.MenuItemID
-                                  LEFT JOIN Courses c2 ON mi2.CourseID = c2.CourseID
-                                  WHERE oi2.OrderID = @OrderID
-                                    AND ISNULL(c2.CourseName, 'Other') = @CourseName
-                                    AND oi2.PreparationStatus = '{PrepPreparing}') > 0
-                                THEN '{PrepReady}'
-                            WHEN (SELECT COUNT(*) FROM OrderItems oi2
-                                  JOIN MenuItems mi2 ON oi2.MenuItemID = mi2.MenuItemID
-                                  LEFT JOIN Courses c2 ON mi2.CourseID = c2.CourseID
-                                  WHERE oi2.OrderID = @OrderID
-                                    AND ISNULL(c2.CourseName, 'Other') = @CourseName
-                                    AND oi2.PreparationStatus = '{PrepReady}') > 0
-                                THEN '{PrepServed}'
-                            ELSE '{PrepPending}'
-                        END
+                    SET oi.PreparationStatus = ns.NewStatus
                     FROM OrderItems oi
                     JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
                     LEFT JOIN Courses c ON mi.CourseID = c.CourseID
+                    CROSS JOIN NextStatus ns
                     WHERE oi.OrderID = @OrderID
-                      AND ISNULL(c.CourseName, 'Other') = @CourseName";
+                      AND ISNULL(c.CourseName, '{CourseOther}') = @CourseName";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {

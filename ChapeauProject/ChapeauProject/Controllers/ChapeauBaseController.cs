@@ -25,7 +25,7 @@ namespace ChapeauProject.Controllers
 
         protected IActionResult RedirectToBasket(int tableNumber)
         {
-            return Redirect(Url.Action("Details", "Tables", new { id = tableNumber }) + "#basket");
+            return Redirect(Url.Action("Details", "Tables", new { tableNumber }) + "#basket");
         }
 
         protected Staff GetLoggedInStaff()

@@ -11,7 +11,7 @@
 
 <div class="page-header">
     <h2>Table @Model.TableNumber Workspace</h2>
-    <a asp-action="Details" asp-route-id="@Model.TableNumber" class="complete-btn btn-inline">&#8635; Refresh</a>
+    <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" class="complete-btn btn-inline">&#8635; Refresh</a>
 </div>
 <hr />
 
@@ -66,7 +66,7 @@ else
                             <td>
                                 <form asp-action="ToggleItem" asp-controller="Orders" method="post" class="form-inline">
                                     <input type="hidden" name="orderItemId" value="@item.OrderItemID" />
-                                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Tables", new { id = Model.TableNumber })" />
+                                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Tables", new { tableNumber = Model.TableNumber })" />
                                     <button type="submit" class="@item.StatusPillClass">@item.StatusLabel</button>
                                 </form>
                             </td>
@@ -86,7 +86,7 @@ else
 
 <div class="mb-4">
     <a asp-action="Index" class="btn btn-secondary py-2 px-3">Back to Tables Grid</a>
-    <a asp-action="Pay" asp-controller="Bill" asp-route-id="@Model.TableNumber"
+    <a asp-action="Pay" asp-controller="Bill" asp-route-tableNumber="@Model.TableNumber"
        class="complete-btn btn-inline" style="padding:10px 24px; margin-left:8px;">
         Process Bill Checkout
     </a>
@@ -101,9 +101,9 @@ else
 
         <div class="d-flex mb-3">
             <div class="btn-group">
-                <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="Lunch" class="btn btn-outline-dark @(currentCard == MenuCard.Lunch ? "active" : "")">Lunch</a>
-                <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="Dinner" class="btn btn-outline-dark @(currentCard == MenuCard.Dinner ? "active" : "")">Dinner</a>
-                <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="Drinks" class="btn btn-outline-dark @(currentCard == MenuCard.Drinks ? "active" : "")">Drinks</a>
+                <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" asp-route-cardFilter="Lunch" class="btn btn-outline-dark @(currentCard == MenuCard.Lunch ? "active" : "")">Lunch</a>
+                <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" asp-route-cardFilter="Dinner" class="btn btn-outline-dark @(currentCard == MenuCard.Dinner ? "active" : "")">Dinner</a>
+                <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" asp-route-cardFilter="Drinks" class="btn btn-outline-dark @(currentCard == MenuCard.Drinks ? "active" : "")">Drinks</a>
             </div>
         </div>
 
@@ -111,10 +111,10 @@ else
         {
             <div class="d-flex mb-4">
                 <div class="btn-group btn-group-sm">
-                    <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="@CourseFilter.All" class="btn btn-light @(ViewBag.CourseFilter == CourseFilter.All ? "active" : "")">All</a>
-                    <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Starter" class="btn btn-light @(ViewBag.CourseFilter == "Starter" ? "active" : "")">Starters</a>
-                    <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Main" class="btn btn-light @(ViewBag.CourseFilter == "Main" ? "active" : "")">Mains</a>
-                    <a asp-action="Details" asp-route-id="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Dessert" class="btn btn-light @(ViewBag.CourseFilter == "Dessert" ? "active" : "")">Desserts</a>
+                    <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="@CourseFilter.All" class="btn btn-light @(ViewBag.CourseFilter == CourseFilter.All ? "active" : "")">All</a>
+                    <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Starter" class="btn btn-light @(ViewBag.CourseFilter == "Starter" ? "active" : "")">Starters</a>
+                    <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Main" class="btn btn-light @(ViewBag.CourseFilter == "Main" ? "active" : "")">Mains</a>
+                    <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Dessert" class="btn btn-light @(ViewBag.CourseFilter == "Dessert" ? "active" : "")">Desserts</a>
                 </div>
             </div>
         }

@@ -123,9 +123,11 @@ namespace ChapeauProject.Services
             foreach (var guest in orders.Guests)
             {
                 decimal guestTotal = guest.Items.Sum(i => i.Price * i.Quantity);
-                decimal vatShare   = orders.TotalAmount > 0
-                    ? guestTotal * (orders.TotalAmount / orders.SubTotalAmount)
-                    : guestTotal;
+                decimal vatShare;
+                if (orders.TotalAmount > 0)
+                    vatShare = guestTotal * (orders.TotalAmount / orders.SubTotalAmount);
+                else
+                    vatShare = guestTotal;
 
                 viewModel.Payers.Add(new SplitPayerViewModel
                 {

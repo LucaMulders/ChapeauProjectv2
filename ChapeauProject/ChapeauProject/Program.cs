@@ -10,10 +10,11 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter());
 });
 
-builder.Services.AddSingleton<IStaffRepository, StaffRepository>();
-builder.Services.AddSingleton<IStaffService, StaffService>();
-builder.Services.AddSingleton<ITableRepository, TableRepository>();
-builder.Services.AddSingleton<ITableService, TableService>();
+// Scoped so each request gets its own instance, consistent with the other services (could change back to singleton)
+builder.Services.AddScoped<IStaffRepository, StaffRepository>();
+builder.Services.AddScoped<IStaffService, StaffService>();
+builder.Services.AddScoped<ITableRepository, TableRepository>();
+builder.Services.AddScoped<ITableService, TableService>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();

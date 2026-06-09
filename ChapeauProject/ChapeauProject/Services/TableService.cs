@@ -23,7 +23,11 @@ namespace ChapeauProject.Services
 
         public List<TablesViewModel> GetTableSummaries(bool occupiedOnly = false)
         {
-            var tables = occupiedOnly ? GetAllOccupiedTables() : GetAllTables();
+            List<Table> tables;
+            if (occupiedOnly)
+                tables = GetAllOccupiedTables();
+            else
+                tables = GetAllTables();
 
             return tables.Select(t =>
             {
@@ -117,7 +121,7 @@ namespace ChapeauProject.Services
             return _tableRepository.GetGuestsByTable(tableNumber);
         }
 
-        public (bool HasFood, bool HasDrink) GetRunningOrderCategories(int tableNumber)
+        public OrderCategories GetRunningOrderCategories(int tableNumber)
         {
             return _tableRepository.GetRunningOrderCategories(tableNumber);
         }
