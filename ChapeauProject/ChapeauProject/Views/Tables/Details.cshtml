@@ -1,9 +1,10 @@
 @model ChapeauProject.ViewModels.TableOrderViewModel
 @using ChapeauProject.Models
+@using ChapeauProject.ViewModels
 
 @{
     ViewData["Title"] = "Table " + Model.TableNumber + " Orders";
-    var menuItems = ViewBag.MenuItems as List<ChapeauProject.Models.MenuItem>;
+    var menuItems = ViewBag.MenuItems as List<MenuItem>;
     var activeBasket = ViewBag.CurrentBasket as ChapeauProject.Models.Order;
     var currentCard = (MenuCard)ViewBag.CardFilter;
 }

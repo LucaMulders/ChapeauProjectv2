@@ -1,4 +1,6 @@
-﻿namespace ChapeauProject.Models
+﻿using ChapeauProject.ViewModels;
+
+namespace ChapeauProject.Models
 {
     public class OrderItem
     {
