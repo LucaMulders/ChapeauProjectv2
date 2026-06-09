@@ -52,21 +52,20 @@ namespace ChapeauProject.Controllers
             return RedirectToAction("Index");
         }
 
-        //NOTE 'id' matches the default ASP. Renaming to tableNumber means updating a lot of view links and redirects. Should we? (ask teacher)
-        public IActionResult Details(int id, MenuCard cardFilter = MenuCard.Lunch, string courseFilter = CourseFilter.All)
+        public IActionResult Details(int tableNumber, MenuCard cardFilter = MenuCard.Lunch, string courseFilter = CourseFilter.All)
         {
             try
             {
-                var viewModel = _tableService.GetTableOrders(id);
+                var viewModel = _tableService.GetTableOrders(tableNumber);
                 if (viewModel == null) return NotFound();
 
                 var activeOrder = GetActiveOrder();
-                if (activeOrder.Table.TableNumber != id)
+                if (activeOrder.Table.TableNumber != tableNumber)
                 {
                     var loggedInStaff = GetLoggedInStaff();
                     activeOrder = new Order
                     {
-                        Table = _tableService.GetByTableNumber(id) ?? new Table { TableNumber = id },
+                        Table = _tableService.GetByTableNumber(tableNumber) ?? new Table { TableNumber = tableNumber },
                         Staff = loggedInStaff
                     };
                     SetActiveOrder(activeOrder);
@@ -75,7 +74,7 @@ namespace ChapeauProject.Controllers
                 ViewBag.CardFilter    = cardFilter;
                 ViewBag.CourseFilter  = courseFilter;
                 ViewBag.CurrentBasket = activeOrder;
-                ViewBag.Guests        = _tableService.GetGuestsByTable(id);
+                ViewBag.Guests        = _tableService.GetGuestsByTable(tableNumber);
                 ViewBag.MenuItems     = _menuService.GetCourseFiltered(cardFilter, courseFilter);
 
                 return View(viewModel);

@@ -32,10 +32,10 @@ namespace ChapeauProject.ViewModels
         public bool AllItemsReady   => Items.All(i => i.PreparationStatus == PreparationStatus.Served);
 
         public List<RunningOrderItemViewModel> FoodItems  =>
-            Items.Where(i => i.MenuCard == "Lunch" || i.MenuCard == "Dinner").ToList();
+            Items.Where(i => i.MenuCard == nameof(MenuCard.Lunch) || i.MenuCard == nameof(MenuCard.Dinner)).ToList();
 
         public List<RunningOrderItemViewModel> DrinkItems =>
-            Items.Where(i => i.MenuCard == "Drinks").ToList();
+            Items.Where(i => i.MenuCard == nameof(MenuCard.Drinks)).ToList();
 
         public List<CourseGroupViewModel> FoodItemsByCourse =>
             CourseOrder

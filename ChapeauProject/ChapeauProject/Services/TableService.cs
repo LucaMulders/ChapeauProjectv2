@@ -23,7 +23,11 @@ namespace ChapeauProject.Services
 
         public List<TablesViewModel> GetTableSummaries(bool occupiedOnly = false)
         {
-            var tables = occupiedOnly ? GetAllOccupiedTables() : GetAllTables();
+            List<Table> tables;
+            if (occupiedOnly)
+                tables = GetAllOccupiedTables();
+            else
+                tables = GetAllTables();
 
             return tables.Select(t =>
             {

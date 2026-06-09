@@ -8,6 +8,9 @@ namespace ChapeauProject.Repositories
 {
     public class MenuRepository : RepositoryBase, IMenuRepository
     {
+        // Use of constants for strings (rubric)
+        private const string CourseNA = "N/A";
+
         public MenuRepository(IConfiguration configuration) : base(configuration) { }
 
         public List<MenuItem> GetCourseFiltered(MenuCard cardFilter, string courseFilter)
@@ -50,9 +53,9 @@ namespace ChapeauProject.Repositories
 
         private string GetSqlForFilteredMenu(string courseFilter)
         {
-            string query = @"
+            string query = $@"
                 SELECT MI.MenuItemID, MI.ItemName, MI.Price, MI.VatRate, ISNULL(S.Quantity, 0) AS Quantity,
-                       ISNULL(C.CourseName, 'N/A') AS CourseName, MI.MenuCard
+                       ISNULL(C.CourseName, '{CourseNA}') AS CourseName, MI.MenuCard
                 FROM MenuItems MI
                 LEFT JOIN Stock S ON MI.MenuItemID = S.MenuItemID
                 LEFT JOIN Courses C ON MI.CourseID = C.CourseID
@@ -97,9 +100,9 @@ namespace ChapeauProject.Repositories
             {
                 using (SqlConnection connection = GetConnection())
                 {
-                    string query = @"
+                    string query = $@"
                         SELECT MI.MenuItemID, MI.ItemName, MI.Price, MI.VatRate, ISNULL(S.Quantity, 0) AS Quantity,
-                               ISNULL(C.CourseName, 'N/A') AS CourseName, MI.MenuCard
+                               ISNULL(C.CourseName, '{CourseNA}') AS CourseName, MI.MenuCard
                         FROM MenuItems MI
                         LEFT JOIN Stock S ON MI.MenuItemID = S.MenuItemID
                         LEFT JOIN Courses C ON MI.CourseID = C.CourseID
