@@ -45,6 +45,7 @@ namespace ChapeauProject.Services
                 .ToList();
         }
 
+        //NOTE use orders guest
         public string? ValidateSaveOrder(Order order, Guest guest)
         {
             if (guest.GuestID <= 0)
