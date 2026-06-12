@@ -225,6 +225,27 @@ namespace ChapeauProject.Repositories
             }
         }
 
+        // Inserts a new guest at the given table and returns the generated GuestID.
+        // Used to auto-create an unnamed guest when an order is placed at a table with no registered guests.
+        public int InsertGuest(int tableNumber, string firstName, string lastName)
+        {
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = @"
+                    INSERT INTO Guests (TableNumber, FirstName, LastName)
+                    VALUES (@TableNumber, @FirstName, @LastName);
+                    SELECT CAST(SCOPE_IDENTITY() as int);";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@TableNumber", tableNumber);
+                    cmd.Parameters.AddWithValue("@FirstName",   firstName);
+                    cmd.Parameters.AddWithValue("@LastName",    lastName);
+                    return (int)cmd.ExecuteScalar();
+                }
+            }
+        }
+
         public OrderCategories GetRunningOrderCategories(int tableNumber)
         {
             var cards    = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

@@ -124,6 +124,10 @@ namespace ChapeauProject.Controllers
             var order = GetActiveOrder();
             int currentTableId = order.Table.TableNumber;
 
+            // If no guest was selected and the table has no registered guests, create an unnamed one.
+            if (guest.GuestID <= 0 && !_tableService.GetGuestsByTable(currentTableId).Any())
+                guest = _tableService.CreateUnnamedGuest(currentTableId);
+
             string? validationError = _orderService.ValidateSaveOrder(order, guest);
             if (validationError != null)
             {

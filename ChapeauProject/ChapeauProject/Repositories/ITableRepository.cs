@@ -15,5 +15,6 @@ namespace ChapeauProject.Repositories
         OrderCategories GetRunningOrderCategories(int tableNumber);
         void MarkTableAsFree(int tableNumber);
         void RemoveGuests(int tableNumber);
+        int InsertGuest(int tableNumber, string firstName, string lastName);
     }
 }
