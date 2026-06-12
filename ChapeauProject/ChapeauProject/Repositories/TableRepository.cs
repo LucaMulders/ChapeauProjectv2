@@ -98,7 +98,7 @@ namespace ChapeauProject.Repositories
                 JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
                 LEFT JOIN Stock s ON mi.MenuItemID = s.MenuItemID
                 WHERE g.TableNumber = @TableNumber
-                  AND o.OrderStatus = '{StatusPending}'";
+                  AND o.OrderStatus IN ('{StatusPending}', '{nameof(OrderStatus.Served)}')";
 
             var guestOrders = new Dictionary<int, GuestOrder>();
 
@@ -156,7 +156,7 @@ namespace ChapeauProject.Repositories
                     JOIN Guests g  ON o.GuestID  = g.GuestID
                     JOIN OrderItems oi ON o.OrderID = oi.OrderID
                     WHERE g.TableNumber  = @TableNumber
-                      AND o.OrderStatus = '{StatusPending}'";
+                      AND o.OrderStatus IN ('{StatusPending}', '{nameof(OrderStatus.Served)}')";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {

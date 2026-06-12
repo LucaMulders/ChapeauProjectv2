@@ -211,7 +211,7 @@ namespace ChapeauProject.Repositories
         {
             using (SqlConnection connection = GetConnection())
             {
-                string query = $"UPDATE Orders SET OrderStatus = '{StatusComplete}' WHERE OrderID = @OrderID";
+                string query = $"UPDATE Orders SET OrderStatus = '{StatusServed}' WHERE OrderID = @OrderID";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@OrderID", orderId);
