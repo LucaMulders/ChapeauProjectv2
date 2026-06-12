@@ -12,8 +12,9 @@ namespace ChapeauProject.Models
         public Staff Staff { get; set; } = new Staff();
         public DateTime OrderTimeStamp { get; set; } = DateTime.Now;
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
-        private readonly List<OrderItem> _orderItems = new List<OrderItem>();
-        public IReadOnlyList<OrderItem> OrderItems => _orderItems;
+        // Must be a public List with a setter so System.Text.Json can round-trip it through session storage.
+        // IReadOnlyList with a private backing field is NOT serialized and would silently lose all basket items.
+        public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
         public decimal CalculateTotalPrice()
         {
@@ -29,7 +30,7 @@ namespace ChapeauProject.Models
             }
             else
             {
-                _orderItems.Add(new OrderItem
+                OrderItems.Add(new OrderItem
                 {
                     MenuItem          = item,
                     Quantity          = 1,
@@ -43,7 +44,7 @@ namespace ChapeauProject.Models
         {
             var item = OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
             if (item != null)
-                _orderItems.Remove(item);
+                OrderItems.Remove(item);
         }
 
         public void IncreaseQuantity(int menuItemID)
@@ -60,7 +61,7 @@ namespace ChapeauProject.Models
 
             item.Quantity--;
             if (item.Quantity <= 0)
-                _orderItems.Remove(item);
+                OrderItems.Remove(item);
         }
 
         public void UpdateItemComment(int menuItemID, string comment)

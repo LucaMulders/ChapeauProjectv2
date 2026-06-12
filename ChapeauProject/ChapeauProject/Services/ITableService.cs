@@ -17,5 +17,6 @@ namespace ChapeauProject.Services
         OrderCategories GetRunningOrderCategories(int tableNumber);
         void MarkTableAsFree(int tableNumber);
         void RemoveGuests(int tableNumber);
+        Guest CreateUnnamedGuest(int tableNumber);
     }
 }

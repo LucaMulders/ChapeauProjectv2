@@ -136,5 +136,12 @@ namespace ChapeauProject.Services
         {
             _tableRepository.RemoveGuests(tableNumber);
         }
+
+        // Creates an unnamed guest at the given table (used when placing an order with no registered guests).
+        public Guest CreateUnnamedGuest(int tableNumber)
+        {
+            int guestId = _tableRepository.InsertGuest(tableNumber, string.Empty, string.Empty);
+            return new Guest(guestId, string.Empty, string.Empty);
+        }
     }
 }

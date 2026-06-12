@@ -59,6 +59,7 @@ namespace ChapeauProject.Controllers
                 }
 
                 await SignInStaff(staff);
+                staff.Password = string.Empty; 
                 HttpContext.Session.SetObject("LoggedInStaff", staff);
                 TempData["SuccessMessage"] = "Welcome back, " + staff.FirstName + "!";
                 return RedirectToAction("Index", "Tables");

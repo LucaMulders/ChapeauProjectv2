@@ -98,7 +98,7 @@ namespace ChapeauProject.Repositories
                 JOIN MenuItems mi ON oi.MenuItemID = mi.MenuItemID
                 LEFT JOIN Stock s ON mi.MenuItemID = s.MenuItemID
                 WHERE g.TableNumber = @TableNumber
-                  AND o.OrderStatus = '{StatusPending}'";
+                  AND o.OrderStatus IN ('{StatusPending}', '{nameof(OrderStatus.Served)}')";
 
             var guestOrders = new Dictionary<int, GuestOrder>();
 
@@ -156,7 +156,7 @@ namespace ChapeauProject.Repositories
                     JOIN Guests g  ON o.GuestID  = g.GuestID
                     JOIN OrderItems oi ON o.OrderID = oi.OrderID
                     WHERE g.TableNumber  = @TableNumber
-                      AND o.OrderStatus = '{StatusPending}'";
+                      AND o.OrderStatus IN ('{StatusPending}', '{nameof(OrderStatus.Served)}')";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -221,6 +221,27 @@ namespace ChapeauProject.Repositories
                 {
                     command.Parameters.AddWithValue("@TableNumber", tableNumber);
                     command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // Inserts a new guest at the given table and returns the generated GuestID.
+        // Used to auto-create an unnamed guest when an order is placed at a table with no registered guests.
+        public int InsertGuest(int tableNumber, string firstName, string lastName)
+        {
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = @"
+                    INSERT INTO Guests (TableNumber, FirstName, LastName)
+                    VALUES (@TableNumber, @FirstName, @LastName);
+                    SELECT CAST(SCOPE_IDENTITY() as int);";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@TableNumber", tableNumber);
+                    cmd.Parameters.AddWithValue("@FirstName",   firstName);
+                    cmd.Parameters.AddWithValue("@LastName",    lastName);
+                    return (int)cmd.ExecuteScalar();
                 }
             }
         }
