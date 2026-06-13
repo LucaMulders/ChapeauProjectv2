@@ -32,7 +32,12 @@ header, .navbar {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 2px;
-    opacity: 1 !important; 
+    opacity: 1 !important;
+}
+
+.nav-link.active {
+    border-bottom: 2px solid var(--bistro-gold);
+    padding-bottom: 2px;
 }
 
 

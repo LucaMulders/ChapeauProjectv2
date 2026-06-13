@@ -13,7 +13,7 @@
         <span class="status-badge @(Model.Table.IsOccupied ? "badge-occupied" : "badge-free")">
             @(Model.Table.IsOccupied ? "Occupied" : "Free")
         </span>
-        <span class="table-seats">@Model.OrderCount orders</span>
+        <span class="table-seats">@Model.OrderCount items</span>
         @if (Model.HasFoodOrder || Model.HasDrinkOrder)
         {
             <div class="order-icons">
