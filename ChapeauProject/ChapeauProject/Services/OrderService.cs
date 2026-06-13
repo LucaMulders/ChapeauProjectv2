@@ -109,21 +109,21 @@ namespace ChapeauProject.Services
             }
         }
 
-        private List<RunningOrderViewModel> MapToViewModels(List<RunningOrder> orders)
+        private List<RunningOrderViewModel> MapToViewModels(List<Order> orders)
         {
             return orders.Select(o => new RunningOrderViewModel
             {
                 OrderID     = o.OrderID,
-                TableNumber = o.TableNumber,
-                OrderTime   = o.OrderTime,
-                Items       = o.Items.Select(i => new RunningOrderItemViewModel
+                TableNumber = o.Table?.TableNumber ?? 0,
+                OrderTime   = o.OrderTimeStamp,
+                Items       = o.OrderItems.Select(i => new RunningOrderItemViewModel
                 {
                     OrderItemID       = i.OrderItemID,
-                    ItemName          = i.MenuItem.ItemName,
+                    ItemName          = i.MenuItem?.ItemName ?? string.Empty,
                     Quantity          = i.Quantity,
                     PreparationStatus = i.PreparationStatus,
-                    MenuCard          = i.MenuItem.AssociatedMenu?.CardType.ToString() ?? string.Empty,
-                    CourseName        = i.CourseName,
+                    MenuCard          = i.MenuItem?.AssociatedMenu?.CardType.ToString() ?? string.Empty,
+                    CourseName        = i.CourseName ?? CourseName.Other,
                     Comment           = i.Comment
                 }).ToList()
             }).ToList();

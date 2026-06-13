@@ -5,8 +5,8 @@ namespace ChapeauProject.Repositories
 {
     public interface IOrderRepository
     {
-        List<RunningOrder> GetAllOrdersByStatus();
-        List<RunningOrder> GetFinishedOrdersToday();
+        List<Order> GetAllOrdersByStatus();
+        List<Order> GetFinishedOrdersToday();
         void ToggleItemPreparation(int orderItemId);
         void ToggleCoursePreparation(int orderId, CourseName courseName);
         void CompleteOrder(int orderId);

@@ -71,13 +71,13 @@ namespace ChapeauProject.Repositories
 
         // Added BuildOrderQuery for repeated code
 
-        public List<RunningOrder> GetAllOrdersByStatus()
+        public List<Order> GetAllOrdersByStatus()
         {
             return ReadOrders(BuildOrderQuery(
                 $"WHERE o.OrderStatus = '{StatusPending}' ORDER BY o.OrderTimeStamp ASC, c.CourseID ASC"));
         }
 
-        public List<RunningOrder> GetFinishedOrdersToday()
+        public List<Order> GetFinishedOrdersToday()
         {
             return ReadOrders(BuildOrderQuery(
                 $"WHERE o.OrderStatus IN ('{StatusComplete}', '{StatusServed}') AND CAST(o.OrderTimeStamp AS DATE) = CAST(GETDATE() AS DATE) ORDER BY o.OrderTimeStamp DESC, c.CourseID ASC"));
@@ -96,9 +96,9 @@ namespace ChapeauProject.Repositories
                 LEFT JOIN Stock s ON mi.MenuItemID = s.MenuItemID
                 {whereClause}";
 
-        private List<RunningOrder> ReadOrders(string query)
+        private List<Order> ReadOrders(string query)
         {
-            var orders = new Dictionary<int, RunningOrder>();
+            var orders = new Dictionary<int, Order>();
 
             using (SqlConnection connection = GetConnection())
             using (SqlCommand command = new SqlCommand(query, connection))
@@ -110,15 +110,15 @@ namespace ChapeauProject.Repositories
 
                     if (!orders.ContainsKey(orderID))
                     {
-                        orders[orderID] = new RunningOrder
+                        orders[orderID] = new Order
                         {
-                            OrderID     = orderID,
-                            TableNumber = reader.GetInt32(reader.GetOrdinal("TableNumber")),
-                            OrderTime   = DateTime.SpecifyKind(reader.GetDateTime(reader.GetOrdinal("OrderTimeStamp")), DateTimeKind.Utc)
+                            OrderID        = orderID,
+                            Table          = new Table { TableNumber = reader.GetInt32(reader.GetOrdinal("TableNumber")) },
+                            OrderTimeStamp = DateTime.SpecifyKind(reader.GetDateTime(reader.GetOrdinal("OrderTimeStamp")), DateTimeKind.Utc)
                         };
                     }
 
-                    orders[orderID].Items.Add(new RunningOrderItem
+                    orders[orderID].OrderItems.Add(new OrderItem
                     {
                         OrderItemID       = reader.GetInt32(reader.GetOrdinal("OrderItemID")),
                         MenuItem          = new MenuItem(
