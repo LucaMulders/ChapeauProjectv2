@@ -194,7 +194,7 @@ namespace ChapeauProject.Repositories
                         WHEN '{PrepPending}'   THEN '{PrepPreparing}'
                         WHEN '{PrepPreparing}' THEN '{PrepReady}'
                         WHEN '{PrepReady}'     THEN '{PrepServed}'
-                        WHEN '{PrepServed}'    THEN '{PrepPending}'
+                        ELSE PreparationStatus
                     END
                     WHERE OrderItemID = @OrderItemID";
 

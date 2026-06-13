@@ -54,7 +54,7 @@ namespace ChapeauProject.Controllers
 
                 if (staff == null)
                 {
-                    ViewBag.ErrorMessage = "Invalid staffID or password";
+                    loginModel.ErrorMessage = "Invalid staffID or password";
                     return View(loginModel);
                 }
 
@@ -66,7 +66,7 @@ namespace ChapeauProject.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorMessage = "An error occurred during login: " + ex.Message;
+                loginModel.ErrorMessage = "An error occurred during login: " + ex.Message;
                 return View(loginModel);
             }
         }

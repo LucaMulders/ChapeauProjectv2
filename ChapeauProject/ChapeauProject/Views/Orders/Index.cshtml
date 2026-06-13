@@ -1,17 +1,16 @@
-@model IEnumerable<ChapeauProject.ViewModels.TableOrderGroupViewModel>
+@model ChapeauProject.ViewModels.OrdersIndexViewModel
 
 @{
     ViewData["Title"] = "Running Orders";
-    string filter = ViewBag.Filter as string ?? "running";
 }
 
 <div class="page-header">
-    <h2 class="page-title">@ViewBag.PageTitle</h2>
+    <h2 class="page-title">@Model.PageTitle</h2>
     <div class="filter-tabs">
         <a asp-action="Index" asp-route-filter="running"
-           class="filter-tab @(filter == "running" ? "filter-tab-active" : "")">Running</a>
+           class="filter-tab @(Model.Filter == "running" ? "filter-tab-active" : "")">Running</a>
         <a asp-action="Index" asp-route-filter="finished"
-           class="filter-tab @(filter == "finished" ? "filter-tab-active" : "")">Finished Today</a>
+           class="filter-tab @(Model.Filter == "finished" ? "filter-tab-active" : "")">Finished Today</a>
     </div>
 </div>
 <hr />
@@ -21,14 +20,14 @@
     <div class="alert-banner">@TempData["ErrorMessage"]</div>
 }
 
-@if (!Model.Any())
+@if (!Model.TableGroups.Any())
 {
-    <p class="text-muted">@ViewBag.EmptyMessage</p>
+    <p class="text-muted">@Model.EmptyMessage</p>
 }
 else
 {
     <div class="orders-grid">
-        @foreach (var tableGroup in Model)
+        @foreach (var tableGroup in Model.TableGroups)
         {
             <div class="order-card">
                 <div class="order-card-header">

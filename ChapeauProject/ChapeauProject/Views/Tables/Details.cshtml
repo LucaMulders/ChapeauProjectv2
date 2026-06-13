@@ -1,17 +1,17 @@
-@model ChapeauProject.ViewModels.TableOrderViewModel
+@model ChapeauProject.ViewModels.TableWorkspaceViewModel
 @using ChapeauProject.Models
 @using ChapeauProject.ViewModels
 
 @{
-    ViewData["Title"] = "Table " + Model.TableNumber + " Orders";
-    var menuItems = ViewBag.MenuItems as List<MenuItem>;
-    var activeBasket = ViewBag.CurrentBasket as ChapeauProject.Models.Order;
-    var currentCard = (MenuCard)ViewBag.CardFilter;
+    ViewData["Title"] = "Table " + Model.TableOrders.TableNumber + " Orders";
+    var menuItems   = Model.MenuItems;
+    var activeBasket = Model.ActiveBasket;
+    var currentCard  = Model.CardFilter;
 }
 
 <div class="page-header">
-    <h2>Table @Model.TableNumber Workspace</h2>
-    <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" class="complete-btn btn-inline">&#8635; Refresh</a>
+    <h2>Table @Model.TableOrders.TableNumber Workspace</h2>
+    <a asp-action="Details" asp-route-tableNumber="@Model.TableOrders.TableNumber" class="complete-btn btn-inline">&#8635; Refresh</a>
 </div>
 <hr />
 
@@ -32,13 +32,13 @@
 
 <h3 class="mb-3 mt-2 menu-heading">Active Table Consumption Log</h3>
 
-@if (!Model.Guests.Any())
+@if (!Model.TableOrders.Guests.Any())
 {
     <p class="text-muted fst-italic py-2">No guests found on this table.</p>
 }
 else
 {
-    @foreach (var guest in Model.Guests)
+    @foreach (var guest in Model.TableOrders.Guests)
     {
         <h4>@guest.FullName</h4>
         <table class="table table-sm align-middle mb-4">
@@ -66,7 +66,7 @@ else
                             <td>
                                 <form asp-action="ToggleItem" asp-controller="Orders" method="post" class="form-inline">
                                     <input type="hidden" name="orderItemId" value="@item.OrderItemID" />
-                                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Tables", new { tableNumber = Model.TableNumber })" />
+                                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Tables", new { tableNumber = Model.TableOrders.TableNumber })" />
                                     <button type="submit" class="@item.StatusPillClass">@item.StatusLabel</button>
                                 </form>
                             </td>
@@ -79,14 +79,14 @@ else
 }
 
 <div class="bg-light p-3 rounded mb-4 border shadow-sm vat-summary">
-    <p class="mb-1 small text-secondary">Low VAT (9%): <span class="fw-bold text-dark float-end">€@Model.LowVAT.ToString("F2")</span></p>
-    <p class="mb-2 small text-secondary">High VAT (21%): <span class="fw-bold text-dark float-end">€@Model.HighVAT.ToString("F2")</span></p>
-    <h5 class="m-0 pt-2 border-top fw-bold menu-item-name">Total (incl. VAT): <span class="float-end">€@Model.TotalAmount.ToString("F2")</span></h5>
+    <p class="mb-1 small text-secondary">Low VAT (9%): <span class="fw-bold text-dark float-end">€@Model.TableOrders.LowVAT.ToString("F2")</span></p>
+    <p class="mb-2 small text-secondary">High VAT (21%): <span class="fw-bold text-dark float-end">€@Model.TableOrders.HighVAT.ToString("F2")</span></p>
+    <h5 class="m-0 pt-2 border-top fw-bold menu-item-name">Total (incl. VAT): <span class="float-end">€@Model.TableOrders.TotalAmount.ToString("F2")</span></h5>
 </div>
 
 <div class="mb-4">
     <a asp-action="Index" class="btn btn-secondary py-2 px-3">Back to Tables Grid</a>
-    <a asp-action="Pay" asp-controller="Bill" asp-route-tableNumber="@Model.TableNumber"
+    <a asp-action="Pay" asp-controller="Bill" asp-route-tableNumber="@Model.TableOrders.TableNumber"
        class="complete-btn btn-inline" style="padding:10px 24px; margin-left:8px;">
         Process Bill Checkout
     </a>
@@ -101,9 +101,9 @@ else
 
         <div class="d-flex mb-3">
             <div class="btn-group">
-                <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" asp-route-cardFilter="Lunch" class="btn btn-outline-dark @(currentCard == MenuCard.Lunch ? "active" : "")">Lunch</a>
-                <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" asp-route-cardFilter="Dinner" class="btn btn-outline-dark @(currentCard == MenuCard.Dinner ? "active" : "")">Dinner</a>
-                <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" asp-route-cardFilter="Drinks" class="btn btn-outline-dark @(currentCard == MenuCard.Drinks ? "active" : "")">Drinks</a>
+                <a asp-action="Details" asp-route-tableNumber="@Model.TableOrders.TableNumber" asp-route-cardFilter="Lunch" class="btn btn-outline-dark @(currentCard == MenuCard.Lunch ? "active" : "")">Lunch</a>
+                <a asp-action="Details" asp-route-tableNumber="@Model.TableOrders.TableNumber" asp-route-cardFilter="Dinner" class="btn btn-outline-dark @(currentCard == MenuCard.Dinner ? "active" : "")">Dinner</a>
+                <a asp-action="Details" asp-route-tableNumber="@Model.TableOrders.TableNumber" asp-route-cardFilter="Drinks" class="btn btn-outline-dark @(currentCard == MenuCard.Drinks ? "active" : "")">Drinks</a>
             </div>
         </div>
 
@@ -111,10 +111,10 @@ else
         {
             <div class="d-flex mb-4">
                 <div class="btn-group btn-group-sm">
-                    <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="@CourseFilter.All" class="btn btn-light @(ViewBag.CourseFilter == CourseFilter.All ? "active" : "")">All</a>
-                    <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Starter" class="btn btn-light @(ViewBag.CourseFilter == "Starter" ? "active" : "")">Starters</a>
-                    <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Main" class="btn btn-light @(ViewBag.CourseFilter == "Main" ? "active" : "")">Mains</a>
-                    <a asp-action="Details" asp-route-tableNumber="@Model.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Dessert" class="btn btn-light @(ViewBag.CourseFilter == "Dessert" ? "active" : "")">Desserts</a>
+                    <a asp-action="Details" asp-route-tableNumber="@Model.TableOrders.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="@CourseFilter.All" class="btn btn-light @(Model.CourseFilter == CourseFilter.All ? "active" : "")">All</a>
+                    <a asp-action="Details" asp-route-tableNumber="@Model.TableOrders.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Starters" class="btn btn-light @(Model.CourseFilter == "Starters" ? "active" : "")">Starters</a>
+                    <a asp-action="Details" asp-route-tableNumber="@Model.TableOrders.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Mains" class="btn btn-light @(Model.CourseFilter == "Mains" ? "active" : "")">Mains</a>
+                    <a asp-action="Details" asp-route-tableNumber="@Model.TableOrders.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Desserts" class="btn btn-light @(Model.CourseFilter == "Desserts" ? "active" : "")">Desserts</a>
                 </div>
             </div>
         }
@@ -153,7 +153,7 @@ else
 
                 <div class="text-center pb-2 mb-4 border-bottom">
                     <h4 class="fw-bold m-0 basket-heading">New Order Ticket</h4>
-                    <small class="text-muted fw-semibold">Table @Model.TableNumber Processing Drawer</small>
+                    <small class="text-muted fw-semibold">Table @Model.TableOrders.TableNumber Processing Drawer</small>
                 </div>
 
                 <div class="basket-items-list overflow-auto pe-1">
@@ -211,7 +211,7 @@ else
 
                 @if (activeBasket != null && activeBasket.OrderItems.Any())
                 {
-                    var tableGuests = (List<ChapeauProject.Models.Guest>)ViewBag.Guests;
+                    var tableGuests = Model.Guests;
                     <div class="mt-4 pt-3 border-top">
                         <div class="d-grid gap-2">
                             <form asp-controller="Orders" asp-action="SaveAndSendOrder" method="post" class="m-0 w-100">

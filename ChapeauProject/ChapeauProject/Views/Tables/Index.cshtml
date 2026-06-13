@@ -5,9 +5,9 @@
     ViewData["Title"] = "Tables";
 }
 
-@if (TempData["Error"] != null)
+@if (TempData["ErrorMessage"] != null)
 {
-    <div class="alert-banner">@TempData["Error"]</div>
+    <div class="alert-banner">@TempData["ErrorMessage"]</div>
 }
 @if (TempData["SuccessMessage"] != null)
 {
@@ -23,8 +23,8 @@
 
 <div class="stat-bar">
     <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">@Model.Count()</div></div>
-    <div class="stat-card"><div class="stat-label">Free</div><div class="stat-value stat-value-free">@ViewBag.FreeCount</div></div>
-    <div class="stat-card"><div class="stat-label">Occupied</div><div class="stat-value stat-value-occupied">@ViewBag.OccupiedCount</div></div>
+    <div class="stat-card"><div class="stat-label">Free</div><div class="stat-value stat-value-free">@Model.Count(t => !t.Table.IsOccupied)</div></div>
+    <div class="stat-card"><div class="stat-label">Occupied</div><div class="stat-value stat-value-occupied">@Model.Count(t => t.Table.IsOccupied)</div></div>
 </div>
 
 <div class="tables-grid">

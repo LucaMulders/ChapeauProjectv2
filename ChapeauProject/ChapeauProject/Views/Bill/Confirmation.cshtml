@@ -1,6 +1,8 @@
+@model int
+
 @{
     ViewData["Title"] = "Payment Confirmed";
-    int tableNumber = ViewBag.TableNumber;
+    int tableNumber = Model;
 }
 
 <div class="confirmation-wrapper">

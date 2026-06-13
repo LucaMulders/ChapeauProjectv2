@@ -87,8 +87,7 @@ namespace ChapeauProject.Controllers
         [HttpGet]
         public IActionResult Confirmation(int tableNumber)
         {
-            ViewBag.TableNumber = tableNumber;
-            return View();
+            return View(tableNumber);
         }
     }
 }

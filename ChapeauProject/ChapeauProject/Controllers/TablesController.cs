@@ -22,9 +22,6 @@ namespace ChapeauProject.Controllers
             try
             {
                 var viewModel = _tableService.GetTableSummaries();
-
-                ViewBag.FreeCount     = viewModel.Count(t => !t.Table.IsOccupied);
-                ViewBag.OccupiedCount = viewModel.Count(t =>  t.Table.IsOccupied);
                 return View(viewModel);
             }
             catch (Exception ex)
@@ -74,13 +71,17 @@ namespace ChapeauProject.Controllers
                     SetActiveOrder(activeOrder);
                 }
 
-                ViewBag.CardFilter    = cardFilter;
-                ViewBag.CourseFilter  = courseFilter;
-                ViewBag.CurrentBasket = activeOrder;
-                ViewBag.Guests        = _tableService.GetGuestsByTable(tableNumber);
-                ViewBag.MenuItems     = _menuService.GetCourseFiltered(cardFilter, courseFilter);
+                var workspaceViewModel = new TableWorkspaceViewModel
+                {
+                    TableOrders  = viewModel,
+                    ActiveBasket = activeOrder,
+                    Guests       = _tableService.GetGuestsByTable(tableNumber),
+                    MenuItems    = _menuService.GetCourseFiltered(cardFilter, courseFilter),
+                    CardFilter   = cardFilter,
+                    CourseFilter = courseFilter
+                };
 
-                return View(viewModel);
+                return View(workspaceViewModel);
             }
             catch (Exception ex)
             {

@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChapeauProject.Controllers
 {
+    //NOTE add kitchen/bar implementation!! and after make roles actually matter when logged in. Sophie hope u do this :P
+
     public class OrdersController : ChapeauBaseController
     {
         private readonly IOrderService _orderService;
@@ -22,25 +24,25 @@ namespace ChapeauProject.Controllers
         {
             try
             {
-                var tableGroups = _orderService.GetOrdersGroupedByTable(filter);
-                ViewBag.Filter = filter;
-
-                if (filter == OrderFilter.Finished)
+                var viewModel = new OrdersIndexViewModel
                 {
-                    ViewBag.PageTitle    = "Finished Orders Today";
-                    ViewBag.EmptyMessage = "No finished orders today yet.";
-                }
-                else
-                {
-                    ViewBag.PageTitle    = "Running Orders";
-                    ViewBag.EmptyMessage = "No running orders at the moment.";
-                }
-                return View(tableGroups);
+                    TableGroups  = _orderService.GetOrdersGroupedByTable(filter),
+                    Filter       = filter,
+                    PageTitle    = filter == OrderFilter.Finished ? "Finished Orders Today" : "Running Orders",
+                    EmptyMessage = filter == OrderFilter.Finished ? "No finished orders today yet." : "No running orders at the moment."
+                };
+                return View(viewModel);
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "Failed to load orders: " + ex.Message;
-                return View(new List<TableOrderGroupViewModel>());
+                return View(new OrdersIndexViewModel
+                {
+                    TableGroups  = new List<TableOrderGroupViewModel>(),
+                    Filter       = filter,
+                    PageTitle    = "Running Orders",
+                    EmptyMessage = "No running orders at the moment."
+                });
             }
         }
 

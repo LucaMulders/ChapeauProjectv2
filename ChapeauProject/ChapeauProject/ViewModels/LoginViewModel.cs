@@ -9,5 +9,7 @@ namespace ChapeauProject.ViewModels
 
         [DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
+
+        public string? ErrorMessage { get; set; }
     }
 }
