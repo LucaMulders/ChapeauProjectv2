@@ -9,7 +9,7 @@ namespace ChapeauProject.Services
         List<RunningOrderViewModel> GetAllOrdersByStatus();
         List<RunningOrderViewModel> GetFinishedOrdersToday();
         List<TableOrderGroupViewModel> GetOrdersGroupedByTable(string filter);
-        string? ValidateSaveOrder(Order order, Guest guest);
+        string? ValidateSaveOrder(Order order);
         string? ValidateAddItem(Order order, int menuItemID);
         string? ValidateIncreaseQuantity(Order order, int menuItemID);
         void ToggleItemPreparation(int orderItemId);

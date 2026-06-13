@@ -45,10 +45,9 @@ namespace ChapeauProject.Services
                 .ToList();
         }
 
-        //NOTE use orders guest
-        public string? ValidateSaveOrder(Order order, Guest guest)
+        public string? ValidateSaveOrder(Order order)
         {
-            if (guest.GuestID <= 0)
+            if (order.Guest.GuestID <= 0)
                 return "Please select a guest before sending the order.";
 
             if (!order.OrderItems.Any())

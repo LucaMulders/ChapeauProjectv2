@@ -5,7 +5,6 @@ using System.Collections.Generic;
 
 namespace ChapeauProject.Repositories
 {
-    //NOTE remove connection string
     public class OrderRepository : RepositoryBase, IOrderRepository
     {
         // Use of Constants for Repeated Strings
@@ -71,7 +70,6 @@ namespace ChapeauProject.Repositories
         }
 
         // Added BuildOrderQuery for repeated code
-
         public List<Order> GetAllOrdersByStatus()
         {
             return ReadOrders(BuildOrderQuery(

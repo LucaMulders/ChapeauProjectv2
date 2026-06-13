@@ -128,7 +128,7 @@ namespace ChapeauProject.Controllers
             if (guest.GuestID <= 0 && !_tableService.GetGuestsByTable(currentTableId).Any())
                 guest = _tableService.CreateUnnamedGuest(currentTableId);
 
-            string? validationError = _orderService.ValidateSaveOrder(order, guest);
+            string? validationError = _orderService.ValidateSaveOrder(order);
             if (validationError != null)
             {
                 TempData["ErrorMessage"] = validationError;
