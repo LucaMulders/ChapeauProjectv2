@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace ChapeauProject.Repositories
 {
+    //NOTE remove connection string
     public class OrderRepository : RepositoryBase, IOrderRepository
     {
         // Use of Constants for Repeated Strings
