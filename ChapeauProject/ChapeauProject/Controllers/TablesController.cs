@@ -56,6 +56,9 @@ namespace ChapeauProject.Controllers
         {
             try
             {
+                var table = _tableService.GetByTableNumber(tableNumber);
+                if (table == null) return NotFound();
+
                 var viewModel = _tableService.GetTableOrders(tableNumber);
                 if (viewModel == null) return NotFound();
 
@@ -65,7 +68,7 @@ namespace ChapeauProject.Controllers
                     var loggedInStaff = GetLoggedInStaff();
                     activeOrder = new Order
                     {
-                        Table = _tableService.GetByTableNumber(tableNumber) ?? new Table { TableNumber = tableNumber },
+                        Table = table,
                         Staff = loggedInStaff
                     };
                     SetActiveOrder(activeOrder);

@@ -5,18 +5,21 @@
                 <img src="~/images/logo_small.png" alt="Chapeau" />
             </a>
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                @{
+                    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+                }
                 <ul class="navbar-nav flex-grow-1">
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Tables" asp-action="Index">Tables</a>
+                        <a class="nav-link @(currentController == "Tables" ? "active" : "")" aria-current="@(currentController == "Tables" ? "page" : null)" asp-controller="Tables" asp-action="Index">Tables</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Menu" asp-action="Index">Menu</a>
+                        <a class="nav-link @(currentController == "Menu" ? "active" : "")" aria-current="@(currentController == "Menu" ? "page" : null)" asp-controller="Menu" asp-action="Index">Menu</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Orders" asp-action="Index">Orders</a>
+                        <a class="nav-link @(currentController == "Orders" ? "active" : "")" aria-current="@(currentController == "Orders" ? "page" : null)" asp-controller="Orders" asp-action="Index">Orders</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Bill" asp-action="Index">Bill</a>
+                        <a class="nav-link @(currentController == "Bill" ? "active" : "")" aria-current="@(currentController == "Bill" ? "page" : null)" asp-controller="Bill" asp-action="Index">Bill</a>
                     </li>
                 </ul>
                 @if (User.Identity.IsAuthenticated)
