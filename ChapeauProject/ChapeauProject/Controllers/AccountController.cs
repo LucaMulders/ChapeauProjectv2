@@ -62,7 +62,7 @@ namespace ChapeauProject.Controllers
                 staff.Password = string.Empty; 
                 HttpContext.Session.SetObject(ChapeauBaseController.LoggedInStaffKey, staff);
                 TempData["SuccessMessage"] = "Welcome back, " + staff.FirstName + "!";
-                return RedirectToAction("Index", "Tables");
+                return RedirectToAction("Index", "Menu");
             }
             catch (Exception ex)
             {
