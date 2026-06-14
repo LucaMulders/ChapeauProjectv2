@@ -10,7 +10,6 @@ namespace ChapeauProject.ViewModels
         public decimal Price { get; set; }
         public decimal VatRate { get; set; }
         public PreparationStatus PreparationStatus { get; set; }
-
         public string StatusPillClass => PreparationStatus.ToStatusPillClass();
         public string StatusLabel     => PreparationStatus.ToStatusLabel();
     }
