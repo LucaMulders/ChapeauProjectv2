@@ -31,10 +31,10 @@ namespace ChapeauProject.ViewModels
         public bool AllItemsReady   => Items.All(i => i.PreparationStatus == PreparationStatus.Served);
 
         public List<RunningOrderItemViewModel> FoodItems  =>
-            Items.Where(i => i.MenuCard == nameof(MenuCard.Lunch) || i.MenuCard == nameof(MenuCard.Dinner)).ToList();
+            Items.Where(i => i.MenuCard == MenuCard.Lunch || i.MenuCard == MenuCard.Dinner).ToList();
 
         public List<RunningOrderItemViewModel> DrinkItems =>
-            Items.Where(i => i.MenuCard == nameof(MenuCard.Drinks)).ToList();
+            Items.Where(i => i.MenuCard == MenuCard.Drinks).ToList();
 
         public List<CourseGroupViewModel> FoodItemsByCourse =>
             CourseOrder
@@ -59,7 +59,7 @@ namespace ChapeauProject.ViewModels
         public string ItemName { get; set; } = string.Empty;
         public int Quantity { get; set; }
         public PreparationStatus PreparationStatus { get; set; }
-        public string MenuCard { get; set; } = string.Empty;
+        public MenuCard MenuCard { get; set; }
         public CourseName CourseName { get; set; }
         public string? Comment { get; set; }
 

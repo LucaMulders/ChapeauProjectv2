@@ -7,7 +7,6 @@
         public PreparationStatus PreparationStatus { get; set; }
         public CourseName? CourseName { get; set; }
         public string Comment { get; set; } = string.Empty;
-        public Order? Order { get; set; }
         public MenuItem? MenuItem { get; set; }
     }
 }

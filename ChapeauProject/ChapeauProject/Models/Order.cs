@@ -16,11 +16,6 @@ namespace ChapeauProject.Models
         // IReadOnlyList with a private backing field is NOT serialized and would silently lose all basket items.
         public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
-        public decimal CalculateTotalPrice()
-        {
-            return OrderItems.Sum(oi => (oi.MenuItem?.Price ?? 0) * oi.Quantity);
-        }
-
         public void AddItem(MenuItem item)
         {
             var existing = OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == item.MenuItemID);

@@ -30,13 +30,5 @@ namespace ChapeauProject.Services
             _menuRepository.DeductStockQuantity(menuItemID, amountToDeduct);
         }
 
-        public List<MenuItem> GetCourseFilteredByName(string menuCard, string courseFilter)
-        {
-            if (Enum.TryParse(menuCard, true, out MenuCard parsed))
-                return GetCourseFiltered(parsed, courseFilter);
-            else
-                return GetCourseFiltered(MenuCard.Lunch, courseFilter);
-        }
-
     }
 }

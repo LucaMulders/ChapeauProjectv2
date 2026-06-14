@@ -129,7 +129,7 @@ namespace ChapeauProject.Services
                     ItemName          = i.MenuItem?.ItemName ?? string.Empty,
                     Quantity          = i.Quantity,
                     PreparationStatus = i.PreparationStatus,
-                    MenuCard          = i.MenuItem?.Card.ToString() ?? string.Empty,
+                    MenuCard          = i.MenuItem?.Card ?? default,
                     CourseName        = i.CourseName ?? CourseName.Other,
                     Comment           = i.Comment
                 }).ToList()

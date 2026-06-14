@@ -19,14 +19,12 @@ namespace ChapeauProject.Repositories
             using (SqlConnection connection = GetConnection())
             {
                 string query = @"
-                    INSERT INTO Bills (OrderID, GuestID, TotalAmount, VatAmount, SubTotalAmount, BillTimeStamp)
+                    INSERT INTO Bills (TotalAmount, VatAmount, SubTotalAmount, BillTimeStamp)
                     OUTPUT INSERTED.BillID
-                    VALUES (@OrderID, @GuestID, @TotalAmount, @VatAmount, @SubTotalAmount, @BillTimeStamp)";
+                    VALUES (@TotalAmount, @VatAmount, @SubTotalAmount, @BillTimeStamp)";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@OrderID",       (object?)bill.Order?.OrderID ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@GuestID",       (object?)bill.Guest?.GuestID ?? DBNull.Value);
                     command.Parameters.AddWithValue("@TotalAmount",    bill.TotalAmount);
                     command.Parameters.AddWithValue("@VatAmount",      bill.VatAmount);
                     command.Parameters.AddWithValue("@SubTotalAmount", bill.SubTotalAmount);
