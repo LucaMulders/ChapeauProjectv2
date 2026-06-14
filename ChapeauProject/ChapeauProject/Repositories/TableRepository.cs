@@ -8,7 +8,7 @@ namespace ChapeauProject.Repositories
         // Use of Constants for Repeated Strings
         private const string StatusPending = nameof(OrderStatus.Pending);
 
-        public TableRepository(IConfiguration configuration) : base(configuration)
+        public TableRepository(string connectionString) : base(connectionString)
         {
         }
 

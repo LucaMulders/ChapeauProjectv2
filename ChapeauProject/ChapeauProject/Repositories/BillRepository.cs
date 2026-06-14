@@ -11,7 +11,7 @@ namespace ChapeauProject.Repositories
         private const string StatusComplete = nameof(OrderStatus.Complete);
         private const string StatusServed   = nameof(OrderStatus.Served);
 
-        public BillRepository(IConfiguration configuration) : base(configuration)
+        public BillRepository(string connectionString) : base(connectionString)
         {
         }
 

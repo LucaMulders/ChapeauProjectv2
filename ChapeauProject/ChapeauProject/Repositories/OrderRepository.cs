@@ -17,7 +17,7 @@ namespace ChapeauProject.Repositories
         private const string PrepServed       = nameof(PreparationStatus.Served);
         private const string CourseOther      = nameof(CourseName.Other);
 
-        public OrderRepository(IConfiguration configuration) : base(configuration)
+        public OrderRepository(string connectionString) : base(connectionString)
         {
         }
 

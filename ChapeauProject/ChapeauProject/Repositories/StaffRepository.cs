@@ -6,7 +6,7 @@ namespace ChapeauProject.Repositories
 {
     public class StaffRepository : RepositoryBase, IStaffRepository
     {
-        public StaffRepository(IConfiguration configuration) : base(configuration)
+        public StaffRepository(string connectionString) : base(connectionString)
         {
         }
 

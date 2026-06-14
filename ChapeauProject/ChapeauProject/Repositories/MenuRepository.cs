@@ -11,7 +11,7 @@ namespace ChapeauProject.Repositories
         // Use of constants for strings (rubric)
         private const string CourseNA = "N/A";
 
-        public MenuRepository(IConfiguration configuration) : base(configuration) { }
+        public MenuRepository(string connectionString) : base(connectionString) { }
 
         public List<MenuItem> GetCourseFiltered(MenuCard cardFilter, string courseFilter)
         {

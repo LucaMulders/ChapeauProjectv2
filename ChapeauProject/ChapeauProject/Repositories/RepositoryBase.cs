@@ -1,16 +1,14 @@
 using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 
 namespace ChapeauProject.Repositories
 {
     public abstract class RepositoryBase
     {
-        protected readonly string? _connectionString;
+        protected readonly string _connectionString;
 
-        protected RepositoryBase(IConfiguration configuration)
+        protected RepositoryBase(string connectionString)
         {
-            // get the connection string from appsettings
-            _connectionString = configuration.GetConnectionString("ChapeauProject");
+            _connectionString = connectionString;
         }
 
         protected SqlConnection GetConnection()
