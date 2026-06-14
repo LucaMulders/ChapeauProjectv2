@@ -113,7 +113,7 @@ namespace ChapeauProject.Repositories
                         {
                             OrderID        = orderID,
                             Table          = new Table { TableNumber = reader.GetInt32(reader.GetOrdinal("TableNumber")) },
-                            OrderTimeStamp = DateTime.SpecifyKind(reader.GetDateTime(reader.GetOrdinal("OrderTimeStamp")), DateTimeKind.Utc)
+                            OrderTimeStamp = reader.GetDateTime(reader.GetOrdinal("OrderTimeStamp"))
                         };
                     }
 
