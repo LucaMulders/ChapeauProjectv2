@@ -1,11 +1,13 @@
 using ChapeauProject.Models;
 using ChapeauProject.Services;
 using ChapeauProject.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 
 namespace ChapeauProject.Controllers
 {
+    [Authorize(Roles = "Waiter,Manager")]
     public class TablesController : ChapeauBaseController
     {
         private readonly ITableService _tableService;

@@ -1,10 +1,12 @@
 using ChapeauProject.Models;
 using ChapeauProject.Services;
 using ChapeauProject.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChapeauProject.Controllers
 {
+    [Authorize(Roles = "Waiter,Manager")]
     public class BillController : Controller
     {
         private readonly ITableService _tableService;
@@ -34,11 +36,11 @@ namespace ChapeauProject.Controllers
         }
 
         [HttpGet]
-        public IActionResult Pay(Table table)
+        public IActionResult Pay(int tableNumber)
         {
             try
             {
-                return View(_billService.GetPayViewModel(table.TableNumber));
+                return View(_billService.GetPayViewModel(tableNumber));
             }
             catch (Exception ex)
             {

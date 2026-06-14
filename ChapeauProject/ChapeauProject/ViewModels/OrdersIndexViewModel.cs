@@ -1,3 +1,5 @@
+using ChapeauProject.Models;
+
 namespace ChapeauProject.ViewModels
 {
     public class OrdersIndexViewModel
@@ -6,5 +8,6 @@ namespace ChapeauProject.ViewModels
         public string Filter { get; set; }
         public string PageTitle { get; set; }
         public string EmptyMessage { get; set; }
+        public StaffRole StaffRole { get; set; }
     }
 }

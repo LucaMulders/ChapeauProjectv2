@@ -14,6 +14,7 @@
             get { return StockQuantity > 0; }
         }
 
+        // Returns true if the requested quantity can still be fulfilled from current stock
         public bool IsInStock(int quantity)
         {
             return quantity < StockQuantity;

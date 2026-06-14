@@ -107,24 +107,9 @@ namespace ChapeauProject.Services
             };
         }
 
-        public int GetOrderCount(int tableNumber)
-        {
-            return _tableRepository.GetOrderCount(tableNumber);
-        }
-
-        public int GetGuestCount(int tableNumber)
-        {
-            return _tableRepository.GetGuestCount(tableNumber);
-        }
-
         public List<Guest> GetGuestsByTable(int tableNumber)
         {
             return _tableRepository.GetGuestsByTable(tableNumber);
-        }
-
-        public OrderCategories GetRunningOrderCategories(int tableNumber)
-        {
-            return _tableRepository.GetRunningOrderCategories(tableNumber);
         }
 
         public void MarkTableAsFree(int tableNumber)

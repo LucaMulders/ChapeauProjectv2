@@ -26,13 +26,20 @@ namespace ChapeauProject.Services
             return MapToViewModels(_orderRepository.GetFinishedOrdersToday());
         }
 
-        public List<TableOrderGroupViewModel> GetOrdersGroupedByTable(string filter)
+        public List<TableOrderGroupViewModel> GetOrdersGroupedByTable(string filter, StaffRole role)
         {
-            List<RunningOrderViewModel> orders;
-            if (filter == OrderFilter.Finished)
-                orders = GetFinishedOrdersToday();
-            else
-                orders = GetAllOrdersByStatus();
+            List<RunningOrderViewModel> orders = filter == OrderFilter.Finished
+                ? GetFinishedOrdersToday()
+                : GetAllOrdersByStatus();
+
+            // Chef sees only orders that contain at least one food item.
+            // Bartender sees only orders that contain at least one drink item.
+            orders = role switch
+            {
+                StaffRole.Chef      => orders.Where(o => o.FoodItems.Any()).ToList(),
+                StaffRole.Bartender => orders.Where(o => o.DrinkItems.Any()).ToList(),
+                _                   => orders
+            };
 
             return orders
                 .GroupBy(o => o.TableNumber)

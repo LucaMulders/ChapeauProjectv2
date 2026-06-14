@@ -101,7 +101,7 @@ else
                 <div class="btn-group btn-group-sm">
                     <a asp-action="Details" asp-route-tableNumber="@Model.TableOrders.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="@CourseFilter.All" class="btn btn-light @(Model.CourseFilter == CourseFilter.All ? "active" : "")">All</a>
                     <a asp-action="Details" asp-route-tableNumber="@Model.TableOrders.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Starters" class="btn btn-light @(Model.CourseFilter == "Starters" ? "active" : "")">Starters</a>
-                    <a asp-action="Details" asp-route-tableNumber="@Model.TableOrders.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Mains" class="btn btn-light @(Model.CourseFilter == "Mains" ? "active" : "")">Mains</a>
+                    <a asp-action="Details" asp-route-tableNumber="@Model.TableOrders.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Main" class="btn btn-light @(Model.CourseFilter == "Main" ? "active" : "")">Mains</a>
                     <a asp-action="Details" asp-route-tableNumber="@Model.TableOrders.TableNumber" asp-route-cardFilter="@currentCard" asp-route-courseFilter="Desserts" class="btn btn-light @(Model.CourseFilter == "Desserts" ? "active" : "")">Desserts</a>
                 </div>
             </div>
@@ -120,7 +120,17 @@ else
                     @foreach (var item in menuItems)
                     {
                         <tr>
-                            <td class="fw-bold py-3 ps-3 menu-item-name">@item.ItemName</td>
+                            <td class="fw-bold py-3 ps-3 menu-item-name">
+                                @item.ItemName
+                                @if (!item.IsAvailable)
+                                {
+                                    <span class="badge bg-danger ms-1">Out of stock</span>
+                                }
+                                else if (item.StockQuantity <= 10)
+                                {
+                                    <span class="badge bg-warning text-dark ms-1">Only @item.StockQuantity left</span>
+                                }
+                            </td>
                             <td class="text-secondary">@item.PriceDisplay</td>
                             <td class="text-center pe-3">
                                 <form asp-controller="Orders" asp-action="AddItemToOrder" method="post" class="m-0">

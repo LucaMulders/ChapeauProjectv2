@@ -8,7 +8,7 @@ namespace ChapeauProject.Services
     {
         List<RunningOrderViewModel> GetAllOrdersByStatus();
         List<RunningOrderViewModel> GetFinishedOrdersToday();
-        List<TableOrderGroupViewModel> GetOrdersGroupedByTable(string filter);
+        List<TableOrderGroupViewModel> GetOrdersGroupedByTable(string filter, StaffRole role);
         string? ValidateSaveOrder(Order order);
         string? ValidateAddItem(Order order, int menuItemID);
         string? ValidateIncreaseQuantity(Order order, int menuItemID);

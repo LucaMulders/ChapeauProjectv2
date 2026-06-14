@@ -1,26 +1,42 @@
 <header>
     <nav class="navbar navbar-expand-sm">
         <div class="container">
-            <a class="navbar-brand" asp-controller="Tables" asp-action="Index">
-                <img src="~/images/logo_small.png" alt="Chapeau" />
-            </a>
+            @{
+                bool isKitchenOrBar = User.IsInRole("Chef") || User.IsInRole("Bartender");
+                var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+            }
+            @if (isKitchenOrBar)
+            {
+                <a class="navbar-brand" asp-controller="Orders" asp-action="Index">
+                    <img src="~/images/logo_small.png" alt="Chapeau" />
+                </a>
+            }
+            else
+            {
+                <a class="navbar-brand" asp-controller="Tables" asp-action="Index">
+                    <img src="~/images/logo_small.png" alt="Chapeau" />
+                </a>
+            }
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                @{
-                    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
-                }
                 <ul class="navbar-nav flex-grow-1">
-                    <li class="nav-item">
-                        <a class="nav-link @(currentController == "Tables" ? "active" : "")" aria-current="@(currentController == "Tables" ? "page" : null)" asp-controller="Tables" asp-action="Index">Tables</a>
-                    </li>
+                    @if (!isKitchenOrBar)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link @(currentController == "Tables" ? "active" : "")" aria-current="@(currentController == "Tables" ? "page" : null)" asp-controller="Tables" asp-action="Index">Tables</a>
+                        </li>
+                    }
                     <li class="nav-item">
                         <a class="nav-link @(currentController == "Menu" ? "active" : "")" aria-current="@(currentController == "Menu" ? "page" : null)" asp-controller="Menu" asp-action="Index">Menu</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(currentController == "Orders" ? "active" : "")" aria-current="@(currentController == "Orders" ? "page" : null)" asp-controller="Orders" asp-action="Index">Orders</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link @(currentController == "Bill" ? "active" : "")" aria-current="@(currentController == "Bill" ? "page" : null)" asp-controller="Bill" asp-action="Index">Bill</a>
-                    </li>
+                    @if (!isKitchenOrBar)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link @(currentController == "Bill" ? "active" : "")" aria-current="@(currentController == "Bill" ? "page" : null)" asp-controller="Bill" asp-action="Index">Bill</a>
+                        </li>
+                    }
                 </ul>
                 @if (User.Identity.IsAuthenticated)
                 {

@@ -1,12 +1,12 @@
 using ChapeauProject.Models;
 using ChapeauProject.Services;
 using ChapeauProject.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChapeauProject.Controllers
 {
-    //NOTE add kitchen/bar implementation!! and after make roles actually matter when logged in. Sophie hope u do this :P
-
+    [Authorize]
     public class OrdersController : ChapeauBaseController
     {
         private readonly IOrderService _orderService;
@@ -22,12 +22,14 @@ namespace ChapeauProject.Controllers
 
         public IActionResult Index(string filter = OrderFilter.Running)
         {
+            var staff = GetLoggedInStaff();
             try
             {
                 var viewModel = new OrdersIndexViewModel
                 {
-                    TableGroups  = _orderService.GetOrdersGroupedByTable(filter),
+                    TableGroups  = _orderService.GetOrdersGroupedByTable(filter, staff.Role),
                     Filter       = filter,
+                    StaffRole    = staff.Role,
                     PageTitle    = filter == OrderFilter.Finished ? "Finished Orders Today" : "Running Orders",
                     EmptyMessage = filter == OrderFilter.Finished ? "No finished orders today yet." : "No running orders at the moment."
                 };
@@ -43,6 +45,7 @@ namespace ChapeauProject.Controllers
                 {
                     TableGroups  = new List<TableOrderGroupViewModel>(),
                     Filter       = filter,
+                    StaffRole    = staff.Role,
                     PageTitle    = "Running Orders",
                     EmptyMessage = "No running orders at the moment."
                 });
@@ -50,6 +53,7 @@ namespace ChapeauProject.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Waiter,Manager")]
         public IActionResult StartNewOrder(int tableNumber)
         {
             var loggedInStaff = GetLoggedInStaff();
@@ -64,6 +68,7 @@ namespace ChapeauProject.Controllers
         // I added fragment baskets which will makes it so we don't have to scroll down after every basket addition.
 
         [HttpPost]
+        [Authorize(Roles = "Waiter,Manager")]
         public IActionResult AddItemToOrder(int menuItemID)
         {
             var order = GetActiveOrder();
@@ -82,6 +87,7 @@ namespace ChapeauProject.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Waiter,Manager")]
         public IActionResult IncreaseQuantity(int menuItemID)
         {
             var order  = GetActiveOrder();
@@ -97,6 +103,7 @@ namespace ChapeauProject.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Waiter,Manager")]
         public IActionResult DecreaseQuantity(int menuItemID)
         {
             var order = GetActiveOrder();
@@ -106,6 +113,7 @@ namespace ChapeauProject.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Waiter,Manager")]
         public IActionResult RemoveRow(int menuItemID)
         {
             var order = GetActiveOrder();
@@ -115,6 +123,7 @@ namespace ChapeauProject.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Waiter,Manager")]
         public IActionResult UpdateItemComment(int menuItemID, string comment)
         {
             var order = GetActiveOrder();
@@ -124,6 +133,7 @@ namespace ChapeauProject.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Waiter,Manager")]
         public IActionResult SaveAndSendOrder(Guest guest)
         {
             var order = GetActiveOrder();
@@ -148,10 +158,11 @@ namespace ChapeauProject.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Waiter,Manager")]
         public IActionResult CancelWholeOrder()
         {
             ClearActiveOrder();
-            TempData["InfoMessage"] = "Order sheet reset.";
+            TempData["SuccessMessage"] = "Order sheet reset.";
             return RedirectToAction("Index", "Tables");
         }
 

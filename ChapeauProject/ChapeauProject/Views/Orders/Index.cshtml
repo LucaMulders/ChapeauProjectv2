@@ -33,7 +33,8 @@ else
 
                 @for (int i = 0; i < tableGroup.Orders.Count; i++)
                 {
-                    @await Html.PartialAsync("_OrderGroup", tableGroup.Orders[i])
+                    @await Html.PartialAsync("_OrderGroup", tableGroup.Orders[i],
+                        new ViewDataDictionary(ViewData) { { "StaffRole", Model.StaffRole } })
                     @if (i < tableGroup.Orders.Count - 1)
                     {
                         <hr class="order-divider" />

@@ -74,6 +74,13 @@ namespace ChapeauProject.Controllers
             }
         }
 
+        // GET: /Account/AccessDenied
+        [HttpGet]
+        public ActionResult AccessDenied()
+        {
+            return View();
+        }
+
         // GET: /Account/Logoff
         [HttpGet]
         public async Task<ActionResult> Logoff()

@@ -1,6 +1,5 @@
 using ChapeauProject.Models;
 using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 
 namespace ChapeauProject.Repositories
@@ -84,6 +83,7 @@ namespace ChapeauProject.Repositories
 
         private string BuildOrderQuery(string whereClause) => $@"
                 SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
+                       g.GuestID, g.FirstName, g.LastName,
                        oi.OrderItemID, mi.MenuItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus,
                        mi.MenuCard, ISNULL(c.CourseName, '{CourseOther}') AS CourseName, oi.Comment,
                        ISNULL(s.Quantity, 0) AS Stock
@@ -113,7 +113,12 @@ namespace ChapeauProject.Repositories
                         {
                             OrderID        = orderID,
                             Table          = new Table { TableNumber = reader.GetInt32(reader.GetOrdinal("TableNumber")) },
-                            OrderTimeStamp = reader.GetDateTime(reader.GetOrdinal("OrderTimeStamp"))
+                            OrderTimeStamp = reader.GetDateTime(reader.GetOrdinal("OrderTimeStamp")),
+                            Guest          = new Guest(
+                                reader.GetInt32(reader.GetOrdinal("GuestID")),
+                                reader.IsDBNull(reader.GetOrdinal("FirstName")) ? string.Empty : reader.GetString(reader.GetOrdinal("FirstName")),
+                                reader.IsDBNull(reader.GetOrdinal("LastName"))  ? string.Empty : reader.GetString(reader.GetOrdinal("LastName"))
+                            )
                         };
                     }
 
