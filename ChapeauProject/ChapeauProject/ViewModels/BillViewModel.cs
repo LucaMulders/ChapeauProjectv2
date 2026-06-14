@@ -14,15 +14,8 @@ namespace ChapeauProject.ViewModels
         public string? Feedback { get; set; }
     }
 
-    public class BillViewModel
+    public class BillViewModel : TableOrderViewModel
     {
-        public int TableNumber { get; set; }
-        public List<GuestOrderViewModel> Guests { get; set; } = new();
-        public decimal SubTotalAmount { get; set; }
-        public decimal LowVAT { get; set; }
-        public decimal HighVAT { get; set; }
-        public decimal TotalAmount { get; set; }
-
         public SplitMode SplitMode { get; set; } = SplitMode.Single;
         public int SplitCount { get; set; } = 1;
 
@@ -32,7 +25,5 @@ namespace ChapeauProject.ViewModels
         public PaymentMethod PaymentMethod { get; set; } = Models.PaymentMethod.Cash;
         public string? Feedback { get; set; }
 
-        public decimal AmountAlreadyPaid { get; set; }
-        public decimal Remaining => TotalAmount - AmountAlreadyPaid;
     }
 }

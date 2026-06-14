@@ -7,7 +7,5 @@ namespace ChapeauProject.Repositories
         int CreateBill(Bill bill);
         void CreatePayment(Payment payment);
         void CompleteOrdersForTable(int tableNumber);
-        int? GetBillIdForTable(int tableNumber);
-        decimal GetAmountPaidForBill(int billId);
     }
 }

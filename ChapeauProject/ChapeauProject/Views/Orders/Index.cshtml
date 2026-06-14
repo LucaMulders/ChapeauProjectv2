@@ -15,10 +15,7 @@
 </div>
 <hr />
 
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert-banner">@TempData["ErrorMessage"]</div>
-}
+<partial name="_ErrorMessage" />
 
 @if (!Model.TableGroups.Any())
 {

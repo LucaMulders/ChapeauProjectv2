@@ -32,7 +32,10 @@ namespace ChapeauProject.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Failed to load menu: " + ex.Message;
+                // Changed errors to be more generic to avoid giving away information about the system
+
+                Console.Error.WriteLine($"[MenuController.Index] {ex}");
+                TempData["ErrorMessage"] = "Failed to load menu. Please try again.";
                 return RedirectToAction("Index", "Tables");
             }
         }

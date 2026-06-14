@@ -11,22 +11,7 @@ namespace ChapeauProject.ViewModels
         public decimal VatRate { get; set; }
         public PreparationStatus PreparationStatus { get; set; }
 
-        public string StatusPillClass => PreparationStatus switch
-        {
-            PreparationStatus.Pending   => "status-pill status-ordered",
-            PreparationStatus.Preparing => "status-pill status-preparing",
-            PreparationStatus.Ready     => "status-pill status-ready",
-            PreparationStatus.Served    => "status-pill status-served",
-            _ => "status-pill"
-        };
-
-        public string StatusLabel => PreparationStatus switch
-        {
-            PreparationStatus.Pending   => "Ordered",
-            PreparationStatus.Preparing => "Being Prepared",
-            PreparationStatus.Ready     => "Ready to Serve",
-            PreparationStatus.Served    => "Served",
-            _                           => PreparationStatus.ToString()
-        };
+        public string StatusPillClass => PreparationStatus.ToStatusPillClass();
+        public string StatusLabel     => PreparationStatus.ToStatusLabel();
     }
 }

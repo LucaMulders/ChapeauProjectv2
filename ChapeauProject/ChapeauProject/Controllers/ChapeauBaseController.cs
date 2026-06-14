@@ -6,7 +6,8 @@ namespace ChapeauProject.Controllers
     // Base controller so we don't have to copy-paste the session helpers into every controller that needs to touch the active order.
     public abstract class ChapeauBaseController : Controller
     {
-        private const string SessionKey = "ActiveWorkingOrder";
+        private const string SessionKey       = "ActiveWorkingOrder";
+        public  const string LoggedInStaffKey = "LoggedInStaff";
 
         protected Order GetActiveOrder()
         {
@@ -30,7 +31,7 @@ namespace ChapeauProject.Controllers
 
         protected Staff GetLoggedInStaff()
         {
-            var staff = HttpContext.Session.GetObject<Staff>("LoggedInStaff");
+            var staff = HttpContext.Session.GetObject<Staff>(LoggedInStaffKey);
             if (staff != null) return staff;
 
             if (int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int staffId))

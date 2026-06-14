@@ -126,7 +126,7 @@ namespace ChapeauProject.Repositories
                             reader.GetDecimal(reader.GetOrdinal("Price")),
                             reader.GetDecimal(reader.GetOrdinal("VatRate")),
                             reader.GetInt32(reader.GetOrdinal("Stock")),
-                            new Menu(Enum.Parse<MenuCard>(reader.GetString(reader.GetOrdinal("MenuCard"))))
+                            Enum.Parse<MenuCard>(reader.GetString(reader.GetOrdinal("MenuCard")))
                         ),
                         Quantity          = reader.GetInt32(reader.GetOrdinal("Quantity")),
                         PreparationStatus = Enum.Parse<PreparationStatus>(reader.GetString(reader.GetOrdinal("PreparationStatus"))),

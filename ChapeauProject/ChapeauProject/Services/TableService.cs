@@ -41,12 +41,10 @@ namespace ChapeauProject.Services
 
                 return new TablesViewModel
                 {
-                    Table              = t,
-                    OrderCount         = _tableRepository.GetOrderCount(t.TableNumber),
-                    HasFoodOrder       = categories.HasFood,
-                    HasDrinkOrder      = categories.HasDrink,
-                    GuestCount         = guestCount,
-                    RunningOrderStatus = categories.OverallStatus
+                    Table      = t,
+                    OrderCount = _tableRepository.GetOrderCount(t.TableNumber),
+                    GuestCount = guestCount,
+                    Categories = categories
                 };
             }).OrderBy(t => t.Table.TableNumber).ToList();
         }
@@ -76,22 +74,24 @@ namespace ChapeauProject.Services
 
         public TableOrderViewModel GetTableOrders(int tableNumber)
         {
-            var guestOrders = _tableRepository.GetTableOrders(tableNumber);
+            var orders = _tableRepository.GetTableOrders(tableNumber);
 
-            var guests = guestOrders.Select(g => new GuestOrderViewModel
-            {
-                GuestID   = g.GuestID,
-                FullName  = g.GuestName,
-                Items     = g.Items.Select(i => new OrderItemViewModel
+            var guests = orders
+                .GroupBy(o => o.Guest.GuestID)
+                .Select(g => new GuestOrderViewModel
                 {
-                    OrderItemID       = i.OrderItemID,
-                    ItemName          = i.ItemName,
-                    Quantity          = i.Quantity,
-                    Price             = i.Price,
-                    VatRate           = i.VatRate,
-                    PreparationStatus = i.PreparationStatus
-                }).ToList()
-            }).ToList();
+                    GuestID  = g.Key,
+                    FullName = g.First().Guest.FullName,
+                    Items    = g.SelectMany(o => o.OrderItems).Select(i => new OrderItemViewModel
+                    {
+                        OrderItemID       = i.OrderItemID,
+                        ItemName          = i.MenuItem?.ItemName ?? string.Empty,
+                        Quantity          = i.Quantity,
+                        Price             = i.MenuItem?.Price ?? 0,
+                        VatRate           = i.MenuItem?.VatRate ?? 0,
+                        PreparationStatus = i.PreparationStatus
+                    }).ToList()
+                }).ToList();
 
             var allItems = guests.SelectMany(g => g.Items).ToList();
             decimal subtotal = allItems.Sum(i => i.Price * i.Quantity);

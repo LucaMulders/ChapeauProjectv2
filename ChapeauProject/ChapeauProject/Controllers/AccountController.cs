@@ -60,13 +60,16 @@ namespace ChapeauProject.Controllers
 
                 await SignInStaff(staff);
                 staff.Password = string.Empty; 
-                HttpContext.Session.SetObject("LoggedInStaff", staff);
+                HttpContext.Session.SetObject(ChapeauBaseController.LoggedInStaffKey, staff);
                 TempData["SuccessMessage"] = "Welcome back, " + staff.FirstName + "!";
                 return RedirectToAction("Index", "Tables");
             }
             catch (Exception ex)
             {
-                loginModel.ErrorMessage = "An error occurred during login: " + ex.Message;
+                // Changed errors to be more generic to avoid giving away information about the system
+
+                Console.Error.WriteLine($"[AccountController.Login] {ex}");
+                loginModel.ErrorMessage = "An error occurred during login. Please try again.";
                 return View(loginModel);
             }
         }
@@ -78,7 +81,7 @@ namespace ChapeauProject.Controllers
             try
             {
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                HttpContext.Session.Remove("LoggedInStaff");
+                HttpContext.Session.Remove(ChapeauBaseController.LoggedInStaffKey);
             }
             catch (Exception ex)
             {

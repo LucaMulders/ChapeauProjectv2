@@ -7,7 +7,7 @@
         public decimal Price { get; set; }
         public decimal VatRate { get; set; }
         public int StockQuantity { get; set; }
-        public Menu? AssociatedMenu { get; set; }
+        public MenuCard Card { get; set; }
 
         public bool IsAvailable
         {
@@ -26,14 +26,14 @@
 
         public MenuItem() { ItemName = string.Empty; }
 
-        public MenuItem(int id, string name, decimal price, decimal vatRate, int stock, Menu? menu)
+        public MenuItem(int id, string name, decimal price, decimal vatRate, int stock, MenuCard card)
         {
-            MenuItemID     = id;
-            ItemName       = name;
-            Price          = price;
-            VatRate        = vatRate;
-            StockQuantity  = stock;
-            AssociatedMenu = menu;
+            MenuItemID    = id;
+            ItemName      = name;
+            Price         = price;
+            VatRate       = vatRate;
+            StockQuantity = stock;
+            Card          = card;
         }
     }
 }

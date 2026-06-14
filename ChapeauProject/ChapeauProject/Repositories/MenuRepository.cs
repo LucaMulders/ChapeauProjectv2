@@ -81,15 +81,13 @@ namespace ChapeauProject.Repositories
                 cardEnum = MenuCard.Lunch; // default 
             }
 
-            Menu associatedMenu = new Menu(cardEnum);
-
             return new MenuItem(
                 (int)reader["MenuItemID"],
                 (string)reader["ItemName"],
                 (decimal)reader["Price"],
                 (decimal)reader["VatRate"],
                 (int)reader["Quantity"],
-                associatedMenu
+                cardEnum
             );
         }
 

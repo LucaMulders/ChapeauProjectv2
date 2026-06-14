@@ -8,7 +8,7 @@ namespace ChapeauProject.Repositories
         List<Table> GetAllOccupiedTables();
         Table? GetByTableNumber(int tableNumber);
         void ToggleOccupied(int tableNumber);
-        List<GuestOrder> GetTableOrders(int tableNumber);
+        List<Order> GetTableOrders(int tableNumber);
         int GetOrderCount(int tableNumber);
         int GetGuestCount(int tableNumber);
         List<Guest> GetGuestsByTable(int tableNumber);

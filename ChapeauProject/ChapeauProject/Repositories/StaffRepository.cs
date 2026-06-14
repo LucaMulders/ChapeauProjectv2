@@ -32,26 +32,6 @@ namespace ChapeauProject.Repositories
             return null;
         }
 
-        public List<Staff> GetAllStaff()
-        {
-            var staffList = new List<Staff>();
-            using (SqlConnection connection = GetConnection())
-            {
-                string query = "SELECT StaffID, FirstName, LastName, Role, Password FROM Staff";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            staffList.Add(ReadUser(reader));
-                        }
-                    }
-                }
-            }
-            return staffList;
-        }
-
         private Staff ReadUser(SqlDataReader reader)
         {
             int id = reader.GetInt32(reader.GetOrdinal("StaffID"));
@@ -71,25 +51,5 @@ namespace ChapeauProject.Repositories
             return new Staff(id, firstName, lastName, role, password);
         }
 
-        public Staff? GetStaffById(int staffId)
-        {
-            using (var connection = GetConnection())
-            {
-                const string query = "SELECT StaffID, FirstName, LastName, Role, Password FROM Staff WHERE StaffID = @StaffID";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@StaffID", staffId);
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            return ReadUser(reader);
-                        }
-                    }
-                }
-            }
-            return null;
-        }
     }
 }

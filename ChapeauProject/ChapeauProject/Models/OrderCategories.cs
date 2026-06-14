@@ -5,6 +5,6 @@ namespace ChapeauProject.Models
         public bool HasFood  { get; set; }
         public bool HasDrink { get; set; }
         // null = no active items
-        public string? OverallStatus { get; set; }
+        public PreparationStatus? OverallStatus { get; set; }
     }
 }

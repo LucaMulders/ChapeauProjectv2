@@ -26,7 +26,10 @@ namespace ChapeauProject.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Failed to load tables: " + ex.Message;
+                // Changed errors to be more generic to avoid giving away information about the system
+
+                Console.Error.WriteLine($"[TablesController.Index] {ex}");
+                TempData["ErrorMessage"] = "Failed to load tables. Please try again.";
                 return View(new List<TablesViewModel>());
             }
         }
@@ -44,7 +47,8 @@ namespace ChapeauProject.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Failed to update table: " + ex.Message;
+                Console.Error.WriteLine($"[TablesController.ToggleOccupied] {ex}");
+                TempData["ErrorMessage"] = "Failed to update table. Please try again.";
             }
             return RedirectToAction("Index");
         }
@@ -85,7 +89,8 @@ namespace ChapeauProject.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Failed to load table details: " + ex.Message;
+                Console.Error.WriteLine($"[TablesController.Details] {ex}");
+                TempData["ErrorMessage"] = "Failed to load table details. Please try again.";
                 return RedirectToAction("Index");
             }
         }

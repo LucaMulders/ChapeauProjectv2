@@ -86,10 +86,10 @@ namespace ChapeauProject.Repositories
             }
         }
 
-        public List<GuestOrder> GetTableOrders(int tableNumber)
+        public List<Order> GetTableOrders(int tableNumber)
         {
             string query = $@"
-                SELECT g.GuestID, g.FirstName, g.LastName,
+                SELECT o.OrderID, g.GuestID, g.FirstName, g.LastName,
                        oi.OrderItemID, mi.MenuItemID, mi.ItemName, mi.Price, mi.VatRate, mi.MenuCard,
                        ISNULL(s.Quantity, 0) AS Stock, oi.Quantity, oi.PreparationStatus
                 FROM Guests g
@@ -100,7 +100,7 @@ namespace ChapeauProject.Repositories
                 WHERE g.TableNumber = @TableNumber
                   AND o.OrderStatus IN ('{StatusPending}', '{nameof(OrderStatus.Served)}')";
 
-            var guestOrders = new Dictionary<int, GuestOrder>();
+            var orders = new Dictionary<int, Order>();
 
             using (SqlConnection connection = GetConnection())
             using (SqlCommand cmd = new SqlCommand(query, connection))
@@ -110,22 +110,22 @@ namespace ChapeauProject.Repositories
                 {
                     while (reader.Read())
                     {
-                        int guestId = reader.GetInt32(reader.GetOrdinal("GuestID"));
+                        int orderId = reader.GetInt32(reader.GetOrdinal("OrderID"));
 
-                        if (!guestOrders.ContainsKey(guestId))
+                        if (!orders.ContainsKey(orderId))
                         {
-                            guestOrders[guestId] = new GuestOrder
+                            orders[orderId] = new Order
                             {
-                                Guest = new Guest(
-                                    guestId,
+                                OrderID = orderId,
+                                Guest   = new Guest(
+                                    reader.GetInt32(reader.GetOrdinal("GuestID")),
                                     reader.GetString(reader.GetOrdinal("FirstName")),
                                     reader.GetString(reader.GetOrdinal("LastName"))
-                                ),
-                                Items = new List<GuestOrderItem>()
+                                )
                             };
                         }
 
-                        guestOrders[guestId].Items.Add(new GuestOrderItem
+                        orders[orderId].OrderItems.Add(new OrderItem
                         {
                             OrderItemID       = reader.GetInt32(reader.GetOrdinal("OrderItemID")),
                             Quantity          = reader.GetInt32(reader.GetOrdinal("Quantity")),
@@ -136,14 +136,14 @@ namespace ChapeauProject.Repositories
                                 reader.GetDecimal(reader.GetOrdinal("Price")),
                                 reader.GetDecimal(reader.GetOrdinal("VatRate")),
                                 reader.GetInt32(reader.GetOrdinal("Stock")),
-                                new Menu(Enum.Parse<MenuCard>(reader.GetString(reader.GetOrdinal("MenuCard"))))
+                                Enum.Parse<MenuCard>(reader.GetString(reader.GetOrdinal("MenuCard")))
                             )
                         });
                     }
                 }
             }
 
-            return guestOrders.Values.ToList();
+            return orders.Values.ToList();
         }
 
         public int GetOrderCount(int tableNumber)
@@ -279,15 +279,15 @@ namespace ChapeauProject.Repositories
             }
 
             // Status: Pending (ordered) > Preparing > Ready
-            string? overallStatus = null;
+            PreparationStatus? overallStatus = null;
             if (statuses.Count > 0)
             {
                 if (statuses.Contains(nameof(PreparationStatus.Pending)))
-                    overallStatus = nameof(PreparationStatus.Pending);
+                    overallStatus = PreparationStatus.Pending;
                 else if (statuses.Contains(nameof(PreparationStatus.Preparing)))
-                    overallStatus = nameof(PreparationStatus.Preparing);
+                    overallStatus = PreparationStatus.Preparing;
                 else
-                    overallStatus = nameof(PreparationStatus.Ready);
+                    overallStatus = PreparationStatus.Ready;
             }
 
             return new OrderCategories

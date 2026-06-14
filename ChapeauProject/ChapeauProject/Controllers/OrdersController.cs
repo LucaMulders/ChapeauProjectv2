@@ -35,7 +35,10 @@ namespace ChapeauProject.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Failed to load orders: " + ex.Message;
+                // Changed errors to be more generic to avoid giving away information about the system
+
+                Console.Error.WriteLine($"[OrdersController.Index] {ex}");
+                TempData["ErrorMessage"] = "Failed to load orders. Please try again.";
                 return View(new OrdersIndexViewModel
                 {
                     TableGroups  = new List<TableOrderGroupViewModel>(),

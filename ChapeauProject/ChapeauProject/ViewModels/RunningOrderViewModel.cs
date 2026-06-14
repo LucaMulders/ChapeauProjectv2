@@ -24,7 +24,6 @@ namespace ChapeauProject.ViewModels
         public int OrderID { get; set; }
         public int TableNumber { get; set; }
         public DateTime OrderTime { get; set; }
-        public string? Status { get; internal set; }
 
         public List<RunningOrderItemViewModel> Items { get; set; } = new();
 
@@ -64,23 +63,8 @@ namespace ChapeauProject.ViewModels
         public CourseName CourseName { get; set; }
         public string? Comment { get; set; }
 
-        public string StatusPillClass => PreparationStatus switch
-        {
-            PreparationStatus.Pending   => "status-pill status-ordered",
-            PreparationStatus.Preparing => "status-pill status-preparing",
-            PreparationStatus.Ready     => "status-pill status-ready",
-            PreparationStatus.Served    => "status-pill status-served",
-            _                           => "status-pill"
-        };
-
-        public string StatusLabel => PreparationStatus switch
-        {
-            PreparationStatus.Pending   => "Ordered",
-            PreparationStatus.Preparing => "Being Prepared",
-            PreparationStatus.Ready     => "Ready to Serve",
-            PreparationStatus.Served => "Served",
-            _                           => PreparationStatus.ToString()
-        };
+        public string StatusPillClass => PreparationStatus.ToStatusPillClass();
+        public string StatusLabel     => PreparationStatus.ToStatusLabel();
 
         public string NameCssClass =>
             PreparationStatus == PreparationStatus.Ready || PreparationStatus == PreparationStatus.Served

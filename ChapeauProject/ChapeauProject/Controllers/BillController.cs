@@ -25,7 +25,10 @@ namespace ChapeauProject.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Failed to load bill overview: " + ex.Message;
+                // Changed errors to be more generic to avoid giving away information about the system
+
+                Console.Error.WriteLine($"[BillController.Index] {ex}");
+                TempData["ErrorMessage"] = "Failed to load bill overview. Please try again.";
                 return View(new List<TablesViewModel>());
             }
         }
@@ -39,7 +42,8 @@ namespace ChapeauProject.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Failed to load bill: " + ex.Message;
+                Console.Error.WriteLine($"[BillController.Pay GET] {ex}");
+                TempData["ErrorMessage"] = "Failed to load bill. Please try again.";
                 return RedirectToAction("Index");
             }
         }
@@ -53,7 +57,8 @@ namespace ChapeauProject.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Failed to set split mode: " + ex.Message;
+                Console.Error.WriteLine($"[BillController.SetSplitMode] {ex}");
+                TempData["ErrorMessage"] = "Failed to set split mode. Please try again.";
                 return RedirectToAction("Index");
             }
         }
@@ -79,7 +84,8 @@ namespace ChapeauProject.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Payment failed: " + ex.Message;
+                Console.Error.WriteLine($"[BillController.Pay POST] {ex}");
+                TempData["ErrorMessage"] = "Payment failed. Please try again.";
                 return View(model);
             }
         }

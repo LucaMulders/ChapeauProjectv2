@@ -20,12 +20,11 @@ namespace ChapeauProject.Services
             var orders = _tableService.GetTableOrders(tableNumber);
             return new BillViewModel
             {
-                TableNumber    = orders.TableNumber,
-                Guests         = orders.Guests,
-                SubTotalAmount = orders.SubTotalAmount,
-                LowVAT         = orders.LowVAT,
-                HighVAT        = orders.HighVAT,
-                TotalAmount    = orders.TotalAmount
+                TableNumber = orders.TableNumber,
+                Guests      = orders.Guests,
+                LowVAT      = orders.LowVAT,
+                HighVAT     = orders.HighVAT,
+                TotalAmount = orders.TotalAmount
             };
         }
 
@@ -74,14 +73,13 @@ namespace ChapeauProject.Services
 
             return new BillViewModel
             {
-                TableNumber    = orders.TableNumber,
-                Guests         = orders.Guests,
-                SubTotalAmount = orders.SubTotalAmount,
-                LowVAT         = orders.LowVAT,
-                HighVAT        = orders.HighVAT,
-                TotalAmount    = orders.TotalAmount,
-                SplitMode      = splitMode,
-                SplitCount     = resolvedSplitCount
+                TableNumber = orders.TableNumber,
+                Guests      = orders.Guests,
+                LowVAT      = orders.LowVAT,
+                HighVAT     = orders.HighVAT,
+                TotalAmount = orders.TotalAmount,
+                SplitMode   = splitMode,
+                SplitCount  = resolvedSplitCount
             };
         }
 
