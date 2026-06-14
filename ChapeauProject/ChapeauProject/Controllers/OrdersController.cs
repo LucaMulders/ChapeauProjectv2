@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChapeauProject.Controllers
 {
-    [Authorize]
     public class OrdersController : ChapeauBaseController
     {
         private readonly IOrderService _orderService;

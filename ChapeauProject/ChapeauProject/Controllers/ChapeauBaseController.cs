@@ -34,8 +34,13 @@ namespace ChapeauProject.Controllers
             var staff = HttpContext.Session.GetObject<Staff>(LoggedInStaffKey);
             if (staff != null) return staff;
 
+            // Session expired but auth cookie is still valid, reconstruct from claims.
             if (int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int staffId))
-                return new Staff { StaffID = staffId };
+            {
+                var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                var role = Enum.TryParse<StaffRole>(roleClaim, out var parsed) ? parsed : StaffRole.Waiter;
+                return new Staff { StaffID = staffId, Role = role };
+            }
 
             return new Staff();
         }

@@ -1,13 +1,11 @@
 ﻿using ChapeauProject.Models;
 using ChapeauProject.Services;
 using ChapeauProject.ViewModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 
 namespace ChapeauProject.Controllers
 {
-    [Authorize]
     public class MenuController : Controller
     {
         private readonly IMenuService _menuService;
@@ -21,7 +19,8 @@ namespace ChapeauProject.Controllers
         {
             try
             {
-                List<MenuItem> filteredItems = _menuService.GetCourseFilteredByName(menuCard, category);
+                MenuCard card = Enum.TryParse<MenuCard>(menuCard, true, out var parsed) ? parsed : MenuCard.Lunch;
+                List<MenuItem> filteredItems = _menuService.GetCourseFiltered(card, category);
 
                 MenuViewModel viewModel = new MenuViewModel
                 {
