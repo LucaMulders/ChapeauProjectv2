@@ -133,14 +133,14 @@ namespace ChapeauProject.Controllers
             if (guest.GuestID <= 0 && !_tableService.GetGuestsByTable(currentTableId).Any())
                 guest = _tableService.CreateUnnamedGuest(currentTableId);
 
+            order.Guest = guest;
+
             string? validationError = _orderService.ValidateSaveOrder(order);
             if (validationError != null)
             {
                 TempData["ErrorMessage"] = validationError;
                 return RedirectToAction("Details", "Tables", new { tableNumber = currentTableId });
             }
-
-            order.Guest = guest;
             _orderService.SaveNewOrder(order);
             TempData["SuccessMessage"] = "Order dispatched and stock adjusted successfully!";
             ClearActiveOrder();
