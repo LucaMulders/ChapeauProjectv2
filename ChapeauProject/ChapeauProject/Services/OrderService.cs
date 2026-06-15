@@ -42,7 +42,7 @@ namespace ChapeauProject.Services
                 {
                     foreach (var item in order.Items)
                     {
-                        if (item.MenuCard == MenuCard.Food)
+                        if (item.MenuCard == MenuCard.Lunch || item.MenuCard == MenuCard.Dinner)
                         {
                             include = true;
                             break;
