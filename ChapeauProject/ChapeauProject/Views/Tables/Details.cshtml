@@ -4,9 +4,18 @@
 
 @{
     ViewData["Title"] = "Table " + Model.TableOrders.TableNumber + " Orders";
-    var menuItems   = Model.MenuItems;
+    var menuItems    = Model.MenuItems;
     var activeBasket = Model.ActiveBasket;
     var currentCard  = Model.CardFilter;
+
+    int unnamedIdx = 0;
+    var guestDisplayNames = new Dictionary<int, string>();
+    foreach (var g in Model.Guests)
+    {
+        guestDisplayNames[g.GuestID] = string.IsNullOrWhiteSpace((g.FirstName + g.LastName).Trim())
+            ? $"Unnamed Guest {++unnamedIdx}"
+            : g.FullName;
+    }
 }
 
 <div class="page-header">
@@ -19,6 +28,28 @@
 <partial name="_SuccessMessage" />
 
 <h3 class="mb-3 mt-2 menu-heading">Active Table Consumption Log</h3>
+
+<div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+    @foreach (var g in Model.Guests)
+    {
+        bool hasOrders = Model.TableOrders.Guests.Any(tg => tg.GuestID == g.GuestID);
+        <span class="badge bg-secondary d-inline-flex align-items-center gap-1 py-2 px-2">
+            @guestDisplayNames[g.GuestID]
+            @if (!hasOrders)
+            {
+                <form asp-action="RemoveGuest" asp-controller="Tables" method="post" class="m-0">
+                    <input type="hidden" name="guestId" value="@g.GuestID" />
+                    <input type="hidden" name="tableNumber" value="@Model.TableOrders.TableNumber" />
+                    <button type="submit" class="btn-close btn-close-white ms-1" style="font-size:0.55rem;" title="Remove guest"></button>
+                </form>
+            }
+        </span>
+    }
+    <form asp-action="AddUnnamedGuest" asp-controller="Tables" method="post" class="m-0">
+        <input type="hidden" name="tableNumber" value="@Model.TableOrders.TableNumber" />
+        <button type="submit" class="btn btn-sm btn-outline-secondary">+ Add Guest</button>
+    </form>
+</div>
 
 @if (!Model.TableOrders.Guests.Any())
 {
@@ -225,7 +256,7 @@ else
                                         <option value="0" disabled selected>— Select guest —</option>
                                         @foreach (var g in tableGuests)
                                         {
-                                            <option value="@g.GuestID" data-firstname="@g.FirstName" data-lastname="@g.LastName">@g.FullName</option>
+                                            <option value="@g.GuestID" data-firstname="@g.FirstName" data-lastname="@g.LastName">@guestDisplayNames[g.GuestID]</option>
                                         }
                                     </select>
                                 }

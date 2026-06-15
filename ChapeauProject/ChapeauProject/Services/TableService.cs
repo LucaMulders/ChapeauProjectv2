@@ -122,6 +122,13 @@ namespace ChapeauProject.Services
             _tableRepository.RemoveGuests(tableNumber);
         }
 
+        public void RemoveGuest(int guestId)
+        {
+            if (_tableRepository.GetGuestOrderCount(guestId) > 0)
+                throw new InvalidOperationException("Cannot remove a guest who has active orders.");
+            _tableRepository.RemoveGuest(guestId);
+        }
+
         // Creates an unnamed guest at the given table (used when placing an order with no registered guests).
         public Guest CreateUnnamedGuest(int tableNumber)
         {

@@ -15,5 +15,6 @@ namespace ChapeauProject.Services
         void MarkTableAsFree(int tableNumber);
         void RemoveGuests(int tableNumber);
         Guest CreateUnnamedGuest(int tableNumber);
+        void RemoveGuest(int guestId);
     }
 }

@@ -55,6 +55,32 @@ namespace ChapeauProject.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        public IActionResult AddUnnamedGuest(int tableNumber)
+        {
+            _tableService.CreateUnnamedGuest(tableNumber);
+            return RedirectToAction("Details", new { tableNumber });
+        }
+
+        [HttpPost]
+        public IActionResult RemoveGuest(int guestId, int tableNumber)
+        {
+            try
+            {
+                _tableService.RemoveGuest(guestId);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[TablesController.RemoveGuest] {ex}");
+                TempData["ErrorMessage"] = "Failed to remove guest. Please try again.";
+            }
+            return RedirectToAction("Details", new { tableNumber });
+        }
+
         public IActionResult Details(int tableNumber, MenuCard cardFilter = MenuCard.Lunch, string courseFilter = CourseFilter.All)
         {
             try

@@ -225,6 +225,32 @@ namespace ChapeauProject.Repositories
             }
         }
 
+        public int GetGuestOrderCount(int guestId)
+        {
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = $"SELECT COUNT(*) FROM Orders WHERE GuestID = @GuestID AND OrderStatus = '{StatusPending}'";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@GuestID", guestId);
+                    return (int)command.ExecuteScalar();
+                }
+            }
+        }
+
+        public void RemoveGuest(int guestId)
+        {
+            using (SqlConnection connection = GetConnection())
+            {
+                string query = "DELETE FROM Guests WHERE GuestID = @GuestID";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@GuestID", guestId);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
         // Inserts a new guest at the given table and returns the generated GuestID.
         // Used to auto-create an unnamed guest when an order is placed at a table with no registered guests.
         public int InsertGuest(int tableNumber, string firstName, string lastName)

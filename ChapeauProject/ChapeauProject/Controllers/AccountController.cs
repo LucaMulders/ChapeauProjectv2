@@ -67,7 +67,6 @@ namespace ChapeauProject.Controllers
             catch (Exception ex)
             {
                 // Changed errors to be more generic to avoid giving away information about the system
-
                 Console.Error.WriteLine($"[AccountController.Login] {ex}");
                 loginModel.ErrorMessage = "An error occurred during login. Please try again.";
                 return View(loginModel);
