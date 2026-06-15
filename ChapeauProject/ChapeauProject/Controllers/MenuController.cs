@@ -19,6 +19,7 @@ namespace ChapeauProject.Controllers
         {
             try
             {
+                //used tenary operator to simplify the parsing of the menuCard parameter and default to Lunch if parsing fails
                 MenuCard card = Enum.TryParse<MenuCard>(menuCard, true, out var parsed) ? parsed : MenuCard.Lunch;
                 List<MenuItem> filteredItems = _menuService.GetCourseFiltered(card, category);
 
