@@ -151,6 +151,9 @@ namespace ChapeauProject.Controllers
                 return RedirectToAction("Details", "Tables", new { tableNumber = currentTableId });
             }
             _orderService.SaveNewOrder(order);
+            // Auto-occupy the table if the order was placed while it was still free.
+            if (order.Table != null && !order.Table.IsOccupied)
+                _tableService.ToggleOccupied(currentTableId);
             TempData["SuccessMessage"] = "Order dispatched and stock adjusted successfully!";
             ClearActiveOrder();
             return RedirectToAction("Index", "Tables");
