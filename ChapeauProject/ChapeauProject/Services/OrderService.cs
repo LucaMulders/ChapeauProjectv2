@@ -46,30 +46,11 @@ namespace ChapeauProject.Services
                 .OrderBy(g => g.Key)
                 .Select(g => new TableOrderGroupViewModel
                 {
-                    foreach (var item in order.Items)
-                    {
-                        if (item.MenuCard == MenuCard.Lunch || item.MenuCard == MenuCard.Dinner)
-                        {
-                            include = true;
-                            break;
-                        }
-                    }
-                }
-                else if (role == StaffRole.Bartender)
-                {
-                    foreach (var item in order.Items)
-                    {
-                        if (item.MenuCard == MenuCard.Drinks)
-                        {
-                            include = true;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    include = true;
-                }
+                    TableNumber = g.Key,
+                    Orders      = g.ToList()
+                })
+                .ToList();
+        }
 
         public string? ValidateSaveOrder(Order order)
         {
