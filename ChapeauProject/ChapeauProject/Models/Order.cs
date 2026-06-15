@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ChapeauProject.Models
 {
@@ -11,21 +12,13 @@ namespace ChapeauProject.Models
         public Staff Staff { get; set; } = new Staff();
         public DateTime OrderTimeStamp { get; set; } = DateTime.Now;
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
+        // Must be a public List with a setter so System.Text.Json can round-trip it through session storage.
+        // IReadOnlyList with a private backing field is NOT serialized and would silently lose all basket items.
         public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
         public void AddItem(MenuItem item)
         {
-            OrderItem existing = null;
-
-            foreach (OrderItem oi in OrderItems)
-            {
-                if (oi.MenuItem != null && oi.MenuItem.MenuItemID == item.MenuItemID)
-                {
-                    existing = oi;
-                    break;
-                }
-            }
-
+            var existing = OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == item.MenuItemID);
             if (existing != null)
             {
                 existing.Quantity++;
@@ -34,75 +27,43 @@ namespace ChapeauProject.Models
             {
                 OrderItems.Add(new OrderItem
                 {
-                    MenuItem = item,
-                    Quantity = 1,
+                    MenuItem          = item,
+                    Quantity          = 1,
                     PreparationStatus = PreparationStatus.Pending,
-                    Comment = string.Empty
+                    Comment           = string.Empty
                 });
             }
         }
 
         public void RemoveItem(int menuItemID)
         {
-            OrderItem item = null;
-
-            foreach (OrderItem oi in OrderItems)
-            {
-                if (oi.MenuItem != null && oi.MenuItem.MenuItemID == menuItemID)
-                {
-                    item = oi;
-                    break;
-                }
-            }
-
+            var item = OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
             if (item != null)
                 OrderItems.Remove(item);
         }
 
         public void IncreaseQuantity(int menuItemID)
         {
-            foreach (OrderItem oi in OrderItems)
-            {
-                if (oi.MenuItem != null && oi.MenuItem.MenuItemID == menuItemID)
-                {
-                    oi.Quantity++;
-                    break;
-                }
-            }
+            var item = OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
+            if (item != null)
+                item.Quantity++;
         }
 
         public void DecreaseQuantity(int menuItemID)
         {
-            OrderItem item = null;
-
-            foreach (OrderItem oi in OrderItems)
-            {
-                if (oi.MenuItem != null && oi.MenuItem.MenuItemID == menuItemID)
-                {
-                    item = oi;
-                    break;
-                }
-            }
-
-            if (item == null)
-                return;
+            var item = OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
+            if (item == null) return;
 
             item.Quantity--;
-
             if (item.Quantity <= 0)
                 OrderItems.Remove(item);
         }
 
         public void UpdateItemComment(int menuItemID, string comment)
         {
-            foreach (OrderItem oi in OrderItems)
-            {
-                if (oi.MenuItem != null && oi.MenuItem.MenuItemID == menuItemID)
-                {
-                    oi.Comment = comment ?? string.Empty;
-                    break;
-                }
-            }
+            var item = OrderItems.FirstOrDefault(oi => oi.MenuItem?.MenuItemID == menuItemID);
+            if (item != null)
+                item.Comment = comment ?? string.Empty;
         }
     }
 }
