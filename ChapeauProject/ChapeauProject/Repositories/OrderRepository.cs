@@ -82,7 +82,7 @@ namespace ChapeauProject.Repositories
         }
 
         private string BuildOrderQuery(string whereClause) => $@"
-                SELECT o.OrderID, g.TableNumber, o.OrderTimeStamp,
+                SELECT o.OrderID, ISNULL(g.TableNumber, 0) AS TableNumber, o.OrderTimeStamp,
                        g.GuestID, g.FirstName, g.LastName,
                        oi.OrderItemID, mi.MenuItemID, mi.ItemName, mi.Price, mi.VatRate, oi.Quantity, oi.PreparationStatus,
                        mi.MenuCard, ISNULL(c.CourseName, '{CourseOther}') AS CourseName, oi.Comment,
